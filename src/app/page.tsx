@@ -89,6 +89,8 @@ const DEFAULT_SETTINGS = {
   currencySymbol: "৳",
   insideCityDelivery: 60,
   outsideCityDelivery: 120,
+  shopCity: "Bogura",
+  shopAddress: "Bogura, Rajshahi, Bangladesh",
 };
 
 export async function generateMetadata(): Promise<Metadata> {

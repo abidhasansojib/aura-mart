@@ -58,6 +58,8 @@ interface StoreSettingsData {
   rocketNumber?: string;
   freeShippingThreshold?: number;
   lowStockThreshold?: number;
+  shopCity?: string;
+  shopAddress?: string;
   isStoreOpen?: boolean;
   storeClosedNotice?: string;
 }

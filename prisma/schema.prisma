@@ -30,6 +30,8 @@ model StoreSettings {
   insideCityDelivery  Float    @default(60)
   outsideCityDelivery Float    @default(120)
   currencySymbol      String   @default("৳")
+  shopCity            String   @default("Bogura")
+  shopAddress         String   @default("Bogura, Rajshahi, Bangladesh")
 
   // Hero & Bento Promotional Content
   heroBadgeText       String   @default("Featured Collection 2026")

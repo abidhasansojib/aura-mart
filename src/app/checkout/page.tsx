@@ -42,6 +42,8 @@ interface StoreSettings {
   freeShippingThreshold?: number;
   isStoreOpen?: boolean;
   storeClosedNotice?: string;
+  shopCity?: string;
+  shopAddress?: string;
 }
 
 interface OrderItemData {
@@ -805,9 +807,11 @@ export default function CheckoutPage() {
                             className="w-4 h-4 text-emerald-600 focus:ring-emerald-500"
                           />
                           <div>
-                            <span className="text-xs font-bold block">Inside City</span>
+                            <span className="text-xs font-bold block">
+                              Inside {settings.shopCity || "Bogura"}
+                            </span>
                             <span className="text-[11px] text-slate-500 block">
-                              Fast Express Delivery
+                              Local delivery in {settings.shopCity || "Bogura"}
                             </span>
                           </div>
                         </div>
@@ -834,9 +838,11 @@ export default function CheckoutPage() {
                             className="w-4 h-4 text-emerald-600 focus:ring-emerald-500"
                           />
                           <div>
-                            <span className="text-xs font-bold block">Outside City / Nationwide</span>
+                            <span className="text-xs font-bold block">
+                              Outside {settings.shopCity || "Bogura"} / Nationwide
+                            </span>
                             <span className="text-[11px] text-slate-500 block">
-                              Courier to any district
+                              Courier to all other districts
                             </span>
                           </div>
                         </div>
@@ -1356,7 +1362,9 @@ export default function CheckoutPage() {
                   )}
 
                   <div className="flex justify-between text-slate-600">
-                    <span>Delivery Charge ({deliveryZone})</span>
+                    <span>
+                      Delivery Charge ({deliveryZone === "Inside City" ? `Inside ${settings.shopCity || "Bogura"}` : `Outside ${settings.shopCity || "Bogura"}`})
+                    </span>
                     <span className="font-semibold font-mono text-slate-900">
                       {isFreeShipping ? (
                         <span className="text-emerald-700 font-bold">FREE (Promo Unlocked)</span>

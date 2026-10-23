@@ -30,6 +30,8 @@ export interface StoreSettingsData {
   insideCityDelivery: number;
   outsideCityDelivery: number;
   currencySymbol: string;
+  shopCity?: string;
+  shopAddress?: string;
   // Hero & Bento
   heroBadgeText?: string;
   heroTitle?: string;
@@ -110,6 +112,8 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
     storeClosedNotice:
       initialSettings.storeClosedNotice ||
       "We are currently restocking our inventory. Orders will resume shortly!",
+    shopCity: initialSettings.shopCity || "Bogura",
+    shopAddress: initialSettings.shopAddress || "Bogura, Rajshahi, Bangladesh",
   });
 
   const [saving, setSaving] = useState(false);
@@ -447,6 +451,38 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
                   />
                 </div>
               </div>
+
+              <div>
+                <label className="block font-bold uppercase tracking-wider text-[11px] text-slate-800 mb-1">
+                  Shop Operating City (Default Base)
+                </label>
+                <input
+                  type="text"
+                  value={settings.shopCity || "Bogura"}
+                  onChange={(e) => setSettings({ ...settings, shopCity: e.target.value })}
+                  placeholder="e.g. Bogura"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-slate-900 font-bold focus:outline-none focus:ring-2 focus:ring-[#FF6448]/20 focus:border-[#FF6448] min-h-[42px]"
+                />
+                <p className="text-[10px] text-slate-400 mt-1">
+                  Sets your local delivery city (e.g. Inside Bogura).
+                </p>
+              </div>
+
+              <div>
+                <label className="block font-bold uppercase tracking-wider text-[11px] text-slate-800 mb-1">
+                  Warehouse / Shop Address
+                </label>
+                <input
+                  type="text"
+                  value={settings.shopAddress || "Bogura, Rajshahi, Bangladesh"}
+                  onChange={(e) => setSettings({ ...settings, shopAddress: e.target.value })}
+                  placeholder="e.g. Bogura, Rajshahi, Bangladesh"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/20 focus:border-[#FF6448] min-h-[42px]"
+                />
+                <p className="text-[10px] text-slate-400 mt-1">
+                  Printed on courier slips and invoices.
+                </p>
+              </div>
             </div>
           </div>
         )}
@@ -638,10 +674,46 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
               </div>
             </div>
 
+            {/* Shop Base City Location Setting */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-indigo-50/60 border border-indigo-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block font-bold uppercase tracking-wider text-[11px] text-indigo-950 mb-1">
+                  Shop Operating City (Inside City Base)
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={settings.shopCity || "Bogura"}
+                  onChange={(e) => setSettings({ ...settings, shopCity: e.target.value })}
+                  placeholder="e.g. Bogura"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-indigo-200 text-slate-900 font-bold focus:outline-none focus:ring-2 focus:ring-[#5256FF]/20 focus:border-[#5256FF] min-h-[42px] bg-white text-xs"
+                />
+                <p className="text-[11px] text-indigo-800/80 mt-1">
+                  Orders delivered within <strong>{settings.shopCity || "Bogura"}</strong> will be charged your local rate.
+                </p>
+              </div>
+
+              <div>
+                <label className="block font-bold uppercase tracking-wider text-[11px] text-indigo-950 mb-1">
+                  Shop Physical / Dispatch Address
+                </label>
+                <input
+                  type="text"
+                  value={settings.shopAddress || "Bogura, Rajshahi, Bangladesh"}
+                  onChange={(e) => setSettings({ ...settings, shopAddress: e.target.value })}
+                  placeholder="e.g. Bogura, Rajshahi, Bangladesh"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-indigo-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#5256FF]/20 focus:border-[#5256FF] min-h-[42px] bg-white text-xs font-medium"
+                />
+                <p className="text-[11px] text-indigo-800/80 mt-1">
+                  Printed on packing slips as return address for Steadfast/Pathao courier parcels.
+                </p>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
               <div>
-                <label className="block font-bold uppercase tracking-wider text-[11px] text-slate-700 mb-1">
-                  Inside City Delivery Fee
+                <label className="block font-bold uppercase tracking-wider text-[11px] text-slate-700 mb-1 truncate" title={`Inside ${settings.shopCity || "Bogura"} Delivery Fee`}>
+                  Inside {settings.shopCity || "Bogura"} Fee
                 </label>
                 <div className="relative">
                   <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-mono font-bold text-slate-400">
@@ -660,8 +732,8 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
               </div>
 
               <div>
-                <label className="block font-bold uppercase tracking-wider text-[11px] text-slate-700 mb-1">
-                  Nationwide / Outside City Fee
+                <label className="block font-bold uppercase tracking-wider text-[11px] text-slate-700 mb-1 truncate" title={`Outside ${settings.shopCity || "Bogura"} / All other districts`}>
+                  Outside {settings.shopCity || "Bogura"} Fee
                 </label>
                 <div className="relative">
                   <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-mono font-bold text-slate-400">

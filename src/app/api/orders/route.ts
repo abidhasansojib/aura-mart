@@ -198,7 +198,10 @@ export async function POST(req: NextRequest) {
       }
 
       // d. Delivery charge calculation with Free Shipping threshold support
-      const isInside = deliveryZone === "Inside City" || deliveryZone === "inside";
+      const isInside =
+        deliveryZone === "Inside City" ||
+        deliveryZone === "inside" ||
+        (typeof deliveryZone === "string" && deliveryZone.toLowerCase().includes("inside"));
       let deliveryCharge = isInside ? settings.insideCityDelivery : settings.outsideCityDelivery;
 
       if (settings.freeShippingThreshold > 0 && subtotal >= settings.freeShippingThreshold) {

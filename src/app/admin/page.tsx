@@ -40,6 +40,8 @@ export default function AdminPage() {
     insideCityDelivery: 60,
     outsideCityDelivery: 120,
     currencySymbol: "৳",
+    shopCity: "Bogura",
+    shopAddress: "Bogura, Rajshahi, Bangladesh",
   });
   const [isLoadingData, setIsLoadingData] = useState(false);
 
