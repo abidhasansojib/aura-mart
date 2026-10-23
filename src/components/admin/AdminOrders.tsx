@@ -365,32 +365,40 @@ export function AdminOrders({
 
       {/* Floating Bulk Action Bar */}
       {selectedIds.length > 0 && (
-        <div className="sticky top-20 z-20 bg-slate-900 text-white p-3.5 sm:p-4 rounded-2xl shadow-xl flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2">
-          <div className="flex items-center gap-2">
-            <span className="bg-emerald-500 text-slate-950 font-mono font-black text-xs px-2 py-0.5 rounded-full">
-              {selectedIds.length}
-            </span>
-            <span className="text-xs font-bold">Orders Selected</span>
+        <div className="sticky top-20 z-20 bg-slate-900 text-white p-3 sm:p-4 rounded-2xl shadow-xl flex flex-col xs:flex-row items-stretch xs:items-center justify-between gap-2.5 sm:gap-3 animate-in fade-in slide-in-from-top-2">
+          <div className="flex items-center justify-between xs:justify-start gap-2">
+            <div className="flex items-center gap-2">
+              <span className="bg-emerald-500 text-slate-950 font-mono font-black text-xs px-2 py-0.5 rounded-full">
+                {selectedIds.length}
+              </span>
+              <span className="text-xs font-bold">Orders Selected</span>
+            </div>
+            <button
+              onClick={() => setSelectedIds([])}
+              className="xs:hidden px-2.5 py-1 bg-white/10 hover:bg-white/20 text-white text-[11px] font-semibold rounded-lg transition-colors"
+            >
+              Cancel
+            </button>
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2">
             <button
               disabled={isBulkUpdating}
               onClick={() => handleBulkStatusChange("Confirmed")}
-              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all disabled:opacity-50"
+              className="flex-1 xs:flex-initial px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all disabled:opacity-50 min-h-[38px] flex items-center justify-center text-center"
             >
               Mark Confirmed
             </button>
             <button
               disabled={isBulkUpdating}
               onClick={() => handleBulkStatusChange("Shipped")}
-              className="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl transition-all disabled:opacity-50"
+              className="flex-1 xs:flex-initial px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl transition-all disabled:opacity-50 min-h-[38px] flex items-center justify-center text-center"
             >
               Mark Shipped
             </button>
             <button
               onClick={() => setSelectedIds([])}
-              className="px-2.5 py-1.5 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold rounded-xl transition-all"
+              className="hidden xs:inline-flex px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold rounded-xl transition-all min-h-[38px] items-center justify-center"
             >
               Cancel
             </button>
@@ -475,7 +483,7 @@ export function AdminOrders({
                     )}
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-between sm:justify-end gap-2.5 sm:gap-3 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100">
                     <span className="text-base font-black text-slate-900 font-mono">
                       {formatPrice(order.totalAmount, currencySymbol)}
                     </span>
@@ -696,16 +704,16 @@ export function AdminOrders({
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-2">
+            <div className="flex flex-col-reverse xs:flex-row items-stretch xs:items-center justify-end gap-2.5 pt-2">
               <button
                 onClick={() => setPrintableOrder(null)}
-                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900"
+                className="w-full xs:w-auto px-4 py-2.5 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-neutral-100 rounded-xl transition-colors min-h-[40px] text-center"
               >
                 Close
               </button>
               <button
                 onClick={() => window.print()}
-                className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white text-xs font-bold rounded-xl shadow-md hover:bg-slate-800 transition-colors min-h-[44px]"
+                className="w-full xs:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-900 text-white text-xs font-bold rounded-xl shadow-md hover:bg-slate-800 transition-colors min-h-[44px] text-center"
               >
                 <Printer className="h-4 w-4" />
                 <span>Print Packing Slip</span>
@@ -777,11 +785,11 @@ export function AdminOrders({
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100">
+            <div className="flex flex-col-reverse xs:flex-row items-stretch xs:items-center justify-end gap-2.5 pt-3 border-t border-gray-100">
               <button
                 type="button"
                 onClick={() => setCourierModalOrder(null)}
-                className="px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-neutral-100 rounded-xl"
+                className="w-full xs:w-auto px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-neutral-100 rounded-xl transition-colors min-h-[40px] text-center"
               >
                 Cancel
               </button>
@@ -789,7 +797,7 @@ export function AdminOrders({
                 type="button"
                 disabled={isSavingCourier}
                 onClick={handleSaveCourier}
-                className="px-4 py-2 text-xs font-bold text-white bg-slate-900 hover:bg-black rounded-xl transition-all shadow-sm disabled:opacity-50"
+                className="w-full xs:w-auto px-4 py-2.5 text-xs font-bold text-white bg-slate-900 hover:bg-black rounded-xl transition-all shadow-sm disabled:opacity-50 min-h-[40px] flex items-center justify-center text-center"
               >
                 {isSavingCourier ? "Saving..." : "Save Courier Info"}
               </button>

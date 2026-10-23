@@ -254,17 +254,17 @@ export function AdminProducts({
     <div className="space-y-6">
       {/* 1. Header with Add Button, Category Filters & Search */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-3xl border border-gray-200 shadow-sm">
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-2.5 w-full md:w-auto">
           <button
             onClick={openAddModal}
-            className="flex items-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-600/20 transition-all min-h-[42px]"
+            className="w-full xs:w-auto flex items-center justify-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-600/20 transition-all min-h-[42px] shrink-0"
           >
             <Plus className="h-4 w-4" />
             <span>Add New Product</span>
           </button>
 
           {/* Category Dropdown or Pills */}
-          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar pl-2">
+          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-1 max-w-full">
             {categories.map((cat) => (
               <button
                 key={cat}
@@ -654,11 +654,11 @@ export function AdminProducts({
               </div>
 
               {/* Modal Buttons */}
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+              <div className="flex flex-col-reverse xs:flex-row items-stretch xs:items-center justify-end gap-2.5 sm:gap-3 pt-4 border-t border-gray-100">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 font-semibold text-slate-600 hover:text-slate-900"
+                  className="w-full xs:w-auto px-4 py-2.5 font-semibold text-slate-600 hover:text-slate-900 hover:bg-neutral-100 rounded-xl transition-colors min-h-[42px] text-center"
                 >
                   Cancel
                 </button>
@@ -666,7 +666,7 @@ export function AdminProducts({
                 <button
                   type="submit"
                   disabled={formLoading || isCompressing}
-                  className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-bold rounded-xl shadow-md transition-colors min-h-[44px]"
+                  className="w-full xs:w-auto px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-bold rounded-xl shadow-md transition-colors min-h-[44px] flex items-center justify-center text-center"
                 >
                   {formLoading ? "Saving Product..." : editingProduct ? "Update Product" : "Create Product"}
                 </button>

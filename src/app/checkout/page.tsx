@@ -354,20 +354,20 @@ export default function CheckoutPage() {
       <div className="min-h-screen bg-[#CBD5CE] py-6 sm:py-12 px-3 sm:px-6 lg:px-8 selection:bg-[#FF6448] selection:text-white">
         <div className="max-w-2xl mx-auto space-y-6">
           {/* Action Bar (hidden when printing) */}
-          <div className="print:hidden flex flex-wrap items-center justify-between gap-3">
+          <div className="print:hidden flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors"
+              className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors py-1"
             >
               <ArrowLeft className="h-4 w-4" />
               <span>Back to Store</span>
             </Link>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-2 w-full sm:w-auto">
               {completedOrder.status === "Pending" && (
                 <button
                   onClick={() => setIsCancelModalOpen(true)}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold rounded-xl border border-rose-200 transition-colors min-h-[44px]"
+                  className="w-full xs:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold rounded-xl border border-rose-200 transition-colors min-h-[44px]"
                   title="Cancel this order before store confirmation"
                 >
                   <Ban className="h-4 w-4 text-rose-600" />
@@ -377,7 +377,7 @@ export default function CheckoutPage() {
 
               <button
                 onClick={() => window.print()}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-xs font-semibold rounded-xl hover:bg-slate-800 transition-colors shadow-sm min-h-[44px]"
+                className="w-full xs:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 bg-slate-900 text-white text-xs font-semibold rounded-xl hover:bg-slate-800 transition-colors shadow-sm min-h-[44px]"
               >
                 <Printer className="h-4 w-4" />
                 <span>Print / Save Receipt (PDF)</span>
@@ -663,12 +663,12 @@ export default function CheckoutPage() {
                     )}
                   </div>
 
-                  <div className="flex items-center justify-end gap-3 pt-2">
+                  <div className="flex flex-col-reverse xs:flex-row items-stretch xs:items-center justify-end gap-2.5 pt-2">
                     <button
                       type="button"
                       disabled={isCancellingOrder}
                       onClick={() => setIsCancelModalOpen(false)}
-                      className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors min-h-[42px]"
+                      className="w-full xs:w-auto px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors min-h-[42px] text-center"
                     >
                       Keep Order
                     </button>
@@ -676,7 +676,7 @@ export default function CheckoutPage() {
                       type="button"
                       disabled={isCancellingOrder}
                       onClick={handleCancelCompletedOrder}
-                      className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 disabled:bg-rose-400 text-white font-bold rounded-xl text-xs shadow-md shadow-rose-600/20 transition-all flex items-center gap-2 min-h-[42px]"
+                      className="w-full xs:w-auto px-5 py-2.5 bg-rose-600 hover:bg-rose-700 disabled:bg-rose-400 text-white font-bold rounded-xl text-xs shadow-md shadow-rose-600/20 transition-all flex items-center justify-center gap-2 min-h-[42px] active:scale-95"
                     >
                       {isCancellingOrder ? (
                         <>
@@ -1105,7 +1105,7 @@ export default function CheckoutPage() {
                         <button
                           type="button"
                           onClick={() => handleCopyPaymentNumber(settings.bkashNumber)}
-                          className="flex items-center gap-1 px-3 py-1.5 bg-white text-slate-800 text-xs font-semibold rounded-lg shadow-sm border border-gray-200 hover:bg-slate-50 transition-colors"
+                          className="flex items-center gap-1 px-3 py-1.5 bg-white text-slate-800 text-xs font-semibold rounded-lg shadow-sm border border-gray-200 hover:bg-slate-50 transition-colors shrink-0 active:scale-95 min-h-[36px]"
                         >
                           {copiedNumber ? (
                             <>
@@ -1209,7 +1209,7 @@ export default function CheckoutPage() {
                             <button
                               type="button"
                               onClick={() => handleCopyPaymentNumber(settings.nagadNumber)}
-                              className="flex items-center gap-1 px-3 py-1.5 bg-white text-slate-800 text-xs font-semibold rounded-lg shadow-sm border border-gray-200 hover:bg-slate-50 transition-colors"
+                              className="flex items-center gap-1 px-3 py-1.5 bg-white text-slate-800 text-xs font-semibold rounded-lg shadow-sm border border-gray-200 hover:bg-slate-50 transition-colors shrink-0 active:scale-95 min-h-[36px]"
                             >
                               {copiedNumber ? (
                                 <>
@@ -1315,7 +1315,7 @@ export default function CheckoutPage() {
                         <button
                           type="button"
                           onClick={() => handleCopyPaymentNumber(settings.rocketNumber || "")}
-                          className="flex items-center gap-1 px-3 py-1.5 bg-white text-slate-800 text-xs font-semibold rounded-lg shadow-sm border border-gray-200 hover:bg-slate-50 transition-colors"
+                          className="flex items-center gap-1 px-3 py-1.5 bg-white text-slate-800 text-xs font-semibold rounded-lg shadow-sm border border-gray-200 hover:bg-slate-50 transition-colors shrink-0 active:scale-95 min-h-[36px]"
                         >
                           {copiedNumber ? (
                             <>
@@ -1435,7 +1435,7 @@ export default function CheckoutPage() {
                     </div>
                   ) : (
                     <div className="space-y-1.5">
-                      <div className="flex gap-2">
+                      <div className="flex flex-col xs:flex-row gap-2">
                         <input
                           type="text"
                           value={couponInput}
@@ -1444,13 +1444,13 @@ export default function CheckoutPage() {
                             setCouponError(null);
                           }}
                           placeholder="e.g. WELCOME10 or FLAT100"
-                          className="flex-1 px-3 py-2 rounded-xl border border-gray-200 text-base sm:text-xs font-mono font-bold uppercase text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/20 focus:border-[#FF6448] bg-white min-h-[40px]"
+                          className="w-full flex-1 min-w-0 px-3 py-2 rounded-xl border border-gray-200 text-base sm:text-xs font-mono font-bold uppercase text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/20 focus:border-[#FF6448] bg-white min-h-[40px]"
                         />
                         <button
                           type="button"
                           disabled={validatingCoupon || !couponInput.trim()}
                           onClick={handleApplyCoupon}
-                          className="px-4 py-2 bg-[#181A1D] hover:bg-black disabled:bg-gray-200 disabled:text-slate-400 text-white font-bold text-xs rounded-xl shadow-sm transition-all min-h-[38px]"
+                          className="w-full xs:w-auto px-4 py-2 bg-[#181A1D] hover:bg-black disabled:bg-gray-200 disabled:text-slate-400 text-white font-bold text-xs rounded-xl shadow-sm transition-all min-h-[40px] shrink-0 active:scale-95 flex items-center justify-center text-center"
                         >
                           {validatingCoupon ? "Checking..." : "Apply"}
                         </button>

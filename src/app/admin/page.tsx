@@ -336,24 +336,24 @@ export default function AdminPage() {
       {/* =======================================================================
           3. MOBILE APP DOCK (Visible ONLY on Small Devices < sm)
           ======================================================================= */}
-      <nav className="sm:hidden fixed bottom-3 inset-x-3 z-50 bg-[#212429]/95 backdrop-blur-xl border border-white/10 rounded-2xl p-1.5 flex items-center justify-around shadow-2xl pb-safe">
+      <nav className="sm:hidden fixed bottom-3 inset-x-3 z-50 bg-[#212429]/95 backdrop-blur-xl border border-white/10 rounded-2xl p-1.5 flex items-center justify-around gap-1 shadow-2xl pb-safe">
         {/* Overview Tab */}
         <button
           onClick={() => setActiveTab("overview")}
-          className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-xl transition-all ${
+          className={`flex-1 min-w-0 flex flex-col items-center justify-center py-1.5 px-2 rounded-xl transition-all ${
             activeTab === "overview"
               ? "bg-[#C4E9E5] text-slate-950 font-bold shadow-md"
               : "text-slate-400 hover:text-white"
           }`}
         >
           <BarChart3 className="h-4 w-4" />
-          <span className="text-[10px] mt-0.5">Overview</span>
+          <span className="text-[10px] mt-0.5 truncate">Overview</span>
         </button>
 
         {/* Orders Tab with Pending Count */}
         <button
           onClick={() => setActiveTab("orders")}
-          className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-xl transition-all relative ${
+          className={`flex-1 min-w-0 flex flex-col items-center justify-center py-1.5 px-2 rounded-xl transition-all relative ${
             activeTab === "orders"
               ? "bg-[#FF6448] text-white font-bold shadow-md"
               : "text-slate-400 hover:text-white"
@@ -361,37 +361,37 @@ export default function AdminPage() {
         >
           <Package className="h-4 w-4" />
           {pendingOrdersCount > 0 && (
-            <span className="absolute top-1 right-2 w-3.5 h-3.5 bg-[#F5B738] text-slate-950 text-[8px] font-black rounded-full flex items-center justify-center ring-2 ring-[#212429]">
+            <span className="absolute top-1 right-1.5 xs:right-2 w-3.5 h-3.5 bg-[#F5B738] text-slate-950 text-[8px] font-black rounded-full flex items-center justify-center ring-2 ring-[#212429]">
               {pendingOrdersCount}
             </span>
           )}
-          <span className="text-[10px] mt-0.5">Orders</span>
+          <span className="text-[10px] mt-0.5 truncate">Orders</span>
         </button>
 
         {/* Products Tab */}
         <button
           onClick={() => setActiveTab("products")}
-          className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-xl transition-all ${
+          className={`flex-1 min-w-0 flex flex-col items-center justify-center py-1.5 px-2 rounded-xl transition-all ${
             activeTab === "products"
               ? "bg-[#5256FF] text-white font-bold shadow-md"
               : "text-slate-400 hover:text-white"
           }`}
         >
           <Boxes className="h-4 w-4" />
-          <span className="text-[10px] mt-0.5">Products</span>
+          <span className="text-[10px] mt-0.5 truncate">Products</span>
         </button>
 
         {/* Settings Tab */}
         <button
           onClick={() => setActiveTab("settings")}
-          className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-xl transition-all ${
+          className={`flex-1 min-w-0 flex flex-col items-center justify-center py-1.5 px-2 rounded-xl transition-all ${
             activeTab === "settings"
               ? "bg-white text-slate-950 font-bold shadow-md"
               : "text-slate-400 hover:text-white"
           }`}
         >
           <Settings className="h-4 w-4" />
-          <span className="text-[10px] mt-0.5">Settings</span>
+          <span className="text-[10px] mt-0.5 truncate">Settings</span>
         </button>
 
         <div className="w-[1px] h-6 bg-white/10 mx-0.5" />

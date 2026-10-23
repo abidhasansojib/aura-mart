@@ -531,11 +531,11 @@ export function AdminOverview({
               value={copilotPrompt}
               onChange={(e) => setCopilotPrompt(e.target.value)}
               placeholder="Ask about revenue, stock, or orders..."
-              className="flex-1 bg-[#1C1E22] border border-white/10 rounded-full px-4 py-2 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500 min-h-[38px]"
+              className="flex-1 min-w-0 bg-[#1C1E22] border border-white/10 rounded-full px-4 py-2 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500 min-h-[38px]"
             />
             <button
               type="submit"
-              className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+              className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors shrink-0"
             >
               <Send className="h-3.5 w-3.5" />
             </button>

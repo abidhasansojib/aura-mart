@@ -197,7 +197,7 @@ export function ProductDetailModal({
                     Sold Out
                   </button>
                 ) : (
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col xs:grid xs:grid-cols-2 gap-2.5 sm:gap-3">
                     <button
                       onClick={handleAddToCart}
                       className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl border-2 border-[#181A1D] text-[#181A1D] font-bold text-xs hover:bg-[#181A1D] hover:text-white transition-all active:scale-95 min-h-[48px]"
