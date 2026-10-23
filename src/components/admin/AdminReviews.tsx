@@ -596,7 +596,7 @@ export function AdminReviews({
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Sojib H."
+                  placeholder="e.g. Tanvir A."
                   value={newCustomerName}
                   onChange={(e) => setNewCustomerName(e.target.value)}
                   className="w-full px-3 py-2 rounded-xl bg-[#181A1D] border border-white/10 text-white text-xs focus:outline-none focus:border-[#FF6448]"

@@ -521,7 +521,7 @@ export function ProductDetailModal({
                           </label>
                           <input
                             type="text"
-                            placeholder="e.g. Sojib H."
+                            placeholder="e.g. Tanvir A."
                             value={customerName}
                             onChange={(e) => setCustomerName(e.target.value)}
                             className="w-full px-2.5 py-1.5 rounded-xl bg-white border border-slate-200 focus:outline-none focus:border-[#FF6448] text-xs"
