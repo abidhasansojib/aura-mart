@@ -62,23 +62,24 @@ export function Navbar({
       {/* 1. Sleek Top Announcement Ribbon */}
       <div className="bg-[#181A1D] text-white text-[10px] sm:text-[11px] font-semibold py-1.5 sm:py-2 px-3 sm:px-4 border-b border-white/5">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 sm:gap-2 truncate text-slate-300 min-w-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 truncate text-slate-300 min-w-0 flex-1">
             <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#FF6448] animate-pulse shrink-0" />
             <span className="truncate hidden sm:inline">{announcementText}</span>
-            <span className="truncate sm:hidden">🚚 Cash on Delivery Nationwide • Fast Express</span>
+            <span className="truncate sm:hidden">🚚 Cash on Delivery Nationwide</span>
           </div>
 
-          <div className="flex items-center gap-2.5 sm:gap-4 shrink-0 text-slate-400">
-            {supportPhone && (
+          {supportPhone && (
+            <div className="flex items-center shrink-0 text-slate-300">
               <a
                 href={`tel:${supportPhone}`}
-                className="hidden xs:flex items-center gap-1 hover:text-white transition-colors"
+                className="flex items-center gap-1 hover:text-white transition-colors bg-white/5 hover:bg-white/10 px-2 py-0.5 rounded-lg border border-white/10 text-[10px] sm:text-[11px] font-mono font-bold"
+                title={`Call Hotline: ${supportPhone}`}
               >
-                <Phone className="h-3 w-3 text-[#FF6448]" />
+                <Phone className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-[#FF6448] shrink-0" />
                 <span>{supportPhone}</span>
               </a>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
 
