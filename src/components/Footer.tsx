@@ -1,15 +1,18 @@
+/* eslint-disable @next/next/no-img-element */
 import React from "react";
 import Link from "next/link";
 import { ShieldCheck, Truck, RotateCcw, Headphones, Phone, Sparkles } from "lucide-react";
 
 interface FooterProps {
   storeName?: string;
+  logoUrl?: string;
   tagline?: string;
   supportPhone?: string;
 }
 
 export function Footer({
   storeName = "Aura Mart",
+  logoUrl,
   tagline = "Quality Products Delivered to Your Doorstep",
   supportPhone = "01700000000",
 }: FooterProps) {
@@ -68,9 +71,19 @@ export function Footer({
           {/* Brand Col */}
           <div className="md:col-span-5 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#24272C] border border-white/10 flex items-center justify-center text-white font-black text-lg">
-                <span>{storeName.charAt(0) || "A"}</span>
-              </div>
+              {logoUrl ? (
+                <div className="h-10 max-w-[140px] flex items-center shrink-0 bg-white/5 px-2.5 py-1 rounded-2xl border border-white/10">
+                  <img
+                    src={logoUrl}
+                    alt={storeName}
+                    className="h-full w-auto max-h-8 object-contain"
+                  />
+                </div>
+              ) : (
+                <div className="w-10 h-10 rounded-2xl bg-[#24272C] border border-white/10 flex items-center justify-center text-white font-black text-lg">
+                  <span>{storeName.charAt(0) || "A"}</span>
+                </div>
+              )}
               <div>
                 <h3 className="text-lg font-black tracking-tight text-white">{storeName}</h3>
                 <span className="text-[10px] text-[#FF6448] font-bold uppercase tracking-wider block">

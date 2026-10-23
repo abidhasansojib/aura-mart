@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -34,6 +35,7 @@ import {
 
 interface StoreSettings {
   storeName: string;
+  logoUrl?: string;
   tagline: string;
   announcementText: string;
   supportPhone: string;
@@ -744,9 +746,19 @@ export default function CheckoutPage() {
           </Link>
 
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-xl bg-[#181A1D] text-white flex items-center justify-center font-black text-xs shadow-sm">
-              {settings.storeName.charAt(0)}
-            </div>
+            {settings.logoUrl ? (
+              <div className="h-7 max-w-[100px] flex items-center shrink-0">
+                <img
+                  src={settings.logoUrl}
+                  alt={settings.storeName}
+                  className="h-full w-auto max-h-7 object-contain rounded-lg"
+                />
+              </div>
+            ) : (
+              <div className="w-7 h-7 rounded-xl bg-[#181A1D] text-white flex items-center justify-center font-black text-xs shadow-sm">
+                {settings.storeName.charAt(0)}
+              </div>
+            )}
             <span className="text-sm font-black text-slate-900 tracking-tight">{settings.storeName}</span>
           </div>
 

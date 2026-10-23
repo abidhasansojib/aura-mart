@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { verifyAdminAuth } from "@/lib/auth";
 import { generateSlug } from "@/lib/utils";
@@ -139,6 +140,12 @@ export async function POST(req: NextRequest) {
         isActive: isActive !== undefined ? Boolean(isActive) : true,
       },
     });
+
+    try {
+      revalidatePath("/");
+    } catch {
+      // safe fallback
+    }
 
     return NextResponse.json(product, { status: 201 });
   } catch (error) {

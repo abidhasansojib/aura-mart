@@ -225,6 +225,7 @@ function ProductCard({
 interface StoreSettingsData {
   id?: string;
   storeName?: string;
+  logoUrl?: string;
   tagline?: string;
   announcementText?: string;
   supportPhone?: string;
@@ -350,18 +351,6 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
     return sortProducts(filterByCategory(initialProducts));
   }, [initialProducts, isSearching, filterByCategory, sortProducts]);
 
-  // Top Viral & Mostly Sold Products (or Admin Pushed)
-  const viralSpotlightProducts = useMemo(() => {
-    return [...initialProducts]
-      .filter((p) => (p.salesCount && p.salesCount > 0) || p.isFeatured || p.isViral)
-      .sort((a, b) => {
-        const scoreA = (a.isFeatured ? 500 : 0) + (a.salesCount || 0) * 10;
-        const scoreB = (b.isFeatured ? 500 : 0) + (b.salesCount || 0) * 10;
-        return scoreB - scoreA;
-      })
-      .slice(0, 4);
-  }, [initialProducts]);
-
   // Featured picks for smart fallback
   const featuredPicks = useMemo(() => {
     return initialProducts.filter((p) => p.isFeatured).slice(0, 4);
@@ -378,6 +367,7 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
       {/* 1. Header & Navigation */}
       <Navbar
         storeName={settings.storeName}
+        logoUrl={settings.logoUrl}
         announcementText={settings.announcementText}
         supportPhone={settings.supportPhone}
         currencySymbol={currencySymbol}
@@ -413,8 +403,8 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
             2. MODERN BENTO HERO SHOWCASE (Matching Dribbble Bento Aesthetic)
             ===================================================================== */}
         <section className="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4">
-          {/* Main Hero Card: Coral `#FF6448` (Span 7 Cols) */}
-          <div className="md:col-span-7 bg-[#FF6448] text-white rounded-[24px] sm:rounded-[32px] p-4 xs:p-6 sm:p-10 shadow-xl flex flex-col justify-between bento-card relative overflow-hidden group">
+          {/* Main Hero Card: Coral `#FF6448` (Full width on mobile, 7 cols on desktop) */}
+          <div className="col-span-12 md:col-span-7 bg-[#FF6448] text-white rounded-[24px] sm:rounded-[32px] p-4 xs:p-6 sm:p-10 shadow-xl flex flex-col justify-between bento-card relative overflow-hidden group">
             <div className="space-y-2.5 sm:space-y-4 relative z-10">
               <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                 <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-[10px] sm:text-xs font-bold border border-white/20 shadow-xs">
@@ -428,7 +418,9 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
               </div>
 
               <h1 className="text-xl xs:text-2xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight">
-                {settings.heroTitle || settings.storeName || "Aura Mart"}
+                {settings.heroTitle && settings.heroTitle !== "Aura Mart"
+                  ? settings.heroTitle
+                  : settings.storeName || "Aura Mart"}
               </h1>
 
               <p className="text-[11px] xs:text-xs sm:text-base text-white/95 max-w-lg leading-relaxed font-medium line-clamp-2 sm:line-clamp-none">
@@ -458,128 +450,61 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
             <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl pointer-events-none" />
           </div>
 
-          {/* Right Bento Column: 2-Column Mini Grid on Mobile (Saves >250px vertical scroll) */}
-          <div className="md:col-span-5 grid grid-cols-2 md:grid-cols-1 gap-2 sm:gap-4">
+          {/* Right Bento Column: Desktop only (>= md), hidden on mobile per user instruction */}
+          <div className="hidden md:grid md:col-span-5 grid-cols-1 gap-4">
             {/* Indigo Blue Card: Nationwide Express */}
-            <div className="bg-[#5256FF] text-white rounded-[20px] sm:rounded-[28px] p-3.5 sm:p-6 shadow-xl flex flex-col justify-between bento-card relative overflow-hidden">
+            <div className="bg-[#5256FF] text-white rounded-[28px] p-6 shadow-xl flex flex-col justify-between bento-card relative overflow-hidden">
               <div className="flex items-center justify-between">
-                <span className="text-[9px] sm:text-[11px] font-black uppercase tracking-wider text-white/85 truncate">
+                <span className="text-[11px] font-black uppercase tracking-wider text-white/85 truncate">
                   EXPRESS SHIPPING
                 </span>
-                <div className="w-6 h-6 sm:w-9 sm:h-9 rounded-xl sm:rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
-                  <Truck className="h-3 sm:h-4 w-3 sm:w-4 text-white" />
+                <div className="w-9 h-9 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
+                  <Truck className="h-4 w-4 text-white" />
                 </div>
               </div>
-              <div className="my-2 sm:my-3">
-                <div className="text-xs xs:text-sm sm:text-xl font-black tracking-tight leading-snug">
+              <div className="my-3">
+                <div className="text-xl font-black tracking-tight leading-snug">
                   {settings.expressCardTitle || "Fast Doorstep Delivery"}
                 </div>
-                <p className="text-[10px] sm:text-xs text-white/85 mt-0.5 sm:mt-1 font-medium leading-tight">
+                <p className="text-xs text-white/85 mt-1 font-medium leading-tight">
                   ৳{settings.insideCityDelivery || 60} City • ৳{settings.outsideCityDelivery || 120} Nationwide
                 </p>
               </div>
-              <div className="text-[9px] sm:text-[11px] font-bold text-white/95 flex items-center gap-1 sm:gap-2">
-                <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2 shrink-0">
+              <div className="text-[11px] font-bold text-white/95 flex items-center gap-2">
+                <span className="relative flex h-2 w-2 shrink-0">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 bg-emerald-400" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
                 </span>
-                <span className="truncate">{settings.expressCardSubtitle || "24-48h Dispatched"}</span>
+                <span className="truncate">{settings.expressCardSubtitle || "All 64 Districts Dispatched in 24-48 Hours"}</span>
               </div>
             </div>
 
             {/* Ice Mint Card: 100% Authentic & Inspection */}
-            <div className="bg-[#C4E9E5] text-slate-950 rounded-[20px] sm:rounded-[28px] p-3.5 sm:p-6 shadow-xl flex flex-col justify-between bento-card">
+            <div className="bg-[#C4E9E5] text-slate-950 rounded-[28px] p-6 shadow-xl flex flex-col justify-between bento-card">
               <div className="flex items-center justify-between">
-                <span className="text-[9px] sm:text-[11px] font-black uppercase tracking-wider text-slate-700 truncate">
+                <span className="text-[11px] font-black uppercase tracking-wider text-slate-700 truncate">
                   INSPECTION & TRUST
                 </span>
-                <div className="w-6 h-6 sm:w-9 sm:h-9 rounded-xl sm:rounded-2xl bg-[#181A1D] text-white flex items-center justify-center shadow-md shrink-0">
-                  <ShieldCheck className="h-3 sm:h-4 w-3 sm:w-4 text-emerald-400" />
+                <div className="w-9 h-9 rounded-2xl bg-[#181A1D] text-white flex items-center justify-center shadow-md shrink-0">
+                  <ShieldCheck className="h-4 w-4 text-emerald-400" />
                 </div>
               </div>
-              <div className="my-1.5 sm:my-2">
-                <div className="text-xs xs:text-sm sm:text-lg font-black tracking-tight leading-snug">
+              <div className="my-2">
+                <div className="text-lg font-black tracking-tight leading-snug">
                   {settings.guaranteeCardTitle || "Open-Box Inspection"}
                 </div>
-                <p className="text-[10px] sm:text-xs text-slate-700 mt-0.5 sm:mt-1 font-medium leading-tight line-clamp-2 sm:line-clamp-none">
+                <p className="text-xs text-slate-700 mt-1 font-medium leading-tight">
                   {settings.guaranteeCardSubtitle ||
-                    "Inspect parcel in front of delivery agent before cash."}
+                    "Check your parcel in front of the delivery agent before paying cash."}
                 </p>
               </div>
-              <div className="text-[9px] sm:text-[11px] font-bold text-slate-900 flex items-center gap-1 sm:gap-1.5 pt-0.5 sm:pt-1 truncate">
-                <RotateCcw className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-emerald-700 shrink-0" />
-                <span className="truncate">7-Day Replacement</span>
+              <div className="text-[11px] font-bold text-slate-900 flex items-center gap-1.5 pt-1 truncate">
+                <RotateCcw className="h-3.5 w-3.5 text-emerald-700 shrink-0" />
+                <span className="truncate">7-Day Replacement Guarantee</span>
               </div>
             </div>
           </div>
         </section>
-
-        {/* =====================================================================
-            2.5. DYNAMIC VIRAL & BEST SELLERS SHOWCASE ("Mostly Sold & Admin Pushed")
-            ===================================================================== */}
-        {!isSearching && viralSpotlightProducts.length > 0 && (
-          <section className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gradient-to-r from-[#181A1D] via-[#212429] to-[#181A1D] text-white p-5 sm:p-7 rounded-[28px] sm:rounded-[32px] shadow-2xl relative overflow-hidden border border-white/5">
-              <div className="space-y-1.5 relative z-10">
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FF6448] text-white text-xs font-black shadow-md shadow-[#FF6448]/30">
-                    <Flame className="h-3.5 w-3.5 fill-white" />
-                    <span>VIRAL & BEST SELLERS</span>
-                  </span>
-                  <span className="text-xs font-bold text-slate-300 hidden xs:inline flex items-center gap-1">
-                    <Sparkles className="h-3 w-3 text-amber-400" />
-                    <span>Mostly Sold & Admin Pushed</span>
-                  </span>
-                </div>
-                <h2 className="text-xl sm:text-3xl font-black tracking-tight text-white">
-                  Trending Hot Picks
-                </h2>
-                <p className="text-xs sm:text-sm text-slate-300 max-w-xl font-medium">
-                  Products with the highest sales volume and hand-picked recommendations from our store admin.
-                </p>
-              </div>
-
-              <div className="relative z-10 shrink-0">
-                <button
-                  onClick={() => {
-                    setSelectedCategory("Viral");
-                    const el = document.getElementById("catalog");
-                    if (el) el.scrollIntoView({ behavior: "smooth" });
-                  }}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 sm:px-5 py-2.5 rounded-xl bg-white text-slate-950 font-bold text-xs hover:bg-slate-100 transition-all active:scale-95 shadow-md"
-                >
-                  <span>Explore All Trending</span>
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </button>
-              </div>
-
-              {/* Decorative background glow */}
-              <div className="absolute -right-12 -top-12 w-48 h-48 bg-[#FF6448]/20 rounded-full blur-3xl pointer-events-none" />
-              <div className="absolute -left-12 -bottom-12 w-48 h-48 bg-[#5256FF]/20 rounded-full blur-3xl pointer-events-none" />
-            </div>
-
-            {/* Top 4 Viral Spotlight Cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3.5 sm:gap-6">
-              {viralSpotlightProducts.map((product, idx) => (
-                <div key={product.id} className="relative">
-                  <div className="absolute -top-2 left-3 z-20 pointer-events-none">
-                    <span className="bg-gradient-to-r from-amber-500 to-[#FF6448] text-white text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-lg border border-white/20 flex items-center gap-1">
-                      <Flame className="h-3 w-3 fill-white" />
-                      <span>#{idx + 1} Viral</span>
-                    </span>
-                  </div>
-                  <ProductCard
-                    product={product}
-                    currencySymbol={currencySymbol}
-                    onOpenModal={setActiveModalProduct}
-                    onAddToCart={(p) => addItem(p, 1)}
-                    onQuickBuy={handleQuickBuy}
-                  />
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
 
         {/* =====================================================================
             3. CATEGORY PILL FILTER & SORT BAR (Streamlined Single-Row Controls)
@@ -986,6 +911,7 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
       {/* 6. Footer */}
       <Footer
         storeName={settings.storeName}
+        logoUrl={settings.logoUrl}
         tagline={settings.tagline}
         supportPhone={settings.supportPhone}
       />

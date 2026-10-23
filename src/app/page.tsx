@@ -4,6 +4,7 @@ import { StorefrontClient } from "@/components/StorefrontClient";
 import { ModalProduct } from "@/components/ProductDetailModal";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 // Fallback demo products if database is not yet connected during local review
 const FALLBACK_PRODUCTS: ModalProduct[] = [
@@ -95,6 +96,7 @@ const FALLBACK_PRODUCTS: ModalProduct[] = [
 
 const DEFAULT_SETTINGS = {
   storeName: "Aura Mart",
+  logoUrl: "",
   tagline: "Quality Products Delivered to Your Doorstep",
   announcementText: "🚚 Cash on Delivery Available Nationwide! Fast Express Shipping.",
   supportPhone: "01700000000",
@@ -249,6 +251,7 @@ export default async function HomePage() {
       settings = {
         ...DEFAULT_SETTINGS,
         ...dbSettings.value,
+        logoUrl: dbSettings.value.logoUrl || "",
       };
     }
   } catch (error) {

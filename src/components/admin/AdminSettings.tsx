@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -21,11 +22,15 @@ import {
   Eye,
   EyeOff,
   Key,
+  Upload,
+  Image as ImageIcon,
 } from "lucide-react";
+import { compressAndUploadImage } from "@/lib/image-upload";
 
 export interface StoreSettingsData {
   id?: string;
   storeName: string;
+  logoUrl?: string;
   tagline: string;
   announcementText: string;
   supportPhone: string;
@@ -87,6 +92,7 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
 
   const [settings, setSettings] = useState<StoreSettingsData>({
     ...initialSettings,
+    logoUrl: initialSettings.logoUrl || "",
     heroBadgeText: initialSettings.heroBadgeText || "Featured Collection 2026",
     heroTitle: initialSettings.heroTitle || initialSettings.storeName || "Aura Mart",
     heroTagline:
@@ -123,6 +129,27 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // Logo upload state
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const [logoUploadFeedback, setLogoUploadFeedback] = useState<string | null>(null);
+
+  const handleLogoFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingLogo(true);
+    setLogoUploadFeedback("Uploading and optimizing brand logo...");
+    try {
+      const uploadedUrl = await compressAndUploadImage(file);
+      setSettings((prev) => ({ ...prev, logoUrl: uploadedUrl }));
+      setLogoUploadFeedback("Logo uploaded successfully! Remember to save changes.");
+    } catch (err) {
+      setLogoUploadFeedback(err instanceof Error ? err.message : "Failed to upload logo image");
+    } finally {
+      setIsUploadingLogo(false);
+    }
+  };
 
   // Security & Password states
   const [currentPassword, setCurrentPassword] = useState("");
@@ -429,6 +456,82 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
                 <p className="text-[11px] text-slate-400">
                   Control how your store appears to customers across the site, header, and footer
                 </p>
+              </div>
+            </div>
+
+            {/* Store Website Brand Logo Panel */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-4">
+              <div>
+                <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                  <ImageIcon className="h-4 w-4 text-[#FF6448]" />
+                  <span>Website Store Logo</span>
+                </h4>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  Upload your brand logo image to display in the header, footer, and checkout. If empty, your store initial monogram will be shown automatically.
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                {/* Logo Live Preview */}
+                <div className="flex items-center justify-center w-24 h-16 sm:w-28 sm:h-20 rounded-2xl bg-white border border-slate-200 shadow-xs p-2 overflow-hidden shrink-0">
+                  {settings.logoUrl ? (
+                    <img
+                      src={settings.logoUrl}
+                      alt={settings.storeName}
+                      className="max-h-full max-w-full object-contain"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-xl bg-[#181A1D] flex items-center justify-center text-white font-black text-lg shadow-sm">
+                      <span>{settings.storeName?.charAt(0) || "A"}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex-1 space-y-2.5 w-full">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <label className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#181A1D] hover:bg-black text-white text-xs font-bold transition-all cursor-pointer shadow-xs active:scale-95">
+                      <Upload className="h-3.5 w-3.5" />
+                      <span>{isUploadingLogo ? "Uploading Logo..." : "Upload Logo Image"}</span>
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif"
+                        disabled={isUploadingLogo}
+                        className="hidden"
+                        onChange={handleLogoFileUpload}
+                      />
+                    </label>
+
+                    {settings.logoUrl && (
+                      <button
+                        type="button"
+                        onClick={() => setSettings({ ...settings, logoUrl: "" })}
+                        className="inline-flex items-center gap-1 px-3 py-2 rounded-xl border border-rose-200 text-rose-700 bg-rose-50 hover:bg-rose-100 text-xs font-bold transition-colors"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        <span>Remove Logo</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {logoUploadFeedback && (
+                    <p className="text-[11px] font-semibold text-[#FF6448]">
+                      {logoUploadFeedback}
+                    </p>
+                  )}
+
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                      Or Direct Logo Image URL
+                    </label>
+                    <input
+                      type="url"
+                      value={settings.logoUrl || ""}
+                      onChange={(e) => setSettings({ ...settings, logoUrl: e.target.value })}
+                      placeholder="https://example.com/logo.png or /uploads/..."
+                      className="w-full px-3 py-2 text-xs rounded-xl border border-gray-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/20 focus:border-[#FF6448]"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 

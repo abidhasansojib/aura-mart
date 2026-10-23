@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { verifyAdminAuth } from "@/lib/auth";
 
@@ -7,6 +8,7 @@ export const dynamic = "force-dynamic";
 const DEFAULT_STORE_SETTINGS = {
   id: "default",
   storeName: "Aura Mart",
+  logoUrl: "",
   tagline: "Quality Products Delivered to Your Doorstep",
   announcementText: "🚚 Cash on Delivery Available Nationwide! Fast Express Shipping.",
   supportPhone: "01700000000",
@@ -65,6 +67,7 @@ export async function PUT(req: NextRequest) {
     const body = await req.json();
     const {
       storeName,
+      logoUrl,
       tagline,
       announcementText,
       supportPhone,
@@ -101,7 +104,8 @@ export async function PUT(req: NextRequest) {
     const updated = await prisma.storeSettings.upsert({
       where: { id: "default" },
       update: {
-        ...(storeName !== undefined && { storeName: String(storeName) }),
+        ...(storeName !== undefined && { storeName: String(storeName).trim() }),
+        ...(logoUrl !== undefined && { logoUrl: String(logoUrl).trim() }),
         ...(tagline !== undefined && { tagline: String(tagline) }),
         ...(announcementText !== undefined && { announcementText: String(announcementText) }),
         ...(supportPhone !== undefined && { supportPhone: String(supportPhone) }),
@@ -136,7 +140,8 @@ export async function PUT(req: NextRequest) {
       },
       create: {
         id: "default",
-        storeName: storeName ?? DEFAULT_STORE_SETTINGS.storeName,
+        storeName: storeName ? String(storeName).trim() : DEFAULT_STORE_SETTINGS.storeName,
+        logoUrl: logoUrl ? String(logoUrl).trim() : "",
         tagline: tagline ?? DEFAULT_STORE_SETTINGS.tagline,
         announcementText: announcementText ?? DEFAULT_STORE_SETTINGS.announcementText,
         supportPhone: supportPhone ?? DEFAULT_STORE_SETTINGS.supportPhone,
@@ -170,6 +175,14 @@ export async function PUT(req: NextRequest) {
         storeClosedNotice: storeClosedNotice ?? DEFAULT_STORE_SETTINGS.storeClosedNotice,
       },
     });
+
+    try {
+      revalidatePath("/");
+      revalidatePath("/checkout");
+      revalidatePath("/admin");
+    } catch {
+      // safe fallback if called outside request context
+    }
 
     return NextResponse.json(updated);
   } catch (error) {

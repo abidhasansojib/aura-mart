@@ -22,7 +22,10 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Aura Mart — Premium Online Store",
+  title: {
+    template: "%s",
+    default: "Official Online Store",
+  },
   description: "Shop quality products delivered directly to your doorstep with fast Cash on Delivery.",
 };
 

@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
@@ -10,6 +11,7 @@ import { ModalProduct } from "@/components/ProductDetailModal";
 
 interface NavbarProps {
   storeName?: string;
+  logoUrl?: string;
   announcementText?: string;
   supportPhone?: string;
   currencySymbol?: string;
@@ -22,6 +24,7 @@ interface NavbarProps {
 
 export function Navbar({
   storeName = "Aura Mart",
+  logoUrl,
   announcementText = "🚚 Cash on Delivery Available Nationwide! Fast Express Shipping.",
   supportPhone = "01700000000",
   currencySymbol = "৳",
@@ -96,10 +99,20 @@ export function Navbar({
             <div className="flex items-center justify-between gap-3">
               {/* Brand Logo & Name */}
               <Link href="/" className="flex items-center gap-2 sm:gap-3 shrink-0 group">
-                <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-[#181A1D] flex items-center justify-center text-white font-black text-sm sm:text-lg shadow-md group-hover:scale-105 transition-transform border border-white/10 relative overflow-hidden">
-                  <span className="relative z-10">{storeName.charAt(0) || "A"}</span>
-                  <div className="absolute inset-0 bg-gradient-to-tr from-[#FF6448]/30 to-transparent pointer-events-none" />
-                </div>
+                {logoUrl ? (
+                  <div className="h-8 sm:h-10 max-w-[120px] sm:max-w-[160px] flex items-center shrink-0">
+                    <img
+                      src={logoUrl}
+                      alt={storeName}
+                      className="h-full w-auto max-h-8 sm:max-h-10 object-contain rounded-lg"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-[#181A1D] flex items-center justify-center text-white font-black text-sm sm:text-lg shadow-md group-hover:scale-105 transition-transform border border-white/10 relative overflow-hidden">
+                    <span className="relative z-10">{storeName.charAt(0) || "A"}</span>
+                    <div className="absolute inset-0 bg-gradient-to-tr from-[#FF6448]/30 to-transparent pointer-events-none" />
+                  </div>
+                )}
                 <div>
                   <span className="text-sm sm:text-lg font-black text-slate-900 tracking-tight block leading-none">
                     {storeName}

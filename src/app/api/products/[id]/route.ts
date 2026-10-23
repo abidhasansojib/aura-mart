@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { verifyAdminAuth } from "@/lib/auth";
 
@@ -73,6 +74,12 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
       },
     });
 
+    try {
+      revalidatePath("/");
+    } catch {
+      // safe fallback
+    }
+
     return NextResponse.json(updated);
   } catch (error) {
     console.error(`PATCH /api/products/${params.id} error:`, error);
@@ -98,6 +105,12 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
     await prisma.product.delete({
       where: { id },
     });
+
+    try {
+      revalidatePath("/");
+    } catch {
+      // safe fallback
+    }
 
     return NextResponse.json({ success: true, message: "Product deleted successfully" });
   } catch (error) {
