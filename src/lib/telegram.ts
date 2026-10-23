@@ -94,3 +94,59 @@ export async function sendTelegramOrderAlert(
     return false;
   }
 }
+
+export async function sendTelegramOrderCancellationAlert(
+  order: {
+    orderNumber: string;
+    customerName: string;
+    customerPhone: string;
+    totalAmount: number;
+    items?: Array<{ productName: string; quantity: number }>;
+  },
+  reason?: string,
+  currencySymbol: string = "৳"
+): Promise<boolean> {
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+
+  if (!botToken || !chatId || botToken === "your-telegram-bot-token") {
+    return false;
+  }
+
+  try {
+    const itemsSummary = order.items && order.items.length > 0
+      ? order.items.map((it) => `• ${it.productName} × ${it.quantity}`).join("\n")
+      : "";
+
+    const messageHtml = [
+      `⚠️ <b>ORDER CANCELLED BY CUSTOMER</b>`,
+      `━━━━━━━━━━━━━━━━━━`,
+      `🆔 <b>Order:</b> <code>${order.orderNumber}</code>`,
+      `👤 <b>Customer:</b> ${order.customerName}`,
+      `📞 <b>Phone:</b> <a href="tel:${order.customerPhone}">${order.customerPhone}</a>`,
+      `💰 <b>Total Amount:</b> ${currencySymbol}${order.totalAmount}`,
+      `💬 <b>Reason:</b> ${reason ? `<i>${reason}</i>` : "No reason specified"}`,
+      itemsSummary ? `━━━━━━━━━━━━━━━━━━\n📦 <b>Restored Items:</b>\n${itemsSummary}` : "",
+      `━━━━━━━━━━━━━━━━━━`,
+      `✅ <b>Status:</b> Cancelled. Items returned to active inventory.`,
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    const endpoint = `https://api.telegram.org/bot${botToken}/sendMessage`;
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: messageHtml,
+        parse_mode: "HTML",
+      }),
+    });
+
+    return res.ok;
+  } catch (error) {
+    console.error("Failed to send Telegram order cancellation alert:", error);
+    return false;
+  }
+}

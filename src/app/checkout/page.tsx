@@ -18,6 +18,8 @@ import {
   Banknote,
   Ticket,
   Sparkles,
+  Ban,
+  X,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/utils";
@@ -64,6 +66,7 @@ interface CompletedOrder {
   paymentSenderNo?: string | null;
   trxId?: string | null;
   orderNote?: string | null;
+  status: string;
   createdAt: string;
   items: OrderItemData[];
 }
@@ -113,6 +116,49 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [completedOrder, setCompletedOrder] = useState<CompletedOrder | null>(null);
+
+  // Cancellation state
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState("Ordered by mistake");
+  const [customCancelReason, setCustomCancelReason] = useState("");
+  const [isCancellingOrder, setIsCancellingOrder] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
+  const [cancelSuccessMsg, setCancelSuccessMsg] = useState<string | null>(null);
+
+  const handleCancelCompletedOrder = async () => {
+    if (!completedOrder) return;
+    setIsCancellingOrder(true);
+    setCancelError(null);
+
+    const reasonText =
+      cancelReason === "Other" && customCancelReason.trim()
+        ? customCancelReason.trim()
+        : cancelReason;
+
+    try {
+      const res = await fetch(`/api/orders/${completedOrder.id}/cancel`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerPhone: completedOrder.customerPhone,
+          reason: reasonText,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to cancel order");
+      }
+
+      setCompletedOrder((prev) => (prev ? { ...prev, status: "Cancelled" } : null));
+      setCancelSuccessMsg(data.message || "Your order has been cancelled successfully.");
+      setIsCancelModalOpen(false);
+    } catch (err) {
+      setCancelError(err instanceof Error ? err.message : "Error cancelling order");
+    } finally {
+      setIsCancellingOrder(false);
+    }
+  };
 
   // Fetch latest settings on mount
   useEffect(() => {
@@ -266,7 +312,7 @@ export default function CheckoutPage() {
       <div className="min-h-screen bg-[#FAFAFA] py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl mx-auto space-y-6">
           {/* Action Bar (hidden when printing) */}
-          <div className="print:hidden flex items-center justify-between">
+          <div className="print:hidden flex flex-wrap items-center justify-between gap-3">
             <Link
               href="/"
               className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors"
@@ -275,27 +321,54 @@ export default function CheckoutPage() {
               <span>Back to Store</span>
             </Link>
 
-            <button
-              onClick={() => window.print()}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-xs font-semibold rounded-xl hover:bg-slate-800 transition-colors shadow-sm min-h-[44px]"
-            >
-              <Printer className="h-4 w-4" />
-              <span>Print / Save Receipt (PDF)</span>
-            </button>
+            <div className="flex items-center gap-2">
+              {completedOrder.status === "Pending" && (
+                <button
+                  onClick={() => setIsCancelModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold rounded-xl border border-rose-200 transition-colors min-h-[44px]"
+                  title="Cancel this order before store confirmation"
+                >
+                  <Ban className="h-4 w-4 text-rose-600" />
+                  <span>Cancel Order</span>
+                </button>
+              )}
+
+              <button
+                onClick={() => window.print()}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-xs font-semibold rounded-xl hover:bg-slate-800 transition-colors shadow-sm min-h-[44px]"
+              >
+                <Printer className="h-4 w-4" />
+                <span>Print / Save Receipt (PDF)</span>
+              </button>
+            </div>
           </div>
 
-          {/* Celebratory Banner (hidden when printing) */}
-          <div className="print:hidden text-center space-y-2 py-4">
-            <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-md">
-              <CheckCircle2 className="h-10 w-10 text-emerald-600" />
+          {/* Celebratory / Status Banner (hidden when printing) */}
+          {completedOrder.status === "Cancelled" ? (
+            <div className="print:hidden text-center space-y-2 py-4 bg-rose-50/70 border border-rose-200 rounded-3xl p-6">
+              <div className="w-16 h-16 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto shadow-md">
+                <Ban className="h-10 w-10 text-rose-600" />
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-black text-rose-950 tracking-tight">
+                Order Cancelled
+              </h1>
+              <p className="text-sm text-rose-800 max-w-md mx-auto">
+                {cancelSuccessMsg || `Order #${completedOrder.orderNumber} has been cancelled successfully. All items have been returned to active stock.`}
+              </p>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-              Order Confirmed!
-            </h1>
-            <p className="text-sm text-slate-600 max-w-md mx-auto">
-              Thank you, <span className="font-semibold text-slate-900">{completedOrder.customerName}</span>! Your order has been placed successfully and will be dispatched shortly.
-            </p>
-          </div>
+          ) : (
+            <div className="print:hidden text-center space-y-2 py-4">
+              <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-md">
+                <CheckCircle2 className="h-10 w-10 text-emerald-600" />
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                Order Placed!
+              </h1>
+              <p className="text-sm text-slate-600 max-w-md mx-auto">
+                Thank you, <span className="font-semibold text-slate-900">{completedOrder.customerName}</span>! Your order has been placed and is awaiting confirmation.
+              </p>
+            </div>
+          )}
 
           {/* Printable Thermal / A4 Packing Slip Card */}
           <div className="bg-white rounded-3xl border border-gray-200 shadow-xl overflow-hidden print:shadow-none print:border print:rounded-none p-6 sm:p-8 space-y-6">
@@ -329,6 +402,19 @@ export default function CheckoutPage() {
                     minute: "2-digit",
                   })}
                 </span>
+                <div className="mt-2 flex sm:justify-end">
+                  <span
+                    className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                      completedOrder.status === "Cancelled"
+                        ? "bg-rose-100 text-rose-800 border border-rose-200"
+                        : completedOrder.status === "Pending"
+                        ? "bg-amber-100 text-amber-800 border border-amber-200"
+                        : "bg-blue-100 text-blue-800 border border-blue-200"
+                    }`}
+                  >
+                    ● {completedOrder.status === "Pending" ? "Pending Confirmation" : completedOrder.status}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -450,6 +536,108 @@ export default function CheckoutPage() {
               <span>Continue Shopping</span>
             </Link>
           </div>
+
+          {/* Cancel Order Confirmation Modal */}
+          {isCancelModalOpen && (
+            <div className="fixed inset-0 z-50 overflow-y-auto">
+              <div
+                className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity"
+                onClick={() => !isCancellingOrder && setIsCancelModalOpen(false)}
+              />
+              <div className="flex min-h-full items-center justify-center p-4">
+                <div className="relative w-full max-w-md rounded-3xl bg-white p-6 sm:p-7 shadow-2xl border border-gray-100 space-y-5 animate-in fade-in zoom-in-95">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+                        <Ban className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-base font-bold text-slate-900">
+                          Cancel Order #{completedOrder.orderNumber}
+                        </h3>
+                        <p className="text-xs text-slate-500">
+                          Pending confirmation cancellation
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      disabled={isCancellingOrder}
+                      onClick={() => setIsCancelModalOpen(false)}
+                      className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-900 leading-relaxed">
+                    Are you sure you want to cancel this order? Reserved items will be released back to our inventory. You can only cancel before store confirmation.
+                  </div>
+
+                  {cancelError && (
+                    <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 font-medium">
+                      {cancelError}
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                      Reason for Cancellation
+                    </label>
+                    <select
+                      value={cancelReason}
+                      onChange={(e) => setCancelReason(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-xs text-slate-900 bg-white font-medium focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 min-h-[44px]"
+                    >
+                      <option value="Ordered by mistake">Ordered by mistake</option>
+                      <option value="Want to change shipping address or delivery zone">Want to change delivery address</option>
+                      <option value="Want to change ordered products or quantity">Want to change products or quantity</option>
+                      <option value="Found a better price or no longer needed">No longer needed</option>
+                      <option value="Other">Other reason</option>
+                    </select>
+
+                    {cancelReason === "Other" && (
+                      <textarea
+                        rows={2}
+                        value={customCancelReason}
+                        onChange={(e) => setCustomCancelReason(e.target.value)}
+                        placeholder="Please specify why you wish to cancel..."
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 mt-2"
+                      />
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-end gap-3 pt-2">
+                    <button
+                      type="button"
+                      disabled={isCancellingOrder}
+                      onClick={() => setIsCancelModalOpen(false)}
+                      className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors min-h-[42px]"
+                    >
+                      Keep Order
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isCancellingOrder}
+                      onClick={handleCancelCompletedOrder}
+                      className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 disabled:bg-rose-400 text-white font-bold rounded-xl text-xs shadow-md shadow-rose-600/20 transition-all flex items-center gap-2 min-h-[42px]"
+                    >
+                      {isCancellingOrder ? (
+                        <>
+                          <div className="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <span>Cancelling...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Ban className="h-3.5 w-3.5" />
+                          <span>Confirm Cancellation</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
