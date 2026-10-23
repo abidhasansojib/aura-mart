@@ -307,7 +307,7 @@ export function AdminProducts({
       ) : (
         <div className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-600">
+            <table className="w-full min-w-[580px] text-left text-xs text-slate-600">
               <thead className="bg-neutral-50 text-[11px] uppercase tracking-wider text-slate-500 border-b border-gray-200">
                 <tr>
                   <th className="py-3.5 px-4 font-bold">Product</th>
@@ -441,10 +441,10 @@ export function AdminProducts({
 
       {/* 3. Add / Edit Product Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
-          <div className="relative w-full max-w-2xl bg-white rounded-3xl p-6 sm:p-8 shadow-2xl my-8 space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-gray-100">
-              <h3 className="text-base font-bold text-slate-900">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
+          <div className="relative w-full max-w-2xl bg-white rounded-3xl p-5 xs:p-6 sm:p-8 shadow-2xl my-6 sm:my-8 space-y-5 sm:space-y-6 max-h-[92vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-gray-100">
+              <h3 className="text-sm sm:text-base font-bold text-slate-900">
                 {editingProduct ? `Edit Product: ${editingProduct.name}` : "Add New Product"}
               </h3>
               <button

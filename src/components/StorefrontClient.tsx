@@ -78,7 +78,7 @@ function ProductCard({
       : null;
 
   return (
-    <div className="group flex flex-col bg-white rounded-[28px] border border-black/5 overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 relative bento-card">
+    <div className="group flex flex-col bg-white rounded-2xl sm:rounded-[28px] border border-black/5 overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 relative bento-card">
       {/* Image Container (1:1 Aspect Ratio) */}
       <div
         onClick={() => onOpenModal(product)}
@@ -92,26 +92,26 @@ function ProductCard({
         />
 
         {/* Top Badges */}
-        <div className="absolute top-3 inset-x-3 flex items-center justify-between pointer-events-none">
+        <div className="absolute top-2 sm:top-3 inset-x-2 sm:inset-x-3 flex items-center justify-between pointer-events-none">
           {discountPercent ? (
-            <span className="bg-[#FF6448] text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-md">
+            <span className="bg-[#FF6448] text-white text-[9px] sm:text-[10px] font-black px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full shadow-md">
               {discountPercent}% OFF
             </span>
           ) : (
             <span />
           )}
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
             {isSimilar && (
-              <span className="bg-amber-100/90 text-amber-900 text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1 border border-amber-200">
+              <span className="bg-amber-100/90 text-amber-900 text-[9px] sm:text-[10px] font-black px-1.5 sm:px-2 py-0.5 rounded-full shadow-sm flex items-center gap-0.5 border border-amber-200">
                 <Sparkles className="h-2.5 w-2.5 text-amber-600" />
-                <span>Related</span>
+                <span className="hidden xs:inline">Related</span>
               </span>
             )}
             {product.isFeatured && (
-              <span className="bg-[#181A1D]/80 backdrop-blur-sm text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1">
+              <span className="bg-[#181A1D]/80 backdrop-blur-sm text-white text-[9px] sm:text-[10px] font-black px-1.5 sm:px-2 py-0.5 rounded-full shadow-sm flex items-center gap-0.5">
                 <Flame className="h-2.5 w-2.5 text-[#FF6448] fill-[#FF6448]" />
-                <span>Hot</span>
+                <span className="hidden xs:inline">Hot</span>
               </span>
             )}
           </div>
@@ -119,7 +119,7 @@ function ProductCard({
 
         {/* Low Stock Warning Badge */}
         {isLowStock && (
-          <span className="absolute bottom-3 left-3 bg-[#F5B738] text-slate-950 text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-md">
+          <span className="absolute bottom-2 sm:bottom-3 left-2 sm:left-3 bg-[#F5B738] text-slate-950 text-[9px] sm:text-[10px] font-black px-2 sm:px-2.5 py-0.5 rounded-full shadow-md">
             Only {product.stock} left!
           </span>
         )}
@@ -127,7 +127,7 @@ function ProductCard({
         {/* Out of Stock Overlay */}
         {isOutOfStock && (
           <div className="absolute inset-0 bg-white/85 backdrop-blur-[2px] flex items-center justify-center p-2">
-            <span className="bg-[#181A1D] text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
+            <span className="bg-[#181A1D] text-white text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-full shadow-md">
               Out of Stock
             </span>
           </div>
@@ -135,32 +135,32 @@ function ProductCard({
       </div>
 
       {/* Card Body */}
-      <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3">
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between text-[10px] font-bold text-slate-400">
-            <span className="uppercase tracking-wider font-mono">{product.category}</span>
-            <span className="flex items-center gap-0.5 text-amber-500">
-              <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+      <div className="p-3 sm:p-4 md:p-5 flex-1 flex flex-col justify-between space-y-2 sm:space-y-3">
+        <div className="space-y-1 sm:space-y-1.5">
+          <div className="flex items-center justify-between text-[9px] sm:text-[10px] font-bold text-slate-400">
+            <span className="uppercase tracking-wider font-mono truncate pr-1">{product.category}</span>
+            <span className="flex items-center gap-0.5 text-amber-500 shrink-0">
+              <Star className="h-2.5 w-2.5 sm:h-3 sm:w-3 fill-amber-400 text-amber-400" />
               <span>4.9</span>
             </span>
           </div>
 
           <h3
             onClick={() => onOpenModal(product)}
-            className="text-xs sm:text-sm font-bold text-slate-900 line-clamp-2 cursor-pointer hover:text-[#FF6448] transition-colors leading-snug"
+            className="text-xs sm:text-sm font-bold text-slate-900 line-clamp-2 cursor-pointer hover:text-[#FF6448] transition-colors leading-snug min-h-[2rem] sm:min-h-[2.5rem]"
           >
             <HighlightText text={product.name} query={searchHighlight} />
           </h3>
         </div>
 
         {/* Price & Action Section */}
-        <div className="space-y-2.5 pt-2 border-t border-gray-100">
-          <div className="flex items-baseline gap-2">
-            <span className="text-base sm:text-lg font-black text-slate-900 font-mono">
+        <div className="space-y-2 pt-1.5 sm:pt-2 border-t border-gray-100">
+          <div className="flex items-baseline gap-1.5 sm:gap-2 flex-wrap">
+            <span className="text-sm xs:text-base sm:text-lg font-black text-slate-900 font-mono">
               {formatPrice(product.price, currencySymbol)}
             </span>
             {product.compareAtPrice && product.compareAtPrice > product.price && (
-              <span className="text-xs text-slate-400 line-through font-mono">
+              <span className="text-[10px] sm:text-xs text-slate-400 line-through font-mono">
                 {formatPrice(product.compareAtPrice, currencySymbol)}
               </span>
             )}
@@ -170,27 +170,27 @@ function ProductCard({
           {isOutOfStock ? (
             <button
               disabled
-              className="w-full py-2 bg-gray-100 text-slate-400 text-xs font-bold rounded-xl cursor-not-allowed min-h-[44px]"
+              className="w-full py-2 bg-gray-100 text-slate-400 text-xs font-bold rounded-xl cursor-not-allowed min-h-[38px] sm:min-h-[44px]"
             >
               Sold Out
             </button>
           ) : (
-            <div className="grid grid-cols-2 gap-1.5">
+            <div className="grid grid-cols-2 gap-1 sm:gap-1.5">
               <button
                 onClick={() => onAddToCart(product)}
-                className="w-full flex items-center justify-center gap-1 py-2 px-2 rounded-2xl border border-slate-900 text-slate-900 text-xs font-bold hover:bg-[#181A1D] hover:text-white transition-all active:scale-95 min-h-[44px]"
+                className="w-full flex items-center justify-center gap-1 py-1.5 sm:py-2 px-1 sm:px-2 rounded-xl sm:rounded-2xl border border-slate-900 text-slate-900 text-[11px] sm:text-xs font-bold hover:bg-[#181A1D] hover:text-white transition-all active:scale-95 min-h-[38px] sm:min-h-[44px]"
                 title="Add to cart"
               >
-                <ShoppingBag className="h-3.5 w-3.5" />
+                <ShoppingBag className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 <span>Add</span>
               </button>
 
               <button
                 onClick={() => onQuickBuy(product)}
-                className="w-full flex items-center justify-center gap-1 py-2 px-2 rounded-2xl bg-[#FF6448] hover:bg-[#e8553b] text-white text-xs font-bold shadow-md shadow-[#FF6448]/25 transition-all active:scale-95 min-h-[44px]"
+                className="w-full flex items-center justify-center gap-1 py-1.5 sm:py-2 px-1 sm:px-2 rounded-xl sm:rounded-2xl bg-[#FF6448] hover:bg-[#e8553b] text-white text-[11px] sm:text-xs font-bold shadow-md shadow-[#FF6448]/25 transition-all active:scale-95 min-h-[38px] sm:min-h-[44px]"
                 title="1-Click Instant Order"
               >
-                <Zap className="h-3.5 w-3.5 fill-white" />
+                <Zap className="h-3 w-3 sm:h-3.5 sm:w-3.5 fill-white" />
                 <span>Order</span>
               </button>
             </div>
@@ -368,41 +368,41 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
             ===================================================================== */}
         <section className="grid grid-cols-1 md:grid-cols-12 gap-4">
           {/* Main Hero Card: Coral `#FF6448` (Span 7 Cols) */}
-          <div className="md:col-span-7 bg-[#FF6448] text-white rounded-[32px] p-7 sm:p-10 shadow-xl flex flex-col justify-between bento-card relative overflow-hidden group">
-            <div className="space-y-4 relative z-10">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-xs font-bold border border-white/20 shadow-sm">
-                  <Sparkles className="h-3.5 w-3.5" />
+          <div className="md:col-span-7 bg-[#FF6448] text-white rounded-[28px] sm:rounded-[32px] p-5 xs:p-7 sm:p-10 shadow-xl flex flex-col justify-between bento-card relative overflow-hidden group">
+            <div className="space-y-3 sm:space-y-4 relative z-10">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-[11px] sm:text-xs font-bold border border-white/20 shadow-sm">
+                  <Sparkles className="h-3 sm:h-3.5 w-3 sm:w-3.5" />
                   <span>{settings.heroBadgeText || "Featured Collection 2026"}</span>
                 </span>
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-950/30 backdrop-blur-md text-white text-[11px] font-bold">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-950/30 backdrop-blur-md text-white text-[10px] sm:text-[11px] font-bold">
                   <Star className="h-3 w-3 fill-amber-300 text-amber-300" />
                   <span>4.9/5 (2,400+ Orders)</span>
                 </span>
               </div>
 
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.08]">
+              <h1 className="text-2xl xs:text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.08]">
                 {settings.heroTitle || settings.storeName || "Aura Mart"}
               </h1>
 
-              <p className="text-sm sm:text-base text-white/95 max-w-lg leading-relaxed font-medium">
+              <p className="text-xs sm:text-base text-white/95 max-w-lg leading-relaxed font-medium">
                 {settings.heroTagline ||
                   settings.tagline ||
                   "Quality Products Delivered to Your Doorstep. Zero advance payment required."}
               </p>
             </div>
 
-            <div className="pt-8 relative z-10 flex flex-wrap items-center gap-3">
+            <div className="pt-6 sm:pt-8 relative z-10 flex flex-col xs:flex-row items-stretch xs:items-center gap-2.5 sm:gap-3">
               <a
                 href="#catalog"
-                className="inline-flex items-center gap-2 bg-[#181A1D] hover:bg-black text-white text-xs sm:text-sm font-bold px-7 py-3.5 rounded-2xl shadow-xl transition-all hover:scale-[1.02] active:scale-95 min-h-[44px]"
+                className="inline-flex items-center justify-center gap-2 bg-[#181A1D] hover:bg-black text-white text-xs sm:text-sm font-bold px-6 sm:px-7 py-3 sm:py-3.5 rounded-2xl shadow-xl transition-all hover:scale-[1.02] active:scale-95 min-h-[44px]"
               >
                 <span>{settings.heroCtaText || "Shop Catalog"}</span>
                 <ArrowRight className="h-4 w-4" />
               </a>
 
-              <span className="inline-flex items-center gap-1.5 text-xs font-bold bg-white/25 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/30 text-white shadow-sm">
-                <CheckCircle2 className="h-4 w-4 text-white" />
+              <span className="inline-flex items-center justify-center gap-1.5 text-[11px] sm:text-xs font-bold bg-white/25 backdrop-blur-md px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-2xl border border-white/30 text-white shadow-sm">
+                <CheckCircle2 className="h-3.5 sm:h-4 w-3.5 sm:w-4 text-white" />
                 <span>{settings.heroBadgeSecondary || "Cash on Delivery Available"}</span>
               </span>
             </div>
@@ -870,23 +870,23 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
 
       {/* 7. Mobile Sticky Bottom Cart Bar */}
       {totalItems > 0 && (
-        <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-[#181A1D]/95 backdrop-blur-xl text-white p-3 shadow-2xl animate-in slide-in-from-bottom border-t border-white/10">
+        <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-[#181A1D]/95 backdrop-blur-xl text-white p-3 pb-safe shadow-2xl animate-in slide-in-from-bottom border-t border-white/10">
           <div className="flex items-center justify-between gap-3">
-            <button onClick={() => setIsCartOpen(true)} className="text-left flex-1 pl-2">
-              <span className="text-[11px] text-slate-400 block font-medium">
+            <button onClick={() => setIsCartOpen(true)} className="text-left flex-1 pl-1">
+              <span className="text-[10px] text-slate-400 block font-medium">
                 {totalItems} {totalItems === 1 ? "Item" : "Items"} in Cart
               </span>
-              <span className="text-base font-black text-white font-mono">
+              <span className="text-sm font-black text-white font-mono">
                 {formatPrice(subtotal, currencySymbol)}
               </span>
             </button>
 
             <Link
               href="/checkout"
-              className="flex items-center justify-center gap-2 bg-[#FF6448] text-white text-xs font-bold px-5 py-3 rounded-2xl shadow-lg shadow-[#FF6448]/30 active:scale-95 transition-all min-h-[44px]"
+              className="flex items-center justify-center gap-1.5 bg-[#FF6448] hover:bg-[#e8553b] text-white text-xs font-bold px-4 py-2.5 rounded-2xl shadow-lg shadow-[#FF6448]/30 active:scale-95 transition-all min-h-[42px]"
             >
-              <span>Checkout Now</span>
-              <ArrowRight className="h-4 w-4" />
+              <span>Checkout</span>
+              <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
         </div>

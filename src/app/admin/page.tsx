@@ -10,8 +10,6 @@ import {
   LogOut,
   ExternalLink,
   RefreshCw,
-  Search,
-  ChevronDown,
   Bell,
   Store,
 } from "lucide-react";
@@ -129,15 +127,15 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#CBD5CE] p-3 sm:p-6 lg:p-8 flex items-center justify-center font-sans">
+    <div className="min-h-screen bg-[#CBD5CE] p-2 xs:p-3 sm:p-6 lg:p-8 pb-24 sm:pb-6 flex items-center justify-center font-sans selection:bg-[#FF6448] selection:text-white">
       {/* =======================================================================
           OUTER MATTE CONTAINER (Replicating Dribbble Reference)
           ======================================================================= */}
-      <div className="w-full max-w-[1440px] bg-[#181A1D] text-white rounded-[36px] shadow-2xl p-4 sm:p-6 lg:p-7 flex gap-4 sm:gap-6 border border-white/5 relative overflow-hidden">
+      <div className="w-full max-w-[1440px] bg-[#181A1D] text-white rounded-2xl sm:rounded-[36px] shadow-2xl p-3.5 xs:p-4 sm:p-6 lg:p-7 flex gap-4 sm:gap-6 border border-white/5 relative overflow-hidden">
         {/* =====================================================================
-            1. FLOATING VERTICAL DOCK (LEFT SIDEBAR)
+            1. FLOATING VERTICAL DOCK (LEFT SIDEBAR - Visible on Desktop >= sm)
             ===================================================================== */}
-        <aside className="w-14 sm:w-16 bg-[#212429] rounded-[28px] p-2.5 flex flex-col justify-between items-center shrink-0 border border-white/5 shadow-lg">
+        <aside className="hidden sm:flex w-14 sm:w-16 bg-[#212429] rounded-[28px] p-2.5 flex-col justify-between items-center shrink-0 border border-white/5 shadow-lg">
           {/* Top Logo */}
           <div className="space-y-4 flex flex-col items-center w-full">
             <Link
@@ -238,34 +236,46 @@ export default function AdminPage() {
         {/* =====================================================================
             2. MAIN DASHBOARD CONTENT AREA
             ===================================================================== */}
-        <div className="flex-1 flex flex-col min-w-0 space-y-6">
+        <div className="flex-1 flex flex-col min-w-0 space-y-5 sm:space-y-6">
           {/* Top Bar matching Dribbble Reference */}
-          <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
-            {/* Breadcrumb Title */}
-            <div className="flex items-center gap-3">
-              <h2 className="text-sm font-semibold tracking-wide text-slate-400 font-mono">
-                {getBreadcrumbTitle()}
-              </h2>
+          <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pb-2 border-b border-white/5 sm:border-transparent">
+            {/* Breadcrumb Title & Mobile Brand/Logout */}
+            <div className="flex items-center justify-between w-full sm:w-auto">
+              <div className="flex items-center gap-2.5">
+                <Link
+                  href="/"
+                  className="sm:hidden w-7 h-7 rounded-xl bg-white text-slate-950 font-black text-xs flex items-center justify-center shadow-md shrink-0"
+                  title="Visit Store"
+                >
+                  Am
+                </Link>
+                <h2 className="text-xs sm:text-sm font-semibold tracking-wide text-slate-400 font-mono truncate">
+                  {getBreadcrumbTitle()}
+                </h2>
+              </div>
+
+              {/* Mobile Logout Quick Trigger */}
+              <button
+                onClick={handleLogout}
+                className="sm:hidden p-1.5 text-rose-400 hover:bg-rose-500/15 rounded-xl transition-colors shrink-0"
+                title="Logout"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
             </div>
 
             {/* Header Right Actions */}
-            <div className="flex items-center gap-2.5 flex-wrap">
-              {/* Search Pill */}
-              <div className="w-9 h-9 rounded-full bg-[#24272C] flex items-center justify-center text-slate-300 hover:text-white border border-white/5 shadow-sm">
-                <Search className="h-4 w-4" />
-              </div>
-
-              {/* Store Location Pill Dropdown */}
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#24272C] border border-white/5 text-xs font-semibold text-slate-200 shadow-sm">
-                <Store className="h-3.5 w-3.5 text-[#FF6448]" />
-                <span className="font-bold">{settings.storeName}</span>
-                <span className="text-slate-400 text-[10px]">Central Hub</span>
-                <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+            <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
+              {/* Store Location Pill */}
+              <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-[#24272C] border border-white/5 text-[11px] sm:text-xs font-semibold text-slate-200 shadow-sm max-w-[200px] truncate">
+                <Store className="h-3.5 w-3.5 text-[#FF6448] shrink-0" />
+                <span className="font-bold truncate">{settings.storeName}</span>
+                <span className="text-slate-400 text-[10px] hidden xs:inline">Central Hub</span>
               </div>
 
               {/* Bell Notification Pill */}
-              <div className="relative w-9 h-9 rounded-full bg-[#24272C] flex items-center justify-center text-slate-300 hover:text-white border border-white/5 shadow-sm">
-                <Bell className="h-4 w-4" />
+              <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#24272C] flex items-center justify-center text-slate-300 hover:text-white border border-white/5 shadow-sm shrink-0">
+                <Bell className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 {pendingOrdersCount > 0 && (
                   <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#FF6448]" />
                 )}
@@ -275,10 +285,10 @@ export default function AdminPage() {
               <Link
                 href="/"
                 target="_blank"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-bold rounded-full transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 sm:py-2 bg-white/10 hover:bg-white/20 text-white text-[11px] sm:text-xs font-bold rounded-full transition-colors shrink-0"
               >
                 <span>Live Store</span>
-                <ExternalLink className="h-3.5 w-3.5" />
+                <ExternalLink className="h-3 sm:h-3.5 w-3 sm:w-3.5" />
               </Link>
             </div>
           </header>
@@ -322,6 +332,81 @@ export default function AdminPage() {
           </div>
         </div>
       </div>
+
+      {/* =======================================================================
+          3. MOBILE APP DOCK (Visible ONLY on Small Devices < sm)
+          ======================================================================= */}
+      <nav className="sm:hidden fixed bottom-3 inset-x-3 z-50 bg-[#212429]/95 backdrop-blur-xl border border-white/10 rounded-2xl p-1.5 flex items-center justify-around shadow-2xl pb-safe">
+        {/* Overview Tab */}
+        <button
+          onClick={() => setActiveTab("overview")}
+          className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-xl transition-all ${
+            activeTab === "overview"
+              ? "bg-[#C4E9E5] text-slate-950 font-bold shadow-md"
+              : "text-slate-400 hover:text-white"
+          }`}
+        >
+          <BarChart3 className="h-4 w-4" />
+          <span className="text-[10px] mt-0.5">Overview</span>
+        </button>
+
+        {/* Orders Tab with Pending Count */}
+        <button
+          onClick={() => setActiveTab("orders")}
+          className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-xl transition-all relative ${
+            activeTab === "orders"
+              ? "bg-[#FF6448] text-white font-bold shadow-md"
+              : "text-slate-400 hover:text-white"
+          }`}
+        >
+          <Package className="h-4 w-4" />
+          {pendingOrdersCount > 0 && (
+            <span className="absolute top-1 right-2 w-3.5 h-3.5 bg-[#F5B738] text-slate-950 text-[8px] font-black rounded-full flex items-center justify-center ring-2 ring-[#212429]">
+              {pendingOrdersCount}
+            </span>
+          )}
+          <span className="text-[10px] mt-0.5">Orders</span>
+        </button>
+
+        {/* Products Tab */}
+        <button
+          onClick={() => setActiveTab("products")}
+          className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-xl transition-all ${
+            activeTab === "products"
+              ? "bg-[#5256FF] text-white font-bold shadow-md"
+              : "text-slate-400 hover:text-white"
+          }`}
+        >
+          <Boxes className="h-4 w-4" />
+          <span className="text-[10px] mt-0.5">Products</span>
+        </button>
+
+        {/* Settings Tab */}
+        <button
+          onClick={() => setActiveTab("settings")}
+          className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-xl transition-all ${
+            activeTab === "settings"
+              ? "bg-white text-slate-950 font-bold shadow-md"
+              : "text-slate-400 hover:text-white"
+          }`}
+        >
+          <Settings className="h-4 w-4" />
+          <span className="text-[10px] mt-0.5">Settings</span>
+        </button>
+
+        <div className="w-[1px] h-6 bg-white/10 mx-0.5" />
+
+        {/* Sync / Refresh */}
+        <button
+          onClick={fetchDashboardData}
+          disabled={isLoadingData}
+          className="flex flex-col items-center justify-center py-1.5 px-2 text-slate-400 hover:text-white"
+          title="Refresh Data"
+        >
+          <RefreshCw className={`h-4 w-4 ${isLoadingData ? "animate-spin text-[#C4E9E5]" : ""}`} />
+          <span className="text-[9px] mt-0.5">Sync</span>
+        </button>
+      </nav>
     </div>
   );
 }

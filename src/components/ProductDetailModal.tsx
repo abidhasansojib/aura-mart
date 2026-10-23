@@ -64,56 +64,56 @@ export function ProductDetailModal({
         onClick={onClose}
       />
 
-      <div className="flex min-h-full items-center justify-center p-4 sm:p-6">
-        <div className="relative w-full max-w-3xl rounded-[32px] bg-white shadow-2xl overflow-hidden border border-black/5 transition-all animate-in zoom-in-95 bento-card">
+      <div className="flex min-h-full items-center justify-center p-3 xs:p-4 sm:p-6">
+        <div className="relative w-full max-w-3xl rounded-3xl sm:rounded-[32px] bg-white shadow-2xl overflow-hidden border border-black/5 transition-all animate-in zoom-in-95 bento-card max-h-[92vh] flex flex-col">
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 z-10 p-2.5 rounded-full bg-white/80 backdrop-blur-md text-slate-700 hover:text-black shadow-md border border-black/5 transition-colors"
+            className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 z-10 p-2 sm:p-2.5 rounded-full bg-white/90 backdrop-blur-md text-slate-700 hover:text-black shadow-md border border-black/5 transition-colors"
             aria-label="Close modal"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4 sm:h-5 sm:w-5" />
           </button>
 
-          <div className="grid grid-cols-1 md:grid-cols-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 overflow-y-auto">
             {/* Image Section */}
-            <div className="relative bg-neutral-100 aspect-square md:aspect-auto h-72 md:h-full flex items-center justify-center p-6 overflow-hidden">
+            <div className="relative bg-neutral-100 aspect-square md:aspect-auto h-56 xs:h-64 sm:h-72 md:h-full flex items-center justify-center p-4 sm:p-6 overflow-hidden">
               <img
                 src={product.imageUrl || "/placeholder-product.png"}
                 alt={product.name}
                 className="max-h-full max-w-full object-cover rounded-2xl shadow-sm"
               />
               {discountPercent && (
-                <div className="absolute top-4 left-4 bg-[#FF6448] text-white text-xs font-black px-3 py-1 rounded-full shadow-md">
+                <div className="absolute top-3 left-3 sm:top-4 sm:left-4 bg-[#FF6448] text-white text-[10px] sm:text-xs font-black px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full shadow-md">
                   {discountPercent}% OFF
                 </div>
               )}
             </div>
 
             {/* Content Section */}
-            <div className="p-6 sm:p-8 flex flex-col justify-between space-y-6">
-              <div className="space-y-3.5">
+            <div className="p-5 xs:p-6 sm:p-8 flex flex-col justify-between space-y-5 sm:space-y-6">
+              <div className="space-y-3 sm:space-y-3.5">
                 {/* Category & Stock Tag */}
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 font-mono uppercase tracking-wider">
+                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                  <span className="px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold bg-slate-100 text-slate-700 font-mono uppercase tracking-wider">
                     {product.category}
                   </span>
 
-                  <span className="flex items-center gap-1 text-xs font-bold text-amber-500 bg-amber-50 px-2.5 py-0.5 rounded-full">
-                    <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                  <span className="flex items-center gap-1 text-[10px] sm:text-xs font-bold text-amber-500 bg-amber-50 px-2 sm:px-2.5 py-0.5 rounded-full">
+                    <Star className="h-3 sm:h-3.5 w-3 sm:w-3.5 fill-amber-400 text-amber-400" />
                     <span>4.9 (Verified)</span>
                   </span>
 
                   {isOutOfStock ? (
-                    <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700">
+                    <span className="px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold bg-red-100 text-red-700">
                       Out of Stock
                     </span>
                   ) : isLowStock ? (
-                    <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#F5B738]/20 text-amber-800">
-                      Only {product.stock} units left!
+                    <span className="px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold bg-[#F5B738]/20 text-amber-800">
+                      Only {product.stock} left!
                     </span>
                   ) : (
-                    <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 flex items-center gap-1">
+                    <span className="px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold bg-emerald-100 text-emerald-800 flex items-center gap-1">
                       <CheckCircle2 className="h-3 w-3" />
                       <span>In Stock</span>
                     </span>
@@ -121,17 +121,17 @@ export function ProductDetailModal({
                 </div>
 
                 {/* Title */}
-                <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-snug">
+                <h2 className="text-lg xs:text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-snug">
                   {product.name}
                 </h2>
 
                 {/* Price Display */}
-                <div className="flex items-baseline gap-3 pt-1">
-                  <span className="text-2xl sm:text-3xl font-black text-slate-900 font-mono">
+                <div className="flex items-baseline gap-2.5 pt-1">
+                  <span className="text-xl xs:text-2xl sm:text-3xl font-black text-slate-900 font-mono">
                     {formatPrice(product.price, currencySymbol)}
                   </span>
                   {product.compareAtPrice && product.compareAtPrice > product.price && (
-                    <span className="text-sm text-slate-400 line-through font-mono">
+                    <span className="text-xs sm:text-sm text-slate-400 line-through font-mono">
                       {formatPrice(product.compareAtPrice, currencySymbol)}
                     </span>
                   )}

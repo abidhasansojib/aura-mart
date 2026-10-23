@@ -29,6 +29,15 @@ body {
   scrollbar-width: none;
 }
 
+/* iOS Safari Safe Area support */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
 /* Subtle striped chart pattern like the Dribbble inspiration */
 .striped-bar-pattern {
   background-image: repeating-linear-gradient(

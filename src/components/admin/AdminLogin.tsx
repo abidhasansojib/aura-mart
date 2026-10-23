@@ -222,18 +222,18 @@ export function AdminLogin({ onSuccess }: AdminLoginProps) {
       <div className="absolute -right-10 -bottom-10 w-72 h-44 striped-bar-pattern opacity-10 pointer-events-none rounded-tl-full" />
 
       {/* Bento Glass Card Container */}
-      <div className="w-full max-w-md bg-white/95 backdrop-blur-2xl rounded-[32px] border border-black/5 shadow-2xl p-7 sm:p-9 space-y-6 relative z-10 bento-card">
+      <div className="w-full max-w-md bg-white/95 backdrop-blur-2xl rounded-2xl sm:rounded-[32px] border border-black/5 shadow-2xl p-5 xs:p-7 sm:p-9 space-y-5 sm:space-y-6 relative z-10 bento-card">
         {/* Brand Header */}
         <div className="text-center space-y-2">
           <Link href="/" className="inline-block group">
-            <div className="w-13 h-13 rounded-2xl bg-[#181A1D] text-white flex items-center justify-center mx-auto shadow-md group-hover:scale-105 transition-transform border border-white/10 relative overflow-hidden">
+            <div className="w-12 h-12 sm:w-13 sm:h-13 rounded-2xl bg-[#181A1D] text-white flex items-center justify-center mx-auto shadow-md group-hover:scale-105 transition-transform border border-white/10 relative overflow-hidden">
               <span className="relative z-10 font-black text-xl">A</span>
               <div className="absolute inset-0 bg-gradient-to-tr from-[#FF6448]/40 to-transparent pointer-events-none" />
             </div>
           </Link>
 
           <div>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
               Aura Mart
             </h1>
             <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#181A1D] text-white text-[10px] font-bold uppercase tracking-wider mt-1 shadow-sm">
@@ -286,7 +286,7 @@ export function AdminLogin({ onSuccess }: AdminLoginProps) {
                   value={usernameOrEmail}
                   onChange={(e) => setUsernameOrEmail(e.target.value)}
                   placeholder="admin or admin@auramart.com"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-black/10 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/30 focus:border-[#FF6448] transition-all min-h-[46px]"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-black/10 bg-white text-base sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/30 focus:border-[#FF6448] transition-all min-h-[46px]"
                 />
               </div>
             </div>
@@ -320,7 +320,7 @@ export function AdminLogin({ onSuccess }: AdminLoginProps) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter password"
-                  className="w-full pl-10 pr-10 py-2.5 rounded-2xl border border-black/10 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/30 focus:border-[#FF6448] transition-all min-h-[46px]"
+                  className="w-full pl-10 pr-10 py-2.5 rounded-2xl border border-black/10 bg-white text-base sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/30 focus:border-[#FF6448] transition-all min-h-[46px]"
                 />
                 <button
                   type="button"
@@ -381,7 +381,7 @@ export function AdminLogin({ onSuccess }: AdminLoginProps) {
                   value={usernameOrEmail}
                   onChange={(e) => setUsernameOrEmail(e.target.value)}
                   placeholder="admin or admin@auramart.com"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-black/10 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/30 focus:border-[#FF6448] transition-all min-h-[46px]"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-black/10 bg-white text-base sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/30 focus:border-[#FF6448] transition-all min-h-[46px]"
                 />
               </div>
             </div>
@@ -476,7 +476,7 @@ export function AdminLogin({ onSuccess }: AdminLoginProps) {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="At least 6 characters"
-                  className="w-full pl-10 pr-10 py-2.5 rounded-2xl border border-black/10 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/30 focus:border-[#FF6448] transition-all min-h-[46px]"
+                  className="w-full pl-10 pr-10 py-2.5 rounded-2xl border border-black/10 bg-white text-base sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/30 focus:border-[#FF6448] transition-all min-h-[46px]"
                 />
                 <button
                   type="button"
@@ -542,7 +542,7 @@ export function AdminLogin({ onSuccess }: AdminLoginProps) {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Re-type new password"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-black/10 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/30 focus:border-[#FF6448] transition-all min-h-[46px]"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-black/10 bg-white text-base sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/30 focus:border-[#FF6448] transition-all min-h-[46px]"
                 />
               </div>
             </div>
@@ -595,7 +595,7 @@ export function AdminLogin({ onSuccess }: AdminLoginProps) {
                   value={masterKey}
                   onChange={(e) => setMasterKey(e.target.value)}
                   placeholder="Enter ADMIN_SECRET_KEY"
-                  className="w-full pl-10 pr-10 py-2.5 rounded-2xl border border-black/10 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/30 focus:border-[#FF6448] transition-all min-h-[46px]"
+                  className="w-full pl-10 pr-10 py-2.5 rounded-2xl border border-black/10 bg-white text-base sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/30 focus:border-[#FF6448] transition-all min-h-[46px]"
                 />
                 <button
                   type="button"
@@ -623,7 +623,7 @@ export function AdminLogin({ onSuccess }: AdminLoginProps) {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="At least 6 characters"
-                  className="w-full pl-10 pr-10 py-2.5 rounded-2xl border border-black/10 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/30 focus:border-[#FF6448] transition-all min-h-[46px]"
+                  className="w-full pl-10 pr-10 py-2.5 rounded-2xl border border-black/10 bg-white text-base sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/30 focus:border-[#FF6448] transition-all min-h-[46px]"
                 />
                 <button
                   type="button"
@@ -651,7 +651,7 @@ export function AdminLogin({ onSuccess }: AdminLoginProps) {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Re-type new password"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-black/10 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/30 focus:border-[#FF6448] transition-all min-h-[46px]"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-black/10 bg-white text-base sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/30 focus:border-[#FF6448] transition-all min-h-[46px]"
                 />
               </div>
             </div>

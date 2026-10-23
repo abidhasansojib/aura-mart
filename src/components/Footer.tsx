@@ -16,46 +16,46 @@ export function Footer({
   return (
     <footer className="mt-16 bg-[#181A1D] text-white rounded-t-[40px] border-t border-white/10 shadow-2xl overflow-hidden">
       {/* 1. Value Propositions Ribbon */}
-      <div className="py-10 border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-            <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-[#24272C] border border-white/5 shadow-sm">
-              <div className="w-11 h-11 rounded-2xl bg-[#5256FF]/20 text-[#5256FF] flex items-center justify-center shrink-0">
-                <Truck className="h-5 w-5" />
+      <div className="py-8 sm:py-10 border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-6">
+            <div className="flex items-center gap-2.5 sm:gap-3.5 p-3 sm:p-4 rounded-2xl bg-[#24272C] border border-white/5 shadow-sm">
+              <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-[#5256FF]/20 text-[#5256FF] flex items-center justify-center shrink-0">
+                <Truck className="h-4 sm:h-5 w-4 sm:w-5" />
               </div>
               <div>
                 <h4 className="text-xs sm:text-sm font-black text-white">Fast Nationwide</h4>
-                <p className="text-[11px] text-slate-400">All 64 districts covered</p>
+                <p className="text-[10px] sm:text-[11px] text-slate-400">All 64 districts</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-[#24272C] border border-white/5 shadow-sm">
-              <div className="w-11 h-11 rounded-2xl bg-[#C4E9E5]/20 text-[#C4E9E5] flex items-center justify-center shrink-0">
-                <ShieldCheck className="h-5 w-5" />
+            <div className="flex items-center gap-2.5 sm:gap-3.5 p-3 sm:p-4 rounded-2xl bg-[#24272C] border border-white/5 shadow-sm">
+              <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-[#C4E9E5]/20 text-[#C4E9E5] flex items-center justify-center shrink-0">
+                <ShieldCheck className="h-4 sm:h-5 w-4 sm:w-5" />
               </div>
               <div>
                 <h4 className="text-xs sm:text-sm font-black text-white">100% Authentic</h4>
-                <p className="text-[11px] text-slate-400">Inspected before delivery</p>
+                <p className="text-[10px] sm:text-[11px] text-slate-400">Inspected parcel</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-[#24272C] border border-white/5 shadow-sm">
-              <div className="w-11 h-11 rounded-2xl bg-[#FF6448]/20 text-[#FF6448] flex items-center justify-center shrink-0">
-                <RotateCcw className="h-5 w-5" />
+            <div className="flex items-center gap-2.5 sm:gap-3.5 p-3 sm:p-4 rounded-2xl bg-[#24272C] border border-white/5 shadow-sm">
+              <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-[#FF6448]/20 text-[#FF6448] flex items-center justify-center shrink-0">
+                <RotateCcw className="h-4 sm:h-5 w-4 sm:w-5" />
               </div>
               <div>
                 <h4 className="text-xs sm:text-sm font-black text-white">Easy Returns</h4>
-                <p className="text-[11px] text-slate-400">7-day replacement</p>
+                <p className="text-[10px] sm:text-[11px] text-slate-400">7-day replacement</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-[#24272C] border border-white/5 shadow-sm">
-              <div className="w-11 h-11 rounded-2xl bg-amber-400/20 text-amber-400 flex items-center justify-center shrink-0">
-                <Headphones className="h-5 w-5" />
+            <div className="flex items-center gap-2.5 sm:gap-3.5 p-3 sm:p-4 rounded-2xl bg-[#24272C] border border-white/5 shadow-sm">
+              <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-amber-400/20 text-amber-400 flex items-center justify-center shrink-0">
+                <Headphones className="h-4 sm:h-5 w-4 sm:w-5" />
               </div>
               <div>
                 <h4 className="text-xs sm:text-sm font-black text-white">Hotline Support</h4>
-                <p className="text-[11px] text-slate-400">{supportPhone}</p>
+                <p className="text-[10px] sm:text-[11px] text-slate-400 truncate max-w-[100px] sm:max-w-none">{supportPhone}</p>
               </div>
             </div>
           </div>

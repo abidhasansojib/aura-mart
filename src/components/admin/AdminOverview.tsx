@@ -198,26 +198,26 @@ export function AdminOverview({
             ======================================================================= */}
         <div className="lg:col-span-8 bg-[#FF6448] text-white rounded-[28px] p-6 sm:p-7 shadow-xl flex flex-col justify-between relative overflow-hidden bento-card">
           {/* Card Header */}
-          <div className="flex items-center justify-between gap-3 relative z-10">
+          <div className="flex items-center justify-between gap-2.5 sm:gap-3 relative z-10 flex-wrap">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
                 <DollarSign className="h-4 w-4 text-white" />
               </div>
-              <h3 className="text-xl font-black tracking-wider uppercase">REVENUE</h3>
+              <h3 className="text-lg sm:text-xl font-black tracking-wider uppercase">REVENUE</h3>
             </div>
 
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full border border-white/20">
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+              <span className="text-[10px] sm:text-[11px] font-bold bg-white/20 backdrop-blur-sm px-2.5 sm:px-3 py-1 rounded-full border border-white/20">
                 this week ▾
               </span>
-              <span className="text-[11px] font-bold bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full border border-white/20">
+              <span className="text-[10px] sm:text-[11px] font-bold bg-white/20 backdrop-blur-sm px-2.5 sm:px-3 py-1 rounded-full border border-white/20">
                 {currencySymbol} (BDT) ▾
               </span>
             </div>
           </div>
 
           {/* Card Body: Split Chart (Left) and High-Impact Numbers (Right) */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end pt-8 relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end pt-6 sm:pt-8 relative z-10">
             {/* Chart Column (7 Cols) */}
             <div className="md:col-span-7 flex flex-col justify-end space-y-3">
               {/* Active Day Price Tooltip Pill */}

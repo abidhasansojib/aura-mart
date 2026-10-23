@@ -1333,7 +1333,7 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
 
         {/* Global Save Changes Floating / Bottom Bar */}
         {activeTab !== "security" && (
-          <div className="flex items-center justify-between p-4 bg-slate-900 text-white rounded-2xl shadow-xl">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-4 bg-slate-900 text-white rounded-2xl shadow-xl">
             <div className="text-xs">
               <span className="font-bold block">Unsaved Changes?</span>
               <span className="text-slate-400 text-[11px]">Click save to push updates to the live storefront immediately.</span>
@@ -1342,7 +1342,7 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
             <button
               type="submit"
               disabled={saving}
-              className="flex items-center gap-2 px-7 py-3 bg-[#FF6448] hover:bg-[#e8553b] disabled:bg-gray-600 text-white font-bold rounded-xl shadow-lg shadow-[#FF6448]/30 transition-all text-xs min-h-[44px] active:scale-95"
+              className="flex items-center justify-center gap-2 px-6 sm:px-7 py-3 bg-[#FF6448] hover:bg-[#e8553b] disabled:bg-gray-600 text-white font-bold rounded-xl shadow-lg shadow-[#FF6448]/30 transition-all text-xs min-h-[44px] active:scale-95 shrink-0"
             >
               <Save className="h-4 w-4" />
               <span>{saving ? "Publishing Changes..." : "Save Store Settings"}</span>

@@ -402,10 +402,10 @@ export function AdminOrders({
 
       {/* 3. Printable Courier Packing Slip Modal */}
       {printableOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-          <div className="relative w-full max-w-lg bg-white rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-gray-200">
-              <h3 className="text-base font-bold text-slate-900">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
+          <div className="relative w-full max-w-lg bg-white rounded-3xl p-4 xs:p-6 sm:p-8 shadow-2xl space-y-4 sm:space-y-6 max-h-[92vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-gray-200">
+              <h3 className="text-sm sm:text-base font-bold text-slate-900">
                 Courier Packing Slip — {printableOrder.orderNumber}
               </h3>
               <button

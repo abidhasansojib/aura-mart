@@ -41,10 +41,10 @@ export function CartDrawer({ currencySymbol = "৳", freeShippingThreshold = 0 }
         onClick={() => setIsCartOpen(false)}
       />
 
-      <div className="fixed inset-y-0 right-0 flex max-w-full pl-10">
+      <div className="fixed inset-y-0 right-0 flex max-w-full pl-0 xs:pl-6 sm:pl-10">
         <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col transform transition-transform ease-out duration-300">
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white">
+          <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-gray-100 bg-white">
             <div className="flex items-center gap-2">
               <ShoppingBag className="h-5 w-5 text-[#FF6448]" />
               <h2 className="text-base sm:text-lg font-bold text-slate-900">
@@ -53,7 +53,7 @@ export function CartDrawer({ currencySymbol = "৳", freeShippingThreshold = 0 }
             </div>
             <button
               onClick={() => setIsCartOpen(false)}
-              className="p-2 -mr-2 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors"
+              className="p-2 -mr-1 sm:-mr-2 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors"
               aria-label="Close cart drawer"
             >
               <X className="h-5 w-5" />
@@ -62,7 +62,7 @@ export function CartDrawer({ currencySymbol = "৳", freeShippingThreshold = 0 }
 
           {/* Free Shipping Dynamic Progress Bar */}
           {freeShippingThreshold > 0 && cart.length > 0 && (
-            <div className="px-6 py-3 bg-neutral-50 border-b border-gray-100 space-y-1.5">
+            <div className="px-4 sm:px-6 py-2.5 sm:py-3 bg-neutral-50 border-b border-gray-100 space-y-1.5">
               <div className="flex items-center justify-between text-xs font-bold">
                 {isFreeShippingUnlocked ? (
                   <span className="text-emerald-700 flex items-center gap-1.5">
@@ -88,7 +88,7 @@ export function CartDrawer({ currencySymbol = "৳", freeShippingThreshold = 0 }
           )}
 
           {/* Cart Items List */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-3 sm:space-y-4">
             {cart.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center py-12">
                 <div className="w-16 h-16 rounded-full bg-neutral-100 flex items-center justify-center text-slate-400 mb-4">
@@ -176,7 +176,7 @@ export function CartDrawer({ currencySymbol = "৳", freeShippingThreshold = 0 }
 
           {/* Footer & Checkout Action */}
           {cart.length > 0 && (
-            <div className="p-6 border-t border-gray-100 bg-neutral-50 space-y-4">
+            <div className="p-4 sm:p-6 pb-safe border-t border-gray-100 bg-neutral-50 space-y-3 sm:space-y-4">
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs text-slate-600">
                   <span>Subtotal</span>

@@ -311,7 +311,7 @@ export default function CheckoutPage() {
   // ---------------------------------------------------------------------------
   if (completedOrder) {
     return (
-      <div className="min-h-screen bg-[#FAFAFA] py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-[#CBD5CE] py-6 sm:py-12 px-3 sm:px-6 lg:px-8 selection:bg-[#FF6448] selection:text-white">
         <div className="max-w-2xl mx-auto space-y-6">
           {/* Action Bar (hidden when printing) */}
           <div className="print:hidden flex flex-wrap items-center justify-between gap-3">
@@ -650,7 +650,7 @@ export default function CheckoutPage() {
   // ---------------------------------------------------------------------------
   if (cart.length === 0) {
     return (
-      <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#CBD5CE] flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white rounded-3xl border border-gray-200 p-8 sm:p-10 text-center space-y-4 shadow-xl">
           <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
             <ShoppingBag className="h-8 w-8" />
@@ -677,9 +677,9 @@ export default function CheckoutPage() {
   // 3. 1-PAGE FRICTIONLESS CHECKOUT FORM
   // ---------------------------------------------------------------------------
   return (
-    <div className="min-h-screen bg-[#FAFAFA] text-slate-900">
+    <div className="min-h-screen bg-[#CBD5CE] text-slate-900 selection:bg-[#FF6448] selection:text-white">
       {/* Top Simple Header */}
-      <header className="bg-white border-b border-gray-200 py-4 px-4 sm:px-6 sticky top-0 z-20 backdrop-blur-md bg-white/95">
+      <header className="bg-white/95 border-b border-black/5 py-3.5 sm:py-4 px-4 sm:px-6 sticky top-0 z-20 backdrop-blur-md shadow-xs">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <Link href="/" className="inline-flex items-center gap-2 group">
             <ArrowLeft className="h-4 w-4 text-slate-500 group-hover:-translate-x-1 transition-transform" />
@@ -689,10 +689,10 @@ export default function CheckoutPage() {
           </Link>
 
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-sm">
+            <div className="w-7 h-7 rounded-xl bg-[#181A1D] text-white flex items-center justify-center font-black text-xs shadow-sm">
               {settings.storeName.charAt(0)}
             </div>
-            <span className="text-sm font-black text-slate-900">{settings.storeName}</span>
+            <span className="text-sm font-black text-slate-900 tracking-tight">{settings.storeName}</span>
           </div>
 
           <div className="flex items-center gap-1.5 text-xs text-emerald-700 font-semibold">
@@ -703,7 +703,7 @@ export default function CheckoutPage() {
       </header>
 
       {/* Main Content Form */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+      <main className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-6 sm:py-10">
         <form onSubmit={handleFormSubmit}>
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             {/* Left Column: Customer Details, Delivery Zone & Payment Method */}
@@ -749,7 +749,7 @@ export default function CheckoutPage() {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="e.g. Tanvir Rahman"
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 min-h-[44px]"
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-base sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 min-h-[44px]"
                     />
                   </div>
 
@@ -768,7 +768,7 @@ export default function CheckoutPage() {
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="e.g. 01712345678"
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 min-h-[44px]"
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-base sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 min-h-[44px]"
                     />
                     <p className="text-[11px] text-slate-400 mt-1">
                       Our delivery courier will call this number before arrival.
@@ -868,7 +868,7 @@ export default function CheckoutPage() {
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
                       placeholder="House / Flat No., Road, Sector / Area, Thana & District"
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600"
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-base sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600"
                     />
                   </div>
 
@@ -886,7 +886,7 @@ export default function CheckoutPage() {
                       value={orderNote}
                       onChange={(e) => setOrderNote(e.target.value)}
                       placeholder="e.g. Call before delivery or deliver after 5 PM"
-                      className="w-full px-4 py-2 rounded-xl border border-gray-200 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 min-h-[40px]"
+                      className="w-full px-4 py-2 rounded-xl border border-gray-200 text-base sm:text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 min-h-[40px]"
                     />
                   </div>
                 </div>
@@ -1024,7 +1024,7 @@ export default function CheckoutPage() {
                             value={paymentSenderNo}
                             onChange={(e) => setPaymentSenderNo(e.target.value)}
                             placeholder="01XXXXXXXXX"
-                            className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#E2136E]/20 focus:border-[#E2136E]"
+                            className="w-full px-3 py-2 rounded-xl border border-gray-200 text-base sm:text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#E2136E]/20 focus:border-[#E2136E] min-h-[42px]"
                           />
                         </div>
 
@@ -1038,7 +1038,7 @@ export default function CheckoutPage() {
                             value={trxId}
                             onChange={(e) => setTrxId(e.target.value)}
                             placeholder="e.g. BL92A8ZK1"
-                            className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs text-slate-900 uppercase font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#E2136E]/20 focus:border-[#E2136E]"
+                            className="w-full px-3 py-2 rounded-xl border border-gray-200 text-base sm:text-xs text-slate-900 uppercase font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#E2136E]/20 focus:border-[#E2136E] min-h-[42px]"
                           />
                         </div>
                       </div>
@@ -1128,7 +1128,7 @@ export default function CheckoutPage() {
                                 value={paymentSenderNo}
                                 onChange={(e) => setPaymentSenderNo(e.target.value)}
                                 placeholder="01XXXXXXXXX"
-                                className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#F7941D]/20 focus:border-[#F7941D]"
+                                className="w-full px-3 py-2 rounded-xl border border-gray-200 text-base sm:text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#F7941D]/20 focus:border-[#F7941D] min-h-[42px]"
                               />
                             </div>
 
@@ -1142,7 +1142,7 @@ export default function CheckoutPage() {
                                 value={trxId}
                                 onChange={(e) => setTrxId(e.target.value)}
                                 placeholder="e.g. 7GA619B0"
-                                className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs text-slate-900 uppercase font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#F7941D]/20 focus:border-[#F7941D]"
+                                className="w-full px-3 py-2 rounded-xl border border-gray-200 text-base sm:text-xs text-slate-900 uppercase font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#F7941D]/20 focus:border-[#F7941D] min-h-[42px]"
                               />
                             </div>
                           </div>
@@ -1234,7 +1234,7 @@ export default function CheckoutPage() {
                             value={paymentSenderNo}
                             onChange={(e) => setPaymentSenderNo(e.target.value)}
                             placeholder="01XXXXXXXXXX"
-                            className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600"
+                            className="w-full px-3 py-2 rounded-xl border border-gray-200 text-base sm:text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 min-h-[42px]"
                           />
                         </div>
 
@@ -1248,7 +1248,7 @@ export default function CheckoutPage() {
                             value={trxId}
                             onChange={(e) => setTrxId(e.target.value)}
                             placeholder="e.g. 7GA619B0"
-                            className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs text-slate-900 uppercase font-mono font-bold focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600"
+                            className="w-full px-3 py-2 rounded-xl border border-gray-200 text-base sm:text-xs text-slate-900 uppercase font-mono font-bold focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 min-h-[42px]"
                           />
                         </div>
                       </div>
@@ -1327,7 +1327,7 @@ export default function CheckoutPage() {
                             setCouponError(null);
                           }}
                           placeholder="e.g. WELCOME10 or FLAT100"
-                          className="flex-1 px-3 py-2 rounded-xl border border-gray-200 text-xs font-mono font-bold uppercase text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/20 focus:border-[#FF6448] bg-white min-h-[38px]"
+                          className="flex-1 px-3 py-2 rounded-xl border border-gray-200 text-base sm:text-xs font-mono font-bold uppercase text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/20 focus:border-[#FF6448] bg-white min-h-[40px]"
                         />
                         <button
                           type="button"
