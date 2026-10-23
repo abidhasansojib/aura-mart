@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -27,6 +27,179 @@ import { Footer } from "@/components/Footer";
 import { CartDrawer } from "@/components/CartDrawer";
 import { ProductDetailModal, ModalProduct } from "@/components/ProductDetailModal";
 import { formatPrice } from "@/lib/utils";
+import { searchProducts } from "@/lib/search";
+
+// Helper for highlighting matching terms
+function HighlightText({ text, query }: { text: string; query?: string }) {
+  if (!query || !query.trim()) return <>{text}</>;
+  const clean = query.trim().replace(/[^\w\s]/g, "");
+  if (!clean) return <>{text}</>;
+  const parts = text.split(new RegExp(`(${clean})`, "gi"));
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.toLowerCase() === clean.toLowerCase() ? (
+          <mark key={i} className="bg-amber-100 text-amber-950 font-black rounded px-0.5">
+            {part}
+          </mark>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      )}
+    </>
+  );
+}
+
+// Bento Product Card Component
+interface ProductCardProps {
+  product: ModalProduct;
+  currencySymbol: string;
+  onOpenModal: (product: ModalProduct) => void;
+  onAddToCart: (product: ModalProduct) => void;
+  onQuickBuy: (product: ModalProduct) => void;
+  searchHighlight?: string;
+  isSimilar?: boolean;
+}
+
+function ProductCard({
+  product,
+  currencySymbol,
+  onOpenModal,
+  onAddToCart,
+  onQuickBuy,
+  searchHighlight,
+  isSimilar,
+}: ProductCardProps) {
+  const isOutOfStock = product.stock <= 0;
+  const isLowStock = product.stock > 0 && product.stock <= 5;
+  const discountPercent =
+    product.compareAtPrice && product.compareAtPrice > product.price
+      ? Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100)
+      : null;
+
+  return (
+    <div className="group flex flex-col bg-white rounded-[28px] border border-black/5 overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 relative bento-card">
+      {/* Image Container (1:1 Aspect Ratio) */}
+      <div
+        onClick={() => onOpenModal(product)}
+        className="relative aspect-square w-full bg-neutral-100 overflow-hidden cursor-pointer"
+      >
+        <img
+          src={product.imageUrl || "/placeholder-product.png"}
+          alt={product.name}
+          className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
+          loading="lazy"
+        />
+
+        {/* Top Badges */}
+        <div className="absolute top-3 inset-x-3 flex items-center justify-between pointer-events-none">
+          {discountPercent ? (
+            <span className="bg-[#FF6448] text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-md">
+              {discountPercent}% OFF
+            </span>
+          ) : (
+            <span />
+          )}
+
+          <div className="flex items-center gap-1.5">
+            {isSimilar && (
+              <span className="bg-amber-100/90 text-amber-900 text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1 border border-amber-200">
+                <Sparkles className="h-2.5 w-2.5 text-amber-600" />
+                <span>Related</span>
+              </span>
+            )}
+            {product.isFeatured && (
+              <span className="bg-[#181A1D]/80 backdrop-blur-sm text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1">
+                <Flame className="h-2.5 w-2.5 text-[#FF6448] fill-[#FF6448]" />
+                <span>Hot</span>
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Low Stock Warning Badge */}
+        {isLowStock && (
+          <span className="absolute bottom-3 left-3 bg-[#F5B738] text-slate-950 text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-md">
+            Only {product.stock} left!
+          </span>
+        )}
+
+        {/* Out of Stock Overlay */}
+        {isOutOfStock && (
+          <div className="absolute inset-0 bg-white/85 backdrop-blur-[2px] flex items-center justify-center p-2">
+            <span className="bg-[#181A1D] text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
+              Out of Stock
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Card Body */}
+      <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3">
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between text-[10px] font-bold text-slate-400">
+            <span className="uppercase tracking-wider font-mono">{product.category}</span>
+            <span className="flex items-center gap-0.5 text-amber-500">
+              <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+              <span>4.9</span>
+            </span>
+          </div>
+
+          <h3
+            onClick={() => onOpenModal(product)}
+            className="text-xs sm:text-sm font-bold text-slate-900 line-clamp-2 cursor-pointer hover:text-[#FF6448] transition-colors leading-snug"
+          >
+            <HighlightText text={product.name} query={searchHighlight} />
+          </h3>
+        </div>
+
+        {/* Price & Action Section */}
+        <div className="space-y-2.5 pt-2 border-t border-gray-100">
+          <div className="flex items-baseline gap-2">
+            <span className="text-base sm:text-lg font-black text-slate-900 font-mono">
+              {formatPrice(product.price, currencySymbol)}
+            </span>
+            {product.compareAtPrice && product.compareAtPrice > product.price && (
+              <span className="text-xs text-slate-400 line-through font-mono">
+                {formatPrice(product.compareAtPrice, currencySymbol)}
+              </span>
+            )}
+          </div>
+
+          {/* Action Buttons */}
+          {isOutOfStock ? (
+            <button
+              disabled
+              className="w-full py-2 bg-gray-100 text-slate-400 text-xs font-bold rounded-xl cursor-not-allowed min-h-[44px]"
+            >
+              Sold Out
+            </button>
+          ) : (
+            <div className="grid grid-cols-2 gap-1.5">
+              <button
+                onClick={() => onAddToCart(product)}
+                className="w-full flex items-center justify-center gap-1 py-2 px-2 rounded-2xl border border-slate-900 text-slate-900 text-xs font-bold hover:bg-[#181A1D] hover:text-white transition-all active:scale-95 min-h-[44px]"
+                title="Add to cart"
+              >
+                <ShoppingBag className="h-3.5 w-3.5" />
+                <span>Add</span>
+              </button>
+
+              <button
+                onClick={() => onQuickBuy(product)}
+                className="w-full flex items-center justify-center gap-1 py-2 px-2 rounded-2xl bg-[#FF6448] hover:bg-[#e8553b] text-white text-xs font-bold shadow-md shadow-[#FF6448]/25 transition-all active:scale-95 min-h-[44px]"
+                title="1-Click Instant Order"
+              >
+                <Zap className="h-3.5 w-3.5 fill-white" />
+                <span>Order</span>
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 interface StoreSettingsData {
   id?: string;
@@ -89,33 +262,64 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
     return ["All", "Featured", ...Array.from(set)];
   }, [initialProducts]);
 
-  // Filtered & sorted products
-  const filteredProducts = useMemo(() => {
-    const filtered = initialProducts.filter((product) => {
-      const matchesSearch =
-        searchQuery.trim() === "" ||
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.category.toLowerCase().includes(searchQuery.toLowerCase());
+  // Helper to sort products
+  const sortProducts = useCallback(
+    <T extends ModalProduct>(items: T[]): T[] => {
+      const list = [...items];
+      return list.sort((a, b) => {
+        if (sortBy === "price-asc") return a.price - b.price;
+        if (sortBy === "price-desc") return b.price - a.price;
+        if (sortBy === "discount") {
+          const discA = a.compareAtPrice && a.compareAtPrice > a.price ? a.compareAtPrice - a.price : 0;
+          const discB = b.compareAtPrice && b.compareAtPrice > b.price ? b.compareAtPrice - b.price : 0;
+          return discB - discA;
+        }
+        return 0; // featured / default order
+      });
+    },
+    [sortBy]
+  );
 
-      if (!matchesSearch) return false;
+  const isSearching = searchQuery.trim().length > 0;
 
-      if (selectedCategory === "All") return true;
-      if (selectedCategory === "Featured") return Boolean(product.isFeatured);
-      return product.category.toLowerCase() === selectedCategory.toLowerCase();
-    });
+  // Intelligent multi-tier search computation
+  const searchResult = useMemo(() => {
+    if (!isSearching) return null;
+    return searchProducts(initialProducts, searchQuery);
+  }, [initialProducts, searchQuery, isSearching]);
 
-    return filtered.sort((a, b) => {
-      if (sortBy === "price-asc") return a.price - b.price;
-      if (sortBy === "price-desc") return b.price - a.price;
-      if (sortBy === "discount") {
-        const discA = a.compareAtPrice && a.compareAtPrice > a.price ? a.compareAtPrice - a.price : 0;
-        const discB = b.compareAtPrice && b.compareAtPrice > b.price ? b.compareAtPrice - b.price : 0;
-        return discB - discA;
-      }
-      return 0; // featured / default order
-    });
-  }, [initialProducts, searchQuery, selectedCategory, sortBy]);
+  // Category filter helper
+  const filterByCategory = useCallback(
+    (items: ModalProduct[]) => {
+      if (selectedCategory === "All") return items;
+      if (selectedCategory === "Featured") return items.filter((p) => Boolean(p.isFeatured));
+      return items.filter((p) => p.category.toLowerCase() === selectedCategory.toLowerCase());
+    },
+    [selectedCategory]
+  );
+
+  // Exact product search results
+  const exactSearchResults = useMemo(() => {
+    if (!searchResult) return [];
+    return sortProducts(filterByCategory(searchResult.exactMatches));
+  }, [searchResult, filterByCategory, sortProducts]);
+
+  // Similar & related recommendations
+  const similarSearchResults = useMemo(() => {
+    if (!searchResult) return [];
+    return sortProducts(filterByCategory(searchResult.similarProducts));
+  }, [searchResult, filterByCategory, sortProducts]);
+
+  // Default filtered products when not searching
+  const standardFilteredProducts = useMemo(() => {
+    if (isSearching) return [];
+    return sortProducts(filterByCategory(initialProducts));
+  }, [initialProducts, isSearching, filterByCategory, sortProducts]);
+
+  // Featured picks for smart fallback
+  const featuredPicks = useMemo(() => {
+    return initialProducts.filter((p) => p.isFeatured).slice(0, 4);
+  }, [initialProducts]);
 
   const handleQuickBuy = (product: ModalProduct) => {
     if (product.stock <= 0) return;
@@ -133,6 +337,13 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
         currencySymbol={currencySymbol}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
+        products={initialProducts}
+        onSelectProduct={(p) => setActiveModalProduct(p)}
+        onSelectCategory={(cat) => {
+          setSelectedCategory(cat);
+          const el = document.getElementById("catalog");
+          if (el) el.scrollIntoView({ behavior: "smooth" });
+        }}
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8 sm:space-y-10">
@@ -264,18 +475,27 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                {selectedCategory === "All"
+                {isSearching
+                  ? "Search Results"
+                  : selectedCategory === "All"
                   ? "Explore Catalog"
                   : selectedCategory === "Featured"
                   ? "Featured Selection"
                   : selectedCategory}
                 <span className="text-xs font-bold text-slate-600 ml-2 px-2.5 py-0.5 rounded-full bg-white/70 border border-black/5">
-                  {filteredProducts.length} {filteredProducts.length === 1 ? "item" : "items"}
+                  {isSearching
+                    ? exactSearchResults.length + similarSearchResults.length
+                    : standardFilteredProducts.length}{" "}
+                  {(isSearching
+                    ? exactSearchResults.length + similarSearchResults.length
+                    : standardFilteredProducts.length) === 1
+                    ? "item"
+                    : "items"}
                 </span>
               </h2>
-              {searchQuery && (
+              {isSearching && (
                 <p className="text-xs font-medium text-slate-600 mt-0.5">
-                  Showing results matching &quot;{searchQuery}&quot;
+                  Showing matches for &quot;{searchQuery}&quot;
                 </p>
               )}
             </div>
@@ -325,161 +545,258 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
               );
             })}
           </div>
+
+          {/* Active Search Summary Pill Bar */}
+          {isSearching && (
+            <div className="bg-white/90 backdrop-blur-md rounded-2xl border border-black/5 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm animate-in fade-in">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-[#FF6448]/10 text-[#FF6448] flex items-center justify-center shrink-0">
+                  <Search className="h-4 w-4" />
+                </div>
+                <div>
+                  <div className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <span>Keyword: &ldquo;{searchQuery}&rdquo;</span>
+                    <span className="text-[11px] font-black px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      {exactSearchResults.length} Exact
+                    </span>
+                    {similarSearchResults.length > 0 && (
+                      <span className="text-[11px] font-black px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                        {similarSearchResults.length} Similar
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Multi-tier search with typo tolerance and category affinity
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                {searchResult?.matchedCategories && searchResult.matchedCategories.length > 0 && (
+                  <div className="hidden md:flex items-center gap-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">Tags:</span>
+                    {searchResult.matchedCategories.map((c) => (
+                      <button
+                        key={c}
+                        onClick={() => setSelectedCategory(c)}
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full border transition-all ${
+                          selectedCategory === c
+                            ? "bg-[#181A1D] text-white border-black"
+                            : "bg-white text-slate-600 border-gray-200 hover:border-gray-300"
+                        }`}
+                      >
+                        {c}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                <button
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSelectedCategory("All");
+                  }}
+                  className="px-3.5 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-slate-700 text-xs font-bold rounded-xl transition-colors shadow-xs"
+                >
+                  Clear Search
+                </button>
+              </div>
+            </div>
+          )}
         </section>
 
         {/* =====================================================================
-            4. RESPONSIVE BENTO PRODUCT GRID
+            4. RESPONSIVE BENTO PRODUCT GRID (MULTI-TIER SEARCH & DISCOVERY)
             ===================================================================== */}
-        <section>
-          {filteredProducts.length === 0 ? (
+        <section className="space-y-8">
+          {isSearching ? (
+            <>
+              {/* Tier 1: Exact Matches */}
+              {exactSearchResults.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-lg bg-[#FF6448] text-white flex items-center justify-center shadow-xs">
+                        <Search className="h-3.5 w-3.5" />
+                      </div>
+                      <div>
+                        <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+                          Exact Product Matches
+                        </h3>
+                        <p className="text-[11px] text-slate-500">
+                          Direct title and keyword matches
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-xs font-bold text-slate-700 bg-white/80 px-2.5 py-0.5 rounded-full border border-black/5">
+                      {exactSearchResults.length} {exactSearchResults.length === 1 ? "item" : "items"}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-6">
+                    {exactSearchResults.map((product) => (
+                      <ProductCard
+                        key={product.id}
+                        product={product}
+                        currencySymbol={currencySymbol}
+                        onOpenModal={setActiveModalProduct}
+                        onAddToCart={(p) => addItem(p, 1)}
+                        onQuickBuy={handleQuickBuy}
+                        searchHighlight={searchQuery}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Tier 2: Similar & Related Products */}
+              {similarSearchResults.length > 0 && (
+                <div className="space-y-3 pt-4 border-t border-black/5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-lg bg-amber-500 text-white flex items-center justify-center shadow-xs">
+                        <Sparkles className="h-3.5 w-3.5" />
+                      </div>
+                      <div>
+                        <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+                          You Might Also Like
+                        </h3>
+                        <p className="text-[11px] text-slate-500">
+                          Related recommendations based on your search
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-xs font-bold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
+                      {similarSearchResults.length} recommendations
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-6">
+                    {similarSearchResults.map((product) => (
+                      <ProductCard
+                        key={product.id}
+                        product={product}
+                        currencySymbol={currencySymbol}
+                        onOpenModal={setActiveModalProduct}
+                        onAddToCart={(p) => addItem(p, 1)}
+                        onQuickBuy={handleQuickBuy}
+                        isSimilar
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Tier 3: Zero Matches State with Smart Category Suggestions & Featured Picks */}
+              {exactSearchResults.length === 0 && similarSearchResults.length === 0 && (
+                <div className="bg-white/90 backdrop-blur-md rounded-3xl border border-black/5 p-8 sm:p-12 text-center max-w-xl mx-auto my-6 space-y-6 shadow-xl animate-in fade-in">
+                  <div className="w-16 h-16 rounded-3xl bg-neutral-100 flex items-center justify-center mx-auto text-slate-400">
+                    <Search className="h-8 w-8 text-slate-400" />
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-black text-slate-900">
+                      No matches found for &ldquo;{searchQuery}&rdquo;
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
+                      We couldn&apos;t find an exact match for your query. Try checking your spelling or explore popular categories below:
+                    </p>
+                  </div>
+
+                  {/* Category Quick Chips */}
+                  <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+                    {categories
+                      .filter((c) => c !== "All")
+                      .map((cat) => (
+                        <button
+                          key={cat}
+                          onClick={() => {
+                            setSearchQuery("");
+                            setSelectedCategory(cat);
+                          }}
+                          className="px-3.5 py-1.5 rounded-full bg-slate-100 hover:bg-[#181A1D] hover:text-white text-slate-800 text-xs font-bold transition-all shadow-xs"
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                  </div>
+
+                  {/* Featured Picks Fallback */}
+                  {featuredPicks.length > 0 && (
+                    <div className="pt-6 border-t border-gray-100 text-left space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Flame className="h-4 w-4 text-[#FF6448]" />
+                        <span className="text-xs font-black uppercase tracking-wider text-slate-700">
+                          Popular Featured Picks
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        {featuredPicks.map((p) => (
+                          <div
+                            key={p.id}
+                            onClick={() => setActiveModalProduct(p)}
+                            className="bg-neutral-50 rounded-2xl p-2.5 cursor-pointer hover:bg-neutral-100 border border-black/5 transition-all text-center group"
+                          >
+                            <div className="aspect-square w-full rounded-xl overflow-hidden bg-white mb-2 border border-black/5">
+                              <img
+                                src={p.imageUrl || "/placeholder-product.png"}
+                                alt={p.name}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                              />
+                            </div>
+                            <p className="text-xs font-bold text-slate-900 truncate">{p.name}</p>
+                            <p className="text-xs font-mono font-black text-[#FF6448] mt-1">
+                              {formatPrice(p.price, currencySymbol)}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div>
+                    <button
+                      onClick={() => {
+                        setSearchQuery("");
+                        setSelectedCategory("All");
+                      }}
+                      className="px-6 py-2.5 bg-[#181A1D] text-white text-xs font-bold rounded-2xl hover:bg-black transition-colors shadow-md min-h-[40px]"
+                    >
+                      Clear Search & Browse All
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : standardFilteredProducts.length === 0 ? (
             <div className="bg-white/90 backdrop-blur-md rounded-3xl border border-black/5 p-12 text-center max-w-md mx-auto my-12 space-y-4 shadow-xl">
               <div className="w-16 h-16 rounded-3xl bg-neutral-100 flex items-center justify-center mx-auto text-slate-400">
                 <Search className="h-8 w-8" />
               </div>
               <h3 className="text-base font-bold text-slate-900">No products found</h3>
               <p className="text-xs text-slate-500 leading-relaxed">
-                We couldn&apos;t find any items matching your filters or search keywords.
+                We couldn&apos;t find any items matching your selected category.
               </p>
               <button
                 onClick={() => {
-                  setSearchQuery("");
                   setSelectedCategory("All");
                 }}
                 className="px-6 py-2.5 bg-[#181A1D] text-white text-xs font-bold rounded-2xl hover:bg-black transition-colors shadow-md min-h-[40px]"
               >
-                Reset Filters
+                Show All Products
               </button>
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-6">
-              {filteredProducts.map((product) => {
-                const isOutOfStock = product.stock <= 0;
-                const isLowStock = product.stock > 0 && product.stock <= 5;
-                const discountPercent =
-                  product.compareAtPrice && product.compareAtPrice > product.price
-                    ? Math.round(
-                        ((product.compareAtPrice - product.price) / product.compareAtPrice) * 100
-                      )
-                    : null;
-
-                return (
-                  <div
-                    key={product.id}
-                    className="group flex flex-col bg-white rounded-[28px] border border-black/5 overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 relative bento-card"
-                  >
-                    {/* Image Container (1:1 Aspect Ratio) */}
-                    <div
-                      onClick={() => setActiveModalProduct(product)}
-                      className="relative aspect-square w-full bg-neutral-100 overflow-hidden cursor-pointer"
-                    >
-                      <img
-                        src={product.imageUrl || "/placeholder-product.png"}
-                        alt={product.name}
-                        className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
-                        loading="lazy"
-                      />
-
-                      {/* Top Badges */}
-                      <div className="absolute top-3 inset-x-3 flex items-center justify-between pointer-events-none">
-                        {discountPercent ? (
-                          <span className="bg-[#FF6448] text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-md">
-                            {discountPercent}% OFF
-                          </span>
-                        ) : (
-                          <span />
-                        )}
-
-                        {product.isFeatured && (
-                          <span className="bg-[#181A1D]/80 backdrop-blur-sm text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1">
-                            <Flame className="h-2.5 w-2.5 text-[#FF6448] fill-[#FF6448]" />
-                            <span>Hot</span>
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Low Stock Warning Badge */}
-                      {isLowStock && (
-                        <span className="absolute bottom-3 left-3 bg-[#F5B738] text-slate-950 text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-md">
-                          Only {product.stock} left!
-                        </span>
-                      )}
-
-                      {/* Out of Stock Overlay */}
-                      {isOutOfStock && (
-                        <div className="absolute inset-0 bg-white/85 backdrop-blur-[2px] flex items-center justify-center p-2">
-                          <span className="bg-[#181A1D] text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
-                            Out of Stock
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Card Body */}
-                    <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3">
-                      <div className="space-y-1.5">
-                        <div className="flex items-center justify-between text-[10px] font-bold text-slate-400">
-                          <span className="uppercase tracking-wider font-mono">{product.category}</span>
-                          <span className="flex items-center gap-0.5 text-amber-500">
-                            <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                            <span>4.9</span>
-                          </span>
-                        </div>
-
-                        <h3
-                          onClick={() => setActiveModalProduct(product)}
-                          className="text-xs sm:text-sm font-bold text-slate-900 line-clamp-2 cursor-pointer hover:text-[#FF6448] transition-colors leading-snug"
-                        >
-                          {product.name}
-                        </h3>
-                      </div>
-
-                      {/* Price & Action Section */}
-                      <div className="space-y-2.5 pt-2 border-t border-gray-100">
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-base sm:text-lg font-black text-slate-900 font-mono">
-                            {formatPrice(product.price, currencySymbol)}
-                          </span>
-                          {product.compareAtPrice && product.compareAtPrice > product.price && (
-                            <span className="text-xs text-slate-400 line-through font-mono">
-                              {formatPrice(product.compareAtPrice, currencySymbol)}
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Action Buttons */}
-                        {isOutOfStock ? (
-                          <button
-                            disabled
-                            className="w-full py-2 bg-gray-100 text-slate-400 text-xs font-bold rounded-xl cursor-not-allowed min-h-[44px]"
-                          >
-                            Sold Out
-                          </button>
-                        ) : (
-                          <div className="grid grid-cols-2 gap-1.5">
-                            <button
-                              onClick={() => addItem(product, 1)}
-                              className="w-full flex items-center justify-center gap-1 py-2 px-2 rounded-2xl border border-slate-900 text-slate-900 text-xs font-bold hover:bg-[#181A1D] hover:text-white transition-all active:scale-95 min-h-[44px]"
-                              title="Add to cart"
-                            >
-                              <ShoppingBag className="h-3.5 w-3.5" />
-                              <span>Add</span>
-                            </button>
-
-                            <button
-                              onClick={() => handleQuickBuy(product)}
-                              className="w-full flex items-center justify-center gap-1 py-2 px-2 rounded-2xl bg-[#FF6448] hover:bg-[#e8553b] text-white text-xs font-bold shadow-md shadow-[#FF6448]/25 transition-all active:scale-95 min-h-[44px]"
-                              title="1-Click Instant Order"
-                            >
-                              <Zap className="h-3.5 w-3.5 fill-white" />
-                              <span>Order</span>
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+              {standardFilteredProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  currencySymbol={currencySymbol}
+                  onOpenModal={setActiveModalProduct}
+                  onAddToCart={(p) => addItem(p, 1)}
+                  onQuickBuy={handleQuickBuy}
+                />
+              ))}
             </div>
           )}
         </section>

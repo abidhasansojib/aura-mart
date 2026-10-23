@@ -5,6 +5,8 @@ import Link from "next/link";
 import { Phone, Search, ShoppingBag, Truck, ShieldCheck, Sparkles } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { TrackOrderModal } from "@/components/TrackOrderModal";
+import { SearchAutocomplete } from "@/components/SearchAutocomplete";
+import { ModalProduct } from "@/components/ProductDetailModal";
 
 interface NavbarProps {
   storeName?: string;
@@ -13,6 +15,9 @@ interface NavbarProps {
   currencySymbol?: string;
   searchQuery: string;
   onSearchChange: (q: string) => void;
+  products?: ModalProduct[];
+  onSelectProduct?: (product: ModalProduct) => void;
+  onSelectCategory?: (category: string) => void;
 }
 
 export function Navbar({
@@ -22,9 +27,13 @@ export function Navbar({
   currencySymbol = "৳",
   searchQuery,
   onSearchChange,
+  products = [],
+  onSelectProduct,
+  onSelectCategory,
 }: NavbarProps) {
   const { totalItems, setIsCartOpen } = useCart();
   const [isTrackModalOpen, setIsTrackModalOpen] = useState(false);
+  const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
 
   return (
     <>
@@ -79,26 +88,57 @@ export function Navbar({
               </div>
             </Link>
 
-            {/* Instant Search Bar */}
+            {/* Instant Search Bar with Live Autocomplete Popover */}
             <div className="flex-1 max-w-lg relative">
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
                 <input
                   type="text"
                   value={searchQuery}
-                  onChange={(e) => onSearchChange(e.target.value)}
+                  onFocus={() => setIsSearchDropdownOpen(true)}
+                  onChange={(e) => {
+                    onSearchChange(e.target.value);
+                    if (!isSearchDropdownOpen) setIsSearchDropdownOpen(true);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Escape") {
+                      setIsSearchDropdownOpen(false);
+                    } else if (e.key === "Enter") {
+                      setIsSearchDropdownOpen(false);
+                    }
+                  }}
                   placeholder="Search products, categories, or keywords..."
                   className="w-full pl-11 pr-4 py-2.5 rounded-full border border-black/10 bg-white/95 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#FF6448]/30 focus:border-[#FF6448] transition-all min-h-[44px] shadow-sm"
                 />
                 {searchQuery && (
                   <button
-                    onClick={() => onSearchChange("")}
+                    onClick={() => {
+                      onSearchChange("");
+                      setIsSearchDropdownOpen(false);
+                    }}
                     className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400 hover:text-slate-700 bg-gray-100 hover:bg-gray-200 px-2 py-0.5 rounded-full"
                   >
                     Clear
                   </button>
                 )}
               </div>
+
+              {/* Live Search Dropdown */}
+              <SearchAutocomplete
+                isOpen={isSearchDropdownOpen}
+                searchQuery={searchQuery}
+                products={products}
+                currencySymbol={currencySymbol}
+                onSelectProduct={(p) => {
+                  if (onSelectProduct) onSelectProduct(p);
+                  setIsSearchDropdownOpen(false);
+                }}
+                onSelectCategory={(cat) => {
+                  if (onSelectCategory) onSelectCategory(cat);
+                  setIsSearchDropdownOpen(false);
+                }}
+                onClose={() => setIsSearchDropdownOpen(false)}
+              />
             </div>
 
             {/* Action Buttons: Track Order & Cart */}

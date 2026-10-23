@@ -25,10 +25,16 @@ export async function GET(req: NextRequest) {
 
     if (search && search.trim() !== "") {
       const query = search.trim();
+      const tokens = query.split(/\s+/).filter((t) => t.length > 0);
       where.OR = [
-        { name: { contains: query, mode: "insensitive" } },
-        { description: { contains: query, mode: "insensitive" } },
-        { category: { contains: query, mode: "insensitive" } },
+        { name: { contains: query, mode: "insensitive" as const } },
+        { description: { contains: query, mode: "insensitive" as const } },
+        { category: { contains: query, mode: "insensitive" as const } },
+        ...tokens.flatMap((t) => [
+          { name: { contains: t, mode: "insensitive" as const } },
+          { category: { contains: t, mode: "insensitive" as const } },
+          { description: { contains: t, mode: "insensitive" as const } },
+        ]),
       ];
     }
 
