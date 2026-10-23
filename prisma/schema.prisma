@@ -102,6 +102,7 @@ model Product {
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
   orderItems     OrderItem[]
+  reviews        Review[]
 
   @@index([category, isActive])
 }
@@ -128,6 +129,7 @@ model Order {
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
   items           OrderItem[]
+  reviews         Review[]
 
   @@index([customerPhone])
   @@index([status, createdAt])
@@ -144,4 +146,25 @@ model OrderItem {
 
   order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+}
+
+model Review {
+  id            String   @id @default(uuid())
+  productId     String
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orderId       String?
+  order         Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  orderNumber   String?
+  customerName  String
+  customerPhone String
+  rating        Int      @default(5)
+  comment       String
+  status        String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  isVerified    Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([productId, status])
+  @@index([customerPhone])
+  @@index([orderId, productId])
 }

@@ -159,10 +159,15 @@ function ProductCard({
                   {product.salesCount} sold
                 </span>
               ) : null}
-              <span className="flex items-center gap-0.5 text-amber-500">
-                <Star className="h-2.5 w-2.5 sm:h-3 sm:w-3 fill-amber-400 text-amber-400" />
-                <span>4.9</span>
-              </span>
+              {product.reviewsCount !== undefined && product.reviewsCount > 0 ? (
+                <span className="flex items-center gap-0.5 text-amber-500 font-bold text-[10px] sm:text-xs">
+                  <Star className="h-2.5 w-2.5 sm:h-3 sm:w-3 fill-amber-400 text-amber-400" />
+                  <span>{product.averageRating}</span>
+                  <span className="text-slate-400 font-normal text-[9px] sm:text-[10px]">({product.reviewsCount})</span>
+                </span>
+              ) : (
+                <span className="text-[10px] text-slate-400 font-medium">New</span>
+              )}
             </div>
           </div>
 

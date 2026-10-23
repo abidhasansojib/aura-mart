@@ -14,14 +14,16 @@ import {
   Bell,
   Store,
   ShieldCheck,
+  Star,
 } from "lucide-react";
 import { AdminLogin } from "@/components/admin/AdminLogin";
 import { AdminOverview } from "@/components/admin/AdminOverview";
 import { AdminOrders, AdminOrder } from "@/components/admin/AdminOrders";
 import { AdminProducts, AdminProduct } from "@/components/admin/AdminProducts";
 import { AdminSettings, StoreSettingsData } from "@/components/admin/AdminSettings";
+import { AdminReviews } from "@/components/admin/AdminReviews";
 
-type ActiveTab = "overview" | "orders" | "products" | "settings";
+type ActiveTab = "overview" | "orders" | "products" | "reviews" | "settings";
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -44,6 +46,7 @@ export default function AdminPage() {
     shopAddress: "Bogura, Rajshahi, Bangladesh",
   });
   const [isLoadingData, setIsLoadingData] = useState(false);
+  const [pendingReviewsCount, setPendingReviewsCount] = useState(0);
 
   // Load settings and check auth on mount
   useEffect(() => {
@@ -74,14 +77,15 @@ export default function AdminPage() {
     }
   }, [settings.storeName]);
 
-  // Fetch orders, products, settings
+  // Fetch orders, products, settings, and pending reviews count
   const fetchDashboardData = useCallback(async () => {
     setIsLoadingData(true);
     try {
-      const [ordersRes, productsRes, settingsRes] = await Promise.allSettled([
+      const [ordersRes, productsRes, settingsRes, reviewsRes] = await Promise.allSettled([
         fetch("/api/orders").then((r) => (r.ok ? r.json() : [])),
         fetch("/api/products?all=true").then((r) => (r.ok ? r.json() : [])),
         fetch("/api/settings").then((r) => (r.ok ? r.json() : null)),
+        fetch("/api/admin/reviews?status=PENDING").then((r) => (r.ok ? r.json() : null)),
       ]);
 
       if (ordersRes.status === "fulfilled" && Array.isArray(ordersRes.value)) {
@@ -92,6 +96,9 @@ export default function AdminPage() {
       }
       if (settingsRes.status === "fulfilled" && settingsRes.value) {
         setSettings(settingsRes.value);
+      }
+      if (reviewsRes.status === "fulfilled" && reviewsRes.value?.counts) {
+        setPendingReviewsCount(reviewsRes.value.counts.pending || 0);
       }
     } catch (error) {
       console.warn("Failed to refresh admin dashboard data:", error);
@@ -225,6 +232,24 @@ export default function AdminPage() {
                 title="Products & Inventory"
               >
                 <Boxes className="h-5 w-5" />
+              </button>
+
+              {/* Reviews Moderation */}
+              <button
+                onClick={() => setActiveTab("reviews")}
+                className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all relative ${
+                  activeTab === "reviews"
+                    ? "bg-amber-500 text-slate-950 shadow-md font-bold"
+                    : "text-slate-400 hover:text-white hover:bg-white/5"
+                }`}
+                title="Customer Reviews Moderation"
+              >
+                <Star className="h-5 w-5 fill-current" />
+                {pendingReviewsCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white text-[9px] font-black rounded-full flex items-center justify-center ring-2 ring-[#212429]">
+                    {pendingReviewsCount}
+                  </span>
+                )}
               </button>
 
               {/* Settings */}
@@ -374,6 +399,14 @@ export default function AdminPage() {
               />
             )}
 
+            {activeTab === "reviews" && (
+              <AdminReviews
+                products={products}
+                currencySymbol={currencySymbol}
+                onReviewsUpdated={fetchDashboardData}
+              />
+            )}
+
             {activeTab === "settings" && (
               <AdminSettings
                 initialSettings={settings}
@@ -430,6 +463,24 @@ export default function AdminPage() {
         >
           <Boxes className="h-4 w-4" />
           <span className="text-[10px] mt-0.5 truncate">Products</span>
+        </button>
+
+        {/* Reviews Tab */}
+        <button
+          onClick={() => setActiveTab("reviews")}
+          className={`flex-1 min-w-0 flex flex-col items-center justify-center py-1.5 px-2 rounded-xl transition-all relative ${
+            activeTab === "reviews"
+              ? "bg-amber-400 text-slate-950 font-bold shadow-md"
+              : "text-slate-400 hover:text-white"
+          }`}
+        >
+          <Star className="h-4 w-4 fill-current" />
+          {pendingReviewsCount > 0 && (
+            <span className="absolute top-1 right-1.5 xs:right-2 w-3.5 h-3.5 bg-rose-500 text-white text-[8px] font-black rounded-full flex items-center justify-center ring-2 ring-[#212429]">
+              {pendingReviewsCount}
+            </span>
+          )}
+          <span className="text-[10px] mt-0.5 truncate">Reviews</span>
         </button>
 
         {/* Settings Tab */}

@@ -146,7 +146,7 @@ export default async function HomePage() {
   let settings = DEFAULT_SETTINGS;
 
   try {
-    const [dbProducts, dbSettings, dbSales] = await Promise.allSettled([
+    const [dbProducts, dbSettings, dbSales, dbReviews] = await Promise.allSettled([
       prisma.product.findMany({
         where: { isActive: true },
         orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
@@ -166,6 +166,18 @@ export default async function HomePage() {
           },
         },
       }),
+      prisma.review.groupBy({
+        by: ["productId"],
+        _avg: {
+          rating: true,
+        },
+        _count: {
+          rating: true,
+        },
+        where: {
+          status: "APPROVED",
+        },
+      }),
     ]);
 
     const salesMap = new Map<string, number>();
@@ -173,6 +185,18 @@ export default async function HomePage() {
       for (const item of dbSales.value) {
         if (item.productId && item._sum?.quantity) {
           salesMap.set(item.productId, item._sum.quantity);
+        }
+      }
+    }
+
+    const reviewsMap = new Map<string, { averageRating: number; reviewsCount: number }>();
+    if (dbReviews && dbReviews.status === "fulfilled" && Array.isArray(dbReviews.value)) {
+      for (const r of dbReviews.value) {
+        if (r.productId) {
+          reviewsMap.set(r.productId, {
+            averageRating: r._avg?.rating ? Number(r._avg.rating.toFixed(1)) : 0,
+            reviewsCount: r._count?.rating || 0,
+          });
         }
       }
     }
@@ -187,17 +211,20 @@ export default async function HomePage() {
     };
 
     if (dbProducts.status === "fulfilled" && dbProducts.value.length > 0) {
-      // Enrich products with sales metrics & viral classification
+      // Enrich products with sales metrics & viral classification & real review stats
       const enriched = dbProducts.value.map((p) => {
         const realSales = salesMap.get(p.id) || 0;
         const starterSales = STARTER_SALES_BY_SLUG[p.slug] || 0;
         const salesCount = realSales > 0 ? realSales + starterSales : starterSales;
         const isViral = salesCount >= 10 || (p.isFeatured && salesCount > 0);
+        const reviewStats = reviewsMap.get(p.id) || { averageRating: 0, reviewsCount: 0 };
 
         return {
           ...p,
           salesCount,
           isViral,
+          averageRating: reviewStats.averageRating,
+          reviewsCount: reviewStats.reviewsCount,
         };
       });
 

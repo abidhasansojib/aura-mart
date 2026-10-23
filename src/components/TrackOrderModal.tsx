@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Search, PackageCheck, CheckCircle2, AlertCircle, ShoppingBag, Ban, Truck } from "lucide-react";
+import { X, Search, PackageCheck, CheckCircle2, AlertCircle, ShoppingBag, Ban, Truck, Star, Send, Loader2 } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 
 interface TrackOrderModalProps {
@@ -12,6 +12,7 @@ interface TrackOrderModalProps {
 
 interface OrderItemData {
   id: string;
+  productId?: string | null;
   productName: string;
   quantity: number;
   priceAtPurchase: number;
@@ -65,6 +66,17 @@ export function TrackOrderModal({ isOpen, onClose, currencySymbol = "৳" }: Tra
   const [cancellingLoading, setCancellingLoading] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
   const [cancelSuccessMsg, setCancelSuccessMsg] = useState<string | null>(null);
+
+  // Review state
+  const [reviewingItem, setReviewingItem] = useState<{
+    item: OrderItemData;
+    order: OrderData;
+  } | null>(null);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviewLoading, setReviewLoading] = useState(false);
+  const [reviewError, setReviewError] = useState<string | null>(null);
+  const [reviewSuccessMsg, setReviewSuccessMsg] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
@@ -127,6 +139,50 @@ export function TrackOrderModal({ isOpen, onClose, currencySymbol = "৳" }: Tra
       setCancelError(err instanceof Error ? err.message : "Error cancelling order");
     } finally {
       setCancellingLoading(false);
+    }
+  };
+
+  const handleSubmitReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reviewingItem) return;
+    setReviewError(null);
+    setReviewSuccessMsg(null);
+
+    if (!reviewComment.trim() || reviewComment.trim().length < 5) {
+      setReviewError("Please write at least 5 characters for your review.");
+      return;
+    }
+
+    setReviewLoading(true);
+    try {
+      const res = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId: reviewingItem.item.productId || reviewingItem.item.productName,
+          orderNumber: reviewingItem.order.orderNumber,
+          customerPhone: reviewingItem.order.customerPhone,
+          customerName: reviewingItem.order.customerName,
+          rating: reviewRating,
+          comment: reviewComment.trim(),
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setReviewError(data.error || "Failed to submit review.");
+      } else {
+        setReviewSuccessMsg("Thank you! Your verified review has been submitted for moderation and will appear once approved by our team.");
+        setReviewComment("");
+        setTimeout(() => {
+          setReviewingItem(null);
+          setReviewSuccessMsg(null);
+        }, 3000);
+      }
+    } catch {
+      setReviewError("An unexpected error occurred. Please try again.");
+    } finally {
+      setReviewLoading(false);
     }
   };
 
@@ -354,15 +410,32 @@ export function TrackOrderModal({ isOpen, onClose, currencySymbol = "৳" }: Tra
                         <ShoppingBag className="h-3.5 w-3.5 text-slate-400" />
                         <span>Items ({order.items.length}):</span>
                       </div>
-                      <div className="pl-5 space-y-0.5">
+                      <div className="pl-5 space-y-1.5">
                         {order.items.map((it) => (
-                          <div key={it.id} className="flex justify-between">
+                          <div key={it.id} className="flex items-center justify-between gap-2">
                             <span className="truncate pr-2">
                               • {it.productName} × {it.quantity}
                             </span>
-                            <span className="shrink-0 font-medium">
-                              {formatPrice(it.priceAtPurchase * it.quantity, currencySymbol)}
-                            </span>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className="font-medium text-slate-700">
+                                {formatPrice(it.priceAtPurchase * it.quantity, currencySymbol)}
+                              </span>
+                              {it.productId && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setReviewError(null);
+                                    setReviewSuccessMsg(null);
+                                    setReviewingItem({ item: it, order });
+                                  }}
+                                  className="px-2 py-0.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 text-[10px] font-bold border border-amber-200/60 flex items-center gap-1 transition-colors"
+                                  title="Write a verified review"
+                                >
+                                  <Star className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
+                                  <span>Review</span>
+                                </button>
+                              )}
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -463,6 +536,124 @@ export function TrackOrderModal({ isOpen, onClose, currencySymbol = "৳" }: Tra
                   </button>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Item Review Dialog Overlay */}
+          {reviewingItem && (
+            <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+              <form
+                onSubmit={handleSubmitReview}
+                className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl border border-gray-100 space-y-4 animate-in fade-in zoom-in-95"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                      <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-900 truncate max-w-[200px]">
+                        Review: {reviewingItem.item.productName}
+                      </h4>
+                      <p className="text-[11px] text-slate-500 font-mono">
+                        Order #{reviewingItem.order.orderNumber}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={reviewLoading}
+                    onClick={() => setReviewingItem(null)}
+                    className="p-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                {reviewError && (
+                  <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-700 font-medium">
+                    {reviewError}
+                  </div>
+                )}
+
+                {reviewSuccessMsg && (
+                  <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 font-medium flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <span>{reviewSuccessMsg}</span>
+                  </div>
+                )}
+
+                {/* Rating selection */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                    Your Rating
+                  </label>
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setReviewRating(star)}
+                        className="p-1 hover:scale-110 transition-transform"
+                      >
+                        <Star
+                          className={`h-5 w-5 ${
+                            star <= reviewRating
+                              ? "fill-amber-400 text-amber-400"
+                              : "text-slate-300"
+                          }`}
+                        />
+                      </button>
+                    ))}
+                    <span className="text-xs font-bold text-slate-600 ml-2">
+                      {reviewRating} / 5
+                    </span>
+                  </div>
+                </div>
+
+                {/* Review comment */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                    Review Feedback
+                  </label>
+                  <textarea
+                    required
+                    rows={3}
+                    placeholder="Tell other shoppers how the product quality and packaging were..."
+                    value={reviewComment}
+                    onChange={(e) => setReviewComment(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs text-slate-900 bg-white font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 resize-none"
+                  />
+                </div>
+
+                <div className="flex flex-col-reverse xs:flex-row items-stretch xs:items-center justify-end gap-2.5 pt-2">
+                  <button
+                    type="button"
+                    disabled={reviewLoading}
+                    onClick={() => setReviewingItem(null)}
+                    className="w-full xs:w-auto px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors min-h-[40px]"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={reviewLoading}
+                    className="w-full xs:w-auto px-4 py-2.5 bg-[#181A1D] hover:bg-black disabled:opacity-50 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all min-h-[40px] active:scale-95"
+                  >
+                    {reviewLoading ? (
+                      <>
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        <span>Submitting...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send className="h-3.5 w-3.5" />
+                        <span>Submit Review</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
             </div>
           )}
         </div>

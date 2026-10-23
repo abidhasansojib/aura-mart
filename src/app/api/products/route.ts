@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
       ];
     }
 
-    const [products, salesAgg] = await Promise.all([
+    const [products, salesAgg, reviewsAgg] = await Promise.all([
       prisma.product.findMany({
         where,
         orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
@@ -56,12 +56,34 @@ export async function GET(req: NextRequest) {
           },
         },
       }).catch(() => []),
+      prisma.review.groupBy({
+        by: ["productId"],
+        _avg: {
+          rating: true,
+        },
+        _count: {
+          rating: true,
+        },
+        where: {
+          status: "APPROVED",
+        },
+      }).catch(() => []),
     ]);
 
     const salesMap = new Map<string, number>();
     for (const item of salesAgg) {
       if (item.productId && item._sum?.quantity) {
         salesMap.set(item.productId, item._sum.quantity);
+      }
+    }
+
+    const reviewsMap = new Map<string, { averageRating: number; reviewsCount: number }>();
+    for (const r of reviewsAgg) {
+      if (r.productId) {
+        reviewsMap.set(r.productId, {
+          averageRating: r._avg?.rating ? Number(r._avg.rating.toFixed(1)) : 0,
+          reviewsCount: r._count?.rating || 0,
+        });
       }
     }
 
@@ -79,11 +101,14 @@ export async function GET(req: NextRequest) {
       const starterSales = STARTER_SALES_BY_SLUG[p.slug] || 0;
       const salesCount = realSales > 0 ? realSales + starterSales : starterSales;
       const isViral = salesCount >= 10 || (p.isFeatured && salesCount > 0);
+      const reviewStats = reviewsMap.get(p.id) || { averageRating: 0, reviewsCount: 0 };
 
       return {
         ...p,
         salesCount,
         isViral,
+        averageRating: reviewStats.averageRating,
+        reviewsCount: reviewStats.reviewsCount,
       };
     });
 
