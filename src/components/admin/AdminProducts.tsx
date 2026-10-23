@@ -636,7 +636,7 @@ export function AdminProducts({
                   <div className="flex-1 w-full space-y-2">
                     <label className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-white border-2 border-dashed border-gray-300 hover:border-emerald-500 rounded-xl cursor-pointer text-xs font-semibold text-slate-700 transition-colors">
                       <Upload className="h-4 w-4 text-emerald-600" />
-                      <span>{isCompressing ? "Compressing WebP..." : "Choose Smartphone Photo (PNG/JPG)"}</span>
+                      <span>{isCompressing ? "Compressing WebP..." : "Choose Photo (PNG/JPG)"}</span>
                       <input
                         type="file"
                         accept="image/*"
