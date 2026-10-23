@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Phone, Search, ShoppingBag, Truck, ShieldCheck, Sparkles } from "lucide-react";
+import { Phone, Search, ShoppingBag, Truck, Sparkles } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { TrackOrderModal } from "@/components/TrackOrderModal";
 import { SearchAutocomplete } from "@/components/SearchAutocomplete";
@@ -78,15 +78,6 @@ export function Navbar({
                 <span>{supportPhone}</span>
               </a>
             )}
-            <Link
-              href="/admin"
-              className="flex items-center gap-1 hover:text-white text-slate-400 transition-colors border-l border-white/10 pl-2.5 sm:pl-3"
-              title="Admin Portal"
-            >
-              <ShieldCheck className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-              <span className="hidden xs:inline">Admin Portal</span>
-              <span className="xs:hidden">Admin</span>
-            </Link>
           </div>
         </div>
       </div>
@@ -98,22 +89,31 @@ export function Navbar({
             {/* Top row on mobile / Left Brand on desktop */}
             <div className="flex items-center justify-between gap-3">
               {/* Brand Logo & Name */}
-              <Link href="/" className="flex items-center gap-2 sm:gap-3 shrink-0 group">
-                {logoUrl ? (
-                  <div className="h-8 sm:h-10 max-w-[120px] sm:max-w-[160px] flex items-center shrink-0">
-                    <img
-                      src={logoUrl}
-                      alt={storeName}
-                      className="h-full w-auto max-h-8 sm:max-h-10 object-contain rounded-lg"
-                    />
-                  </div>
-                ) : (
-                  <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-[#181A1D] flex items-center justify-center text-white font-black text-sm sm:text-lg shadow-md group-hover:scale-105 transition-transform border border-white/10 relative overflow-hidden">
-                    <span className="relative z-10">{storeName.charAt(0) || "A"}</span>
-                    <div className="absolute inset-0 bg-gradient-to-tr from-[#FF6448]/30 to-transparent pointer-events-none" />
-                  </div>
-                )}
-                <div>
+              <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                {/* Logo redirects to Admin Portal */}
+                <Link
+                  href="/admin"
+                  title="Admin Portal"
+                  className="group shrink-0 cursor-pointer"
+                >
+                  {logoUrl ? (
+                    <div className="h-8 sm:h-10 max-w-[120px] sm:max-w-[160px] flex items-center shrink-0">
+                      <img
+                        src={logoUrl}
+                        alt={storeName}
+                        className="h-full w-auto max-h-8 sm:max-h-10 object-contain rounded-lg group-hover:opacity-90 transition-opacity"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-[#181A1D] flex items-center justify-center text-white font-black text-sm sm:text-lg shadow-md group-hover:scale-105 transition-transform border border-white/10 relative overflow-hidden">
+                      <span className="relative z-10">{storeName.charAt(0) || "A"}</span>
+                      <div className="absolute inset-0 bg-gradient-to-tr from-[#FF6448]/30 to-transparent pointer-events-none" />
+                    </div>
+                  )}
+                </Link>
+
+                {/* Brand Name redirects to Homepage */}
+                <Link href="/" className="hover:opacity-90 transition-opacity">
                   <span className="text-sm sm:text-lg font-black text-slate-900 tracking-tight block leading-none">
                     {storeName}
                   </span>
@@ -121,8 +121,8 @@ export function Navbar({
                     <Sparkles className="h-2.5 w-2.5" />
                     <span>Premium Store</span>
                   </span>
-                </div>
-              </Link>
+                </Link>
+              </div>
 
               {/* Mobile Actions: Search Trigger, Track Order & Cart (Visible on < sm) */}
               <div className="flex items-center gap-1.5 sm:hidden">

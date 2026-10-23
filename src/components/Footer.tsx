@@ -1,13 +1,15 @@
 /* eslint-disable @next/next/no-img-element */
 import React from "react";
 import Link from "next/link";
-import { ShieldCheck, Truck, RotateCcw, Headphones, Phone, Sparkles } from "lucide-react";
+import { ShieldCheck, Truck, RotateCcw, Headphones, Phone } from "lucide-react";
 
 interface FooterProps {
   storeName?: string;
   logoUrl?: string;
   tagline?: string;
   supportPhone?: string;
+  facebookUrl?: string;
+  instagramUrl?: string;
 }
 
 export function Footer({
@@ -15,6 +17,8 @@ export function Footer({
   logoUrl,
   tagline = "Quality Products Delivered to Your Doorstep",
   supportPhone = "01700000000",
+  facebookUrl,
+  instagramUrl,
 }: FooterProps) {
   return (
     <footer className="mt-16 bg-[#181A1D] text-white rounded-t-[40px] border-t border-white/10 shadow-2xl overflow-hidden">
@@ -107,6 +111,40 @@ export function Footer({
                 </a>
               </div>
             )}
+
+            {/* Social Links (Facebook & Instagram) */}
+            {(facebookUrl || instagramUrl) && (
+              <div className="pt-2 flex flex-wrap items-center gap-2.5">
+                {facebookUrl && (
+                  <a
+                    href={facebookUrl.startsWith("http") ? facebookUrl : `https://${facebookUrl}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#1877F2]/10 hover:bg-[#1877F2]/20 text-[#1877F2] hover:text-[#4287f5] border border-[#1877F2]/30 text-xs font-bold transition-all shadow-sm group"
+                  >
+                    <svg className="w-4 h-4 fill-current transition-transform group-hover:scale-110" viewBox="0 0 24 24">
+                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                    <span>Visit Facebook Page</span>
+                  </a>
+                )}
+                {instagramUrl && (
+                  <a
+                    href={instagramUrl.startsWith("http") ? instagramUrl : `https://${instagramUrl}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#E4405F]/10 hover:bg-[#E4405F]/20 text-[#E4405F] hover:text-[#f85a7a] border border-[#E4405F]/30 text-xs font-bold transition-all shadow-sm group"
+                  >
+                    <svg className="w-4 h-4 transition-transform group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+                    </svg>
+                    <span>Follow Instagram</span>
+                  </a>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Quick Links */}
@@ -125,14 +163,18 @@ export function Footer({
                   Instant Checkout
                 </Link>
               </li>
-              <li>
-                <Link href="/admin" className="hover:text-white transition-colors flex items-center gap-1.5">
-                  <span>Merchant Admin Portal</span>
-                  <span className="px-1.5 py-0.5 rounded-full bg-[#FF6448]/20 text-[#FF6448] text-[9px] font-bold">
-                    Staff
-                  </span>
-                </Link>
-              </li>
+              {facebookUrl && (
+                <li>
+                  <a
+                    href={facebookUrl.startsWith("http") ? facebookUrl : `https://${facebookUrl}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-white transition-colors"
+                  >
+                    Facebook Page
+                  </a>
+                </li>
+              )}
             </ul>
           </div>
 
@@ -160,12 +202,8 @@ export function Footer({
         </div>
 
         {/* 3. Bottom Copyright */}
-        <div className="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+        <div className="mt-12 pt-8 border-t border-white/10 flex items-center justify-center text-center text-xs text-slate-500">
           <p>© {new Date().getFullYear()} {storeName}. All rights reserved.</p>
-          <p className="flex items-center gap-1.5 font-medium text-slate-400">
-            <Sparkles className="h-3 w-3 text-[#FF6448]" />
-            <span>Modern Bento-Box E-Commerce Architecture</span>
-          </p>
         </div>
       </div>
     </footer>

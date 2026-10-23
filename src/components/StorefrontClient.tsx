@@ -914,6 +914,8 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
         logoUrl={settings.logoUrl}
         tagline={settings.tagline}
         supportPhone={settings.supportPhone}
+        facebookUrl={settings.facebookUrl}
+        instagramUrl={settings.instagramUrl}
       />
 
       {/* 7. Mobile Sticky Bottom Cart Bar */}
