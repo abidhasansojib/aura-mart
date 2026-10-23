@@ -74,9 +74,10 @@ export function AdminOverview({
     const todayOrders = orders.filter((o) => new Date(o.createdAt).getTime() >= startOfToday);
     const todayRevenue = todayOrders.reduce((sum, o) => sum + o.totalAmount, 0);
 
+    const nonCancelledOrders = orders.filter((o) => o.status !== "Cancelled");
     const avgOrderValue =
-      orders.length > 0
-        ? Math.round(orders.reduce((sum, o) => sum + o.totalAmount, 0) / orders.length)
+      nonCancelledOrders.length > 0
+        ? Math.round(nonCancelledOrders.reduce((sum, o) => sum + o.totalAmount, 0) / nonCancelledOrders.length)
         : 0;
 
     const lowStockCount = products.filter((p) => p.stock <= 5).length;

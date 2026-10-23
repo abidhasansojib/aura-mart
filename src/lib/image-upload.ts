@@ -28,14 +28,32 @@ export async function compressAndUploadImage(file: File): Promise<string> {
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
   const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
-  // Fallback: If Cloudinary credentials are not configured, return Base64 data URL for local testing
+  // If Cloudinary credentials are not configured, upload directly to server storage /api/admin/upload
   if (
     !cloudName ||
     cloudName === "your-cloud-name" ||
     !uploadPreset ||
     uploadPreset === "your-unsigned-preset"
   ) {
-    console.info("Cloudinary not configured. Generating Base64 image data URL as fallback.");
+    try {
+      const serverFormData = new FormData();
+      serverFormData.append("file", compressedFile, file.name || "product.webp");
+      const serverRes = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: serverFormData,
+      });
+
+      if (serverRes.ok) {
+        const result = await serverRes.json();
+        if (result.url) {
+          return result.url;
+        }
+      }
+    } catch (serverErr) {
+      console.warn("Direct server upload failed, falling back to Base64:", serverErr);
+    }
+
+    console.info("Using Base64 image fallback.");
     return await fileToBase64(compressedFile);
   }
 

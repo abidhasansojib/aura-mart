@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   ShoppingBag,
   Truck,
@@ -20,9 +21,16 @@ import {
   Sparkles,
   Ban,
   X,
+  MessageCircle,
+  Clock,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/utils";
+import {
+  BANGLADESH_DISTRICTS,
+  isInsideLocalCity,
+  getEstimatedDeliveryTurnaround,
+} from "@/lib/districts";
 
 interface StoreSettings {
   storeName: string;
@@ -44,6 +52,7 @@ interface StoreSettings {
   storeClosedNotice?: string;
   shopCity?: string;
   shopAddress?: string;
+  whatsappNumber?: string;
 }
 
 interface OrderItemData {
@@ -101,6 +110,7 @@ export default function CheckoutPage() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [selectedDistrict, setSelectedDistrict] = useState("Bogura");
   const [deliveryZone, setDeliveryZone] = useState<"Inside City" | "Outside City">("Inside City");
   const [orderNote, setOrderNote] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"COD" | "bKash" | "Nagad" | "Rocket">("COD");
@@ -117,6 +127,7 @@ export default function CheckoutPage() {
   const [copiedNumber, setCopiedNumber] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [cartValidationWarning, setCartValidationWarning] = useState<string | null>(null);
   const [completedOrder, setCompletedOrder] = useState<CompletedOrder | null>(null);
 
   // Cancellation state
@@ -169,6 +180,9 @@ export default function CheckoutPage() {
       .then((data) => {
         if (data) {
           setSettings((prev) => ({ ...prev, ...data }));
+          if (data.shopCity) {
+            setSelectedDistrict(data.shopCity);
+          }
           if (data.enableCod === false && data.enableBkash) {
             setPaymentMethod("bKash");
           } else if (data.enableCod === false && data.enableNagad) {
@@ -178,6 +192,28 @@ export default function CheckoutPage() {
       })
       .catch((err) => console.warn("Could not load dynamic store settings:", err));
   }, []);
+
+  // Pre-checkout cart stock validation
+  useEffect(() => {
+    if (cart.length > 0) {
+      fetch("/api/cart/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: cart.map((c) => ({ productId: c.productId, quantity: c.quantity })),
+        }),
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data?.hasChanges) {
+            setCartValidationWarning(
+              "Note: Some items in your shopping bag have stock or availability changes. Please review your order."
+            );
+          }
+        })
+        .catch(() => {});
+    }
+  }, [cart]);
 
   const isFreeShipping = Boolean(
     settings.freeShippingThreshold &&
@@ -264,10 +300,14 @@ export default function CheckoutPage() {
     setIsSubmitting(true);
 
     try {
+      const formattedAddress = address.trim().toLowerCase().includes(selectedDistrict.toLowerCase())
+        ? address.trim()
+        : `${address.trim()}, ${selectedDistrict}`;
+
       const payload = {
         customerName: name.trim(),
         customerPhone: phone.trim(),
-        shippingAddress: address.trim(),
+        shippingAddress: formattedAddress,
         deliveryZone,
         paymentMethod,
         paymentSenderNo: paymentMethod !== "COD" ? paymentSenderNo.trim() : null,
@@ -476,11 +516,13 @@ export default function CheckoutPage() {
                 {completedOrder.items.map((item) => (
                   <div key={item.id} className="py-3 flex items-center justify-between text-xs">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-lg bg-neutral-100 overflow-hidden shrink-0 border border-gray-200">
-                        <img
+                      <div className="relative w-12 h-12 rounded-lg bg-neutral-100 overflow-hidden shrink-0 border border-gray-200">
+                        <Image
                           src={item.productImage || "/placeholder-product.png"}
                           alt={item.productName}
-                          className="w-full h-full object-cover"
+                          fill
+                          sizes="48px"
+                          className="object-cover"
                         />
                       </div>
                       <div>
@@ -529,11 +571,24 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* Navigation link back */}
-          <div className="print:hidden text-center pt-4">
+          {/* Navigation & WhatsApp Confirmation Actions */}
+          <div className="print:hidden flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
+            {settings.whatsappNumber && (
+              <a
+                href={`https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+                  `Hello ${settings.storeName}! I just placed Order #${completedOrder.orderNumber} for ${settings.currencySymbol}${completedOrder.totalAmount}.\nCustomer: ${completedOrder.customerName}\nPhone: ${completedOrder.customerPhone}\nDestination: ${completedOrder.shippingAddress}\nPlease confirm my delivery.`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20ba5a] text-white font-bold py-3.5 px-6 rounded-2xl shadow-lg shadow-emerald-500/20 transition-all min-h-[44px]"
+              >
+                <MessageCircle className="h-5 w-5" />
+                <span>Confirm via WhatsApp</span>
+              </a>
+            )}
             <Link
               href="/"
-              className="inline-flex items-center justify-center gap-2 bg-[#FF6448] hover:bg-[#e8553b] text-white font-black py-3.5 px-8 rounded-2xl shadow-lg shadow-[#FF6448]/25 transition-all min-h-[44px]"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#FF6448] hover:bg-[#e8553b] text-white font-black py-3.5 px-8 rounded-2xl shadow-lg shadow-[#FF6448]/25 transition-all min-h-[44px]"
             >
               <span>Continue Shopping</span>
             </Link>
@@ -719,6 +774,24 @@ export default function CheckoutPage() {
                 </div>
               )}
 
+              {/* Cart Stock Update Warning */}
+              {cartValidationWarning && (
+                <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-medium flex items-start gap-2.5 shadow-sm animate-in fade-in">
+                  <AlertCircle className="h-4 w-4 shrink-0 text-amber-600 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="font-bold">Cart Update Notice:</p>
+                    <p className="mt-0.5">{cartValidationWarning}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setCartValidationWarning(null)}
+                    className="text-amber-500 hover:text-amber-800"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+
               {/* 1. Customer Information Card */}
               <div className="bg-white rounded-3xl border border-gray-200 p-6 sm:p-7 shadow-sm space-y-5">
                 <div className="flex items-center gap-2.5 pb-3 border-b border-gray-100">
@@ -773,6 +846,48 @@ export default function CheckoutPage() {
                     <p className="text-[11px] text-slate-400 mt-1">
                       Our delivery courier will call this number before arrival.
                     </p>
+                  </div>
+
+                  {/* Destination District (Bangladesh) */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                      Destination District (Bangladesh) <span className="text-rose-500">*</span>
+                    </label>
+                    <select
+                      value={selectedDistrict}
+                      onChange={(e) => {
+                        const newDist = e.target.value;
+                        setSelectedDistrict(newDist);
+                        if (isInsideLocalCity(newDist, settings.shopCity)) {
+                          setDeliveryZone("Inside City");
+                        } else {
+                          setDeliveryZone("Outside City");
+                        }
+                      }}
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-base sm:text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 min-h-[44px]"
+                    >
+                      {BANGLADESH_DISTRICTS.map((d) => (
+                        <option key={d.name} value={d.name}>
+                          {d.name} ({d.bnName}) — {d.division} Division
+                        </option>
+                      ))}
+                    </select>
+
+                    {/* Estimated Courier Turnaround Notice */}
+                    {(() => {
+                      const est = getEstimatedDeliveryTurnaround(selectedDistrict, settings.shopCity);
+                      return (
+                        <div className="mt-2 flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50 border border-slate-200/80 text-xs text-slate-700">
+                          <span className="flex items-center gap-1.5 font-medium">
+                            <Clock className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                            <span>Estimated Delivery: <b>{est.days}</b></span>
+                          </span>
+                          <span className="text-[11px] font-bold text-emerald-800 bg-emerald-100/70 px-2 py-0.5 rounded-full">
+                            {est.badge}
+                          </span>
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   {/* Delivery Area Selection (Radio Cards) */}
@@ -1272,11 +1387,13 @@ export default function CheckoutPage() {
                 <div className="max-h-72 overflow-y-auto space-y-3 pr-1 divide-y divide-gray-100">
                   {cart.map((item) => (
                     <div key={item.productId} className="pt-3 first:pt-0 flex items-center gap-3">
-                      <div className="w-14 h-14 rounded-xl bg-neutral-100 overflow-hidden shrink-0 border border-gray-200">
-                        <img
+                      <div className="relative w-14 h-14 rounded-xl bg-neutral-100 overflow-hidden shrink-0 border border-gray-200">
+                        <Image
                           src={item.imageUrl || "/placeholder-product.png"}
                           alt={item.name}
-                          className="w-full h-full object-cover"
+                          fill
+                          sizes="56px"
+                          className="object-cover"
                         />
                       </div>
                       <div className="flex-1 min-w-0">

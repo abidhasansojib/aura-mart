@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useRef, useEffect } from "react";
+import Image from "next/image";
 import { Search, Sparkles, ArrowRight, Tag, Flame } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import { searchProducts, SearchableProduct } from "@/lib/search";
@@ -128,13 +129,15 @@ export function SearchAutocomplete<T extends SearchableProduct>({
                 >
                   <div className="flex items-center gap-3 min-w-0 pr-2">
                     <div className="w-12 h-12 rounded-xl bg-neutral-100 overflow-hidden shrink-0 border border-black/5 relative">
-                      <img
+                      <Image
                         src={p.imageUrl || "/placeholder-product.png"}
                         alt={p.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                        fill
+                        sizes="48px"
+                        className="object-cover group-hover:scale-105 transition-transform"
                       />
                       {p.isFeatured && (
-                        <div className="absolute top-0.5 right-0.5 bg-[#FF6448] text-white p-0.5 rounded-full">
+                        <div className="absolute top-0.5 right-0.5 bg-[#FF6448] text-white p-0.5 rounded-full z-10">
                           <Flame className="h-2 w-2" />
                         </div>
                       )}
@@ -190,11 +193,13 @@ export function SearchAutocomplete<T extends SearchableProduct>({
                   }}
                   className="flex items-center gap-2.5 p-2 rounded-2xl bg-neutral-50/70 hover:bg-neutral-100 border border-black/5 cursor-pointer group transition-all"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-white overflow-hidden shrink-0 border border-black/5">
-                    <img
+                  <div className="relative w-10 h-10 rounded-xl bg-white overflow-hidden shrink-0 border border-black/5">
+                    <Image
                       src={p.imageUrl || "/placeholder-product.png"}
                       alt={p.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      fill
+                      sizes="40px"
+                      className="object-cover group-hover:scale-105 transition-transform"
                     />
                   </div>
                   <div className="min-w-0 flex-1">

@@ -2,11 +2,26 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hashPassword, verifyPassword, setAdminSessionCookie } from "@/lib/auth";
 import { sendTelegramPasswordChangedAlert } from "@/lib/telegram";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req);
+    // Rate limit: max 5 password reset attempts per 15 minutes per IP
+    const rateCheck = checkRateLimit(`reset-attempt:${ip}`, 5, 900);
+    if (!rateCheck.success) {
+      return NextResponse.json(
+        {
+          error: `Too many password reset attempts. Please wait ${Math.ceil(
+            rateCheck.resetInSeconds / 60
+          )} minute(s) before trying again.`,
+        },
+        { status: 429 }
+      );
+    }
+
     const body = await req.json();
     const { emailOrUsername, otp, masterKey, newPassword } = body;
 

@@ -183,5 +183,72 @@ export default async function HomePage() {
     console.warn("Could not query database for storefront, using safe fallbacks:", error);
   }
 
-  return <StorefrontClient initialProducts={products} settings={settings} />;
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
+  // Schema.org JSON-LD Structured Data for Google Rich Snippets
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": `${baseUrl}/#website`,
+        url: baseUrl,
+        name: settings.storeName,
+        description: settings.tagline,
+        potentialAction: {
+          "@type": "SearchAction",
+          target: `${baseUrl}/?q={search_term_string}`,
+          "query-input": "required name=search_term_string",
+        },
+      },
+      {
+        "@type": "OnlineStore",
+        "@id": `${baseUrl}/#store`,
+        name: settings.storeName,
+        url: baseUrl,
+        telephone: settings.supportPhone,
+        priceRange: "৳৳",
+        address: {
+          "@type": "PostalAddress",
+          addressLocality: settings.shopCity || "Bogura",
+          addressRegion: "Rajshahi",
+          addressCountry: "BD",
+        },
+      },
+      {
+        "@type": "ItemList",
+        itemListElement: products.slice(0, 24).map((p, idx) => ({
+          "@type": "ListItem",
+          position: idx + 1,
+          item: {
+            "@type": "Product",
+            name: p.name,
+            description: p.description,
+            image: p.imageUrl,
+            offers: {
+              "@type": "Offer",
+              price: p.price,
+              priceCurrency: "BDT",
+              availability:
+                p.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+              seller: {
+                "@type": "Organization",
+                name: settings.storeName,
+              },
+            },
+          },
+        })),
+      },
+    ],
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <StorefrontClient initialProducts={products} settings={settings} />
+    </>
+  );
 }

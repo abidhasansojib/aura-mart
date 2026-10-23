@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import Image from "next/image";
 import {
   Plus,
   Search,
@@ -328,11 +329,13 @@ export function AdminProducts({
                       {/* Product Thumbnail & Name */}
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-xl bg-neutral-100 overflow-hidden shrink-0 border border-gray-200">
-                            <img
+                          <div className="relative w-12 h-12 rounded-xl bg-neutral-100 overflow-hidden shrink-0 border border-gray-200">
+                            <Image
                               src={p.imageUrl || "/placeholder-product.png"}
                               alt={p.name}
-                              className="w-full h-full object-cover"
+                              fill
+                              sizes="48px"
+                              className="object-cover"
                             />
                           </div>
                           <div>
@@ -563,12 +566,14 @@ export function AdminProducts({
 
                 <div className="flex flex-col sm:flex-row gap-4 items-center">
                   {/* Image Preview */}
-                  <div className="w-24 h-24 rounded-xl bg-white border border-gray-200 overflow-hidden shrink-0 flex items-center justify-center">
+                  <div className="relative w-24 h-24 rounded-xl bg-white border border-gray-200 overflow-hidden shrink-0 flex items-center justify-center">
                     {imageUrl ? (
-                      <img
+                      <Image
                         src={imageUrl}
                         alt="Preview"
-                        className="w-full h-full object-cover"
+                        fill
+                        unoptimized
+                        className="object-cover"
                       />
                     ) : (
                       <ImageIcon className="h-8 w-8 text-slate-300" />

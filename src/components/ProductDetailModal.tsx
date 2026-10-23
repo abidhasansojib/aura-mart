@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { X, Plus, Minus, ShoppingBag, Zap, CheckCircle2, ShieldCheck, Truck, Star } from "lucide-react";
 import { useCart } from "@/context/CartContext";
@@ -78,13 +79,18 @@ export function ProductDetailModal({
           <div className="grid grid-cols-1 md:grid-cols-2 overflow-y-auto">
             {/* Image Section */}
             <div className="relative bg-neutral-100 aspect-square md:aspect-auto h-56 xs:h-64 sm:h-72 md:h-full flex items-center justify-center p-4 sm:p-6 overflow-hidden">
-              <img
-                src={product.imageUrl || "/placeholder-product.png"}
-                alt={product.name}
-                className="max-h-full max-w-full object-cover rounded-2xl shadow-sm"
-              />
+              <div className="relative w-full h-full min-h-[220px]">
+                <Image
+                  src={product.imageUrl || "/placeholder-product.png"}
+                  alt={product.name}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="object-contain rounded-2xl"
+                  priority
+                />
+              </div>
               {discountPercent && (
-                <div className="absolute top-3 left-3 sm:top-4 sm:left-4 bg-[#FF6448] text-white text-[10px] sm:text-xs font-black px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full shadow-md">
+                <div className="absolute top-3 left-3 sm:top-4 sm:left-4 bg-[#FF6448] text-white text-[10px] sm:text-xs font-black px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full shadow-md z-10">
                   {discountPercent}% OFF
                 </div>
               )}

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { generateOrderNumber } from "@/lib/utils";
-import { sendTelegramOrderAlert } from "@/lib/telegram";
+import { sendTelegramOrderAlert, sendTelegramLowStockAlert } from "@/lib/telegram";
 import { verifyAdminAuth } from "@/lib/auth";
 import { Prisma } from "@prisma/client";
 
@@ -21,13 +21,29 @@ export async function GET(req: NextRequest) {
 
     const isAdmin = verifyAdminAuth();
 
-    // 1. Customer order tracking via phone number
+    // 1. Customer order tracking via phone number (strict exact/normalized lookup)
     if (phone && phone.trim() !== "") {
-      const cleanPhone = phone.trim();
+      const rawDigits = phone.replace(/[^0-9]/g, "");
+      if (rawDigits.length < 11) {
+        return NextResponse.json(
+          { error: "Please enter your full 11-digit phone number (e.g. 017XXXXXXXX) to view your orders." },
+          { status: 400 }
+        );
+      }
+
+      // Bangladesh standard mobile number is 11 digits (01XXXXXXXXX)
+      const standard11 = rawDigits.slice(-11);
+      const possibleVariants = [
+        standard11,
+        `+88${standard11}`,
+        `88${standard11}`,
+        phone.trim(),
+      ];
+
       const orders = await prisma.order.findMany({
         where: {
           customerPhone: {
-            contains: cleanPhone,
+            in: possibleVariants,
           },
         },
         include: {
@@ -154,30 +170,21 @@ export async function POST(req: NextRequest) {
         quantity: number;
         priceAtPurchase: number;
       }[] = [];
+      const lowStockAlerts: { name: string; stock: number; category?: string }[] = [];
 
-      // b. Verify each product and stock atomically
+      // b. Verify each product and atomically decrement stock with conditional check
       for (const item of items as CheckoutItemPayload[]) {
         if (!item.productId || !item.quantity || item.quantity <= 0) {
           throw new Error("Invalid item in shopping cart.");
         }
 
-        const product = await tx.product.findUnique({
-          where: { id: item.productId },
-        });
-
-        if (!product || !product.isActive) {
-          throw new Error(`Product "${product?.name || item.productId}" is currently unavailable.`);
-        }
-
-        if (product.stock < item.quantity) {
-          throw new Error(
-            `Sorry, "${product.name}" only has ${product.stock} left in stock (you requested ${item.quantity}).`
-          );
-        }
-
-        // c. Atomically decrement stock
-        await tx.product.update({
-          where: { id: product.id },
+        // Strict Atomic conditional decrement: Only succeeds if current stock >= requested quantity
+        const updateResult = await tx.product.updateMany({
+          where: {
+            id: item.productId,
+            isActive: true,
+            stock: { gte: item.quantity },
+          },
           data: {
             stock: {
               decrement: item.quantity,
@@ -185,16 +192,41 @@ export async function POST(req: NextRequest) {
           },
         });
 
-        const linePrice = product.price * item.quantity;
+        if (updateResult.count === 0) {
+          const currentProduct = await tx.product.findUnique({
+            where: { id: item.productId },
+          });
+          if (!currentProduct || !currentProduct.isActive) {
+            throw new Error(`Product "${currentProduct?.name || item.productId}" is currently unavailable.`);
+          }
+          throw new Error(
+            `Sorry, "${currentProduct.name}" only has ${currentProduct.stock} left in stock (you requested ${item.quantity}).`
+          );
+        }
+
+        // Fetch freshly decremented product
+        const updatedProduct = await tx.product.findUniqueOrThrow({
+          where: { id: item.productId },
+        });
+
+        const linePrice = updatedProduct.price * item.quantity;
         subtotal += linePrice;
 
         verifiedItems.push({
-          productId: product.id,
-          productName: product.name,
-          productImage: product.imageUrl,
+          productId: updatedProduct.id,
+          productName: updatedProduct.name,
+          productImage: updatedProduct.imageUrl,
           quantity: item.quantity,
-          priceAtPurchase: product.price,
+          priceAtPurchase: updatedProduct.price,
         });
+
+        if (updatedProduct.stock <= (settings.lowStockThreshold || 5)) {
+          lowStockAlerts.push({
+            name: updatedProduct.name,
+            stock: updatedProduct.stock,
+            category: updatedProduct.category,
+          });
+        }
       }
 
       // d. Delivery charge calculation with Free Shipping threshold support
@@ -288,6 +320,8 @@ export async function POST(req: NextRequest) {
       return {
         order: createdOrder,
         currencySymbol: settings.currencySymbol,
+        lowStockThreshold: settings.lowStockThreshold || 5,
+        lowStockAlerts,
       };
     });
 
@@ -295,6 +329,15 @@ export async function POST(req: NextRequest) {
     sendTelegramOrderAlert(transactionResult.order, transactionResult.currencySymbol).catch(
       (err) => console.error("Async Telegram alert error:", err)
     );
+
+    // Asynchronously dispatch Telegram low stock alerts if threshold breached
+    if (transactionResult.lowStockAlerts && transactionResult.lowStockAlerts.length > 0) {
+      transactionResult.lowStockAlerts.forEach((item) => {
+        sendTelegramLowStockAlert(item, transactionResult.lowStockThreshold).catch((err) =>
+          console.error("Async Telegram low-stock alert error:", err)
+        );
+      });
+    }
 
     return NextResponse.json(transactionResult.order, { status: 201 });
   } catch (error) {

@@ -13,6 +13,11 @@ interface RouteParams {
 export async function GET(req: NextRequest, { params }: RouteParams) {
   try {
     const { id } = params;
+    const { searchParams } = new URL(req.url);
+    const phone = searchParams.get("phone");
+
+    const isAdmin = verifyAdminAuth();
+
     const order = await prisma.order.findUnique({
       where: { id },
       include: {
@@ -22,6 +27,31 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
 
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+
+    // Security check: Requester must be admin OR supply matching customer phone number
+    if (!isAdmin) {
+      if (!phone || phone.trim() === "") {
+        return NextResponse.json(
+          { error: "Unauthorized. Customer phone number is required to access order details." },
+          { status: 401 }
+        );
+      }
+
+      const inputDigits = phone.replace(/[^0-9]/g, "");
+      const orderDigits = order.customerPhone.replace(/[^0-9]/g, "");
+
+      const isMatch =
+        orderDigits === inputDigits ||
+        orderDigits.endsWith(inputDigits.slice(-11)) ||
+        inputDigits.endsWith(orderDigits.slice(-11));
+
+      if (!isMatch) {
+        return NextResponse.json(
+          { error: "Unauthorized. Phone number does not match this order." },
+          { status: 403 }
+        );
+      }
     }
 
     return NextResponse.json(order);
@@ -42,7 +72,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
   try {
     const { id } = params;
     const body = await req.json();
-    const { status } = body;
+    const { status, courierName, courierTrackingCode } = body;
 
     const validStatuses = ["Pending", "Confirmed", "Shipped", "Delivered", "Cancelled"];
     if (status && !validStatuses.includes(status)) {
@@ -104,6 +134,10 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
         where: { id },
         data: {
           ...(status !== undefined && { status }),
+          ...(courierName !== undefined && { courierName: courierName ? String(courierName).trim() : null }),
+          ...(courierTrackingCode !== undefined && {
+            courierTrackingCode: courierTrackingCode ? String(courierTrackingCode).trim() : null,
+          }),
         },
         include: {
           items: true,

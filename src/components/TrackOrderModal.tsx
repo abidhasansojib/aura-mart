@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Search, PackageCheck, CheckCircle2, AlertCircle, ShoppingBag, Ban } from "lucide-react";
+import { X, Search, PackageCheck, CheckCircle2, AlertCircle, ShoppingBag, Ban, Truck } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 
 interface TrackOrderModalProps {
@@ -28,7 +28,25 @@ interface OrderData {
   paymentMethod: string;
   status: string;
   createdAt: string;
+  courierName?: string | null;
+  courierTrackingCode?: string | null;
   items: OrderItemData[];
+}
+
+function getCourierTrackingUrl(courier?: string | null, code?: string | null): string | null {
+  if (!code) return null;
+  const cleanCourier = (courier || "").toLowerCase().trim();
+  const cleanCode = encodeURIComponent(code.trim());
+  if (cleanCourier.includes("steadfast")) {
+    return `https://steadfast.com.bd/t/${cleanCode}`;
+  }
+  if (cleanCourier.includes("pathao")) {
+    return `https://merchant.pathao.com/tracking?consignment_id=${cleanCode}`;
+  }
+  if (cleanCourier.includes("redx")) {
+    return `https://redx.com.bd/track/${cleanCode}`;
+  }
+  return null;
 }
 
 const STATUS_STEPS = ["Pending", "Confirmed", "Shipped", "Delivered"];
@@ -274,6 +292,31 @@ export function TrackOrderModal({ isOpen, onClose, currencySymbol = "৳" }: Tra
                             );
                           })}
                         </div>
+                      </div>
+                    )}
+
+                    {/* Courier Tracking Dispatch Pill */}
+                    {order.courierTrackingCode && (
+                      <div className="flex items-center justify-between p-2.5 rounded-xl bg-blue-50/80 border border-blue-200 text-xs text-blue-900">
+                        <span className="flex items-center gap-1.5 font-medium">
+                          <Truck className="h-3.5 w-3.5 text-blue-600 shrink-0" />
+                          <span>
+                            {order.courierName || "Courier"}: <b>{order.courierTrackingCode}</b>
+                          </span>
+                        </span>
+                        {(() => {
+                          const trackUrl = getCourierTrackingUrl(order.courierName, order.courierTrackingCode);
+                          return trackUrl ? (
+                            <a
+                              href={trackUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="font-bold text-blue-700 hover:text-blue-900 underline text-[11px]"
+                            >
+                              Track Live Parcel ↗
+                            </a>
+                          ) : null;
+                        })()}
                       </div>
                     )}
 

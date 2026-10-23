@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import Image from "next/image";
 import {
   Search,
   Phone,
@@ -11,8 +12,14 @@ import {
   X,
   MapPin,
   Download,
+  Truck,
+  Calendar,
+  CheckSquare,
+  Square,
 } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
+
+export type DateFilterType = "all" | "today" | "yesterday" | "last7" | "thisMonth";
 
 interface OrderItem {
   id: string;
@@ -38,6 +45,8 @@ export interface AdminOrder {
   orderNote?: string | null;
   status: string;
   createdAt: string;
+  courierName?: string | null;
+  courierTrackingCode?: string | null;
   items: OrderItem[];
 }
 
@@ -59,9 +68,20 @@ export function AdminOrders({
   onOrderUpdated,
 }: AdminOrdersProps) {
   const [selectedStatus, setSelectedStatus] = useState("All");
+  const [selectedDateFilter, setSelectedDateFilter] = useState<"all" | "today" | "yesterday" | "last7" | "thisMonth">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [printableOrder, setPrintableOrder] = useState<AdminOrder | null>(null);
+
+  // Bulk Selection
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isBulkUpdating, setIsBulkUpdating] = useState(false);
+
+  // Courier Assignment Modal State
+  const [courierModalOrder, setCourierModalOrder] = useState<AdminOrder | null>(null);
+  const [courierNameInput, setCourierNameInput] = useState("Steadfast");
+  const [courierCodeInput, setCourierCodeInput] = useState("");
+  const [isSavingCourier, setIsSavingCourier] = useState(false);
 
   // Status Counts
   const statusCounts = useMemo(() => {
@@ -75,23 +95,110 @@ export function AdminOrders({
     return counts;
   }, [orders]);
 
-  // Filtered Orders
+  // Filtered Orders with Date Range Support
   const filteredOrders = useMemo(() => {
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const startOfYesterday = startOfToday - 86400000;
+    const startOf7Days = startOfToday - 6 * 86400000;
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+
     return orders.filter((o) => {
+      // 1. Status Filter
       if (selectedStatus !== "All" && o.status !== selectedStatus) {
         return false;
       }
+
+      // 2. Date Filter
+      const orderTime = new Date(o.createdAt).getTime();
+      if (selectedDateFilter === "today" && orderTime < startOfToday) return false;
+      if (selectedDateFilter === "yesterday" && (orderTime < startOfYesterday || orderTime >= startOfToday)) {
+        return false;
+      }
+      if (selectedDateFilter === "last7" && orderTime < startOf7Days) return false;
+      if (selectedDateFilter === "thisMonth" && orderTime < startOfMonth) return false;
+
+      // 3. Search Query
       if (searchQuery.trim() !== "") {
         const q = searchQuery.toLowerCase().trim();
         const matchesNumber = o.orderNumber.toLowerCase().includes(q);
         const matchesName = o.customerName.toLowerCase().includes(q);
         const matchesPhone = o.customerPhone.toLowerCase().includes(q);
         const matchesTrx = o.trxId ? o.trxId.toLowerCase().includes(q) : false;
-        return matchesNumber || matchesName || matchesPhone || matchesTrx;
+        const matchesCourier = o.courierTrackingCode
+          ? o.courierTrackingCode.toLowerCase().includes(q)
+          : false;
+        return matchesNumber || matchesName || matchesPhone || matchesTrx || matchesCourier;
       }
       return true;
     });
-  }, [orders, selectedStatus, searchQuery]);
+  }, [orders, selectedStatus, selectedDateFilter, searchQuery]);
+
+  const handleToggleSelectAll = () => {
+    if (selectedIds.length === filteredOrders.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredOrders.map((o) => o.id));
+    }
+  };
+
+  const handleToggleSelectOrder = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleBulkStatusChange = async (newStatus: string) => {
+    if (selectedIds.length === 0) return;
+    setIsBulkUpdating(true);
+    try {
+      await Promise.all(
+        selectedIds.map((id) =>
+          fetch(`/api/orders/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: newStatus }),
+          })
+        )
+      );
+      setSelectedIds([]);
+      onOrderUpdated();
+    } catch {
+      alert("Error updating some orders in bulk.");
+    } finally {
+      setIsBulkUpdating(false);
+    }
+  };
+
+  const openCourierModal = (order: AdminOrder) => {
+    setCourierModalOrder(order);
+    setCourierNameInput(order.courierName || "Steadfast");
+    setCourierCodeInput(order.courierTrackingCode || "");
+  };
+
+  const handleSaveCourier = async () => {
+    if (!courierModalOrder) return;
+    setIsSavingCourier(true);
+    try {
+      const res = await fetch(`/api/orders/${courierModalOrder.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          courierName: courierNameInput,
+          courierTrackingCode: courierCodeInput,
+        }),
+      });
+      if (!res.ok) {
+        throw new Error("Failed to assign courier details.");
+      }
+      setCourierModalOrder(null);
+      onOrderUpdated();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Error saving courier");
+    } finally {
+      setIsSavingCourier(false);
+    }
+  };
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     setUpdatingId(orderId);
@@ -144,66 +251,152 @@ export function AdminOrders({
   return (
     <div className="space-y-6">
       {/* 1. Header, Filters & Search */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
-        {/* Status Filter Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
-          {["All", ...STATUS_OPTIONS].map((status) => {
-            const isActive = selectedStatus === status;
-            const count = statusCounts[status] || 0;
-            return (
-              <button
-                key={status}
-                onClick={() => setSelectedStatus(status)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 min-h-[38px] ${
-                  isActive
-                    ? "bg-slate-900 text-white shadow-sm"
-                    : "bg-neutral-50 text-slate-600 hover:bg-slate-100 border border-gray-200"
-                }`}
-              >
-                <span>{status}</span>
-                <span
-                  className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                    isActive ? "bg-white/20 text-white" : "bg-gray-200 text-slate-600"
+      <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm space-y-3.5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          {/* Status Filter Pills */}
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
+            {["All", ...STATUS_OPTIONS].map((status) => {
+              const isActive = selectedStatus === status;
+              const count = statusCounts[status] || 0;
+              return (
+                <button
+                  key={status}
+                  onClick={() => setSelectedStatus(status)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 min-h-[38px] ${
+                    isActive
+                      ? "bg-slate-900 text-white shadow-sm"
+                      : "bg-neutral-50 text-slate-600 hover:bg-slate-100 border border-gray-200"
                   }`}
                 >
-                  {count}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Actions: Search Bar & Export CSV */}
-        <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full md:w-auto">
-          <div className="relative w-full sm:w-72">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search Order #, Name, Phone, TrxID..."
-              className="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-200 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 min-h-[40px]"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 hover:text-slate-600"
-              >
-                Clear
-              </button>
-            )}
+                  <span>{status}</span>
+                  <span
+                    className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                      isActive ? "bg-white/20 text-white" : "bg-gray-200 text-slate-600"
+                    }`}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
-          <a
-            href={`/api/admin/orders/export?status=${selectedStatus}`}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition-all shadow-sm shrink-0 min-h-[40px]"
-            title="Download CSV for Steadfast / Pathao courier bulk upload"
-          >
-            <Download className="h-3.5 w-3.5 text-emerald-400" />
-            <span>Export CSV</span>
-          </a>
+          {/* Actions: Search Bar & Export CSV */}
+          <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full md:w-auto">
+            <div className="relative w-full sm:w-72">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search Order #, Name, Phone, Courier..."
+                className="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-200 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 min-h-[40px]"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 hover:text-slate-600"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+
+            <a
+              href={`/api/admin/orders/export?status=${selectedStatus}`}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition-all shadow-sm shrink-0 min-h-[40px]"
+              title="Download CSV for Steadfast / Pathao courier bulk upload"
+            >
+              <Download className="h-3.5 w-3.5 text-emerald-400" />
+              <span>Export CSV</span>
+            </a>
+          </div>
+        </div>
+
+        {/* Date Filter Presets Row & Select All */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-gray-100 text-xs">
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1 mr-1">
+              <Calendar className="h-3.5 w-3.5 text-slate-400" /> Date:
+            </span>
+            {(
+              [
+                { id: "all", label: "All Time" },
+                { id: "today", label: "Today" },
+                { id: "yesterday", label: "Yesterday" },
+                { id: "last7", label: "Last 7 Days" },
+                { id: "thisMonth", label: "This Month" },
+              ] as const
+            ).map((d) => (
+              <button
+                key={d.id}
+                onClick={() => setSelectedDateFilter(d.id)}
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all ${
+                  selectedDateFilter === d.id
+                    ? "bg-emerald-600 text-white font-bold"
+                    : "bg-neutral-100 text-slate-600 hover:bg-neutral-200"
+                }`}
+              >
+                {d.label}
+              </button>
+            ))}
+          </div>
+
+          {filteredOrders.length > 0 && (
+            <button
+              onClick={handleToggleSelectAll}
+              className="text-[11px] font-bold text-slate-600 hover:text-slate-900 flex items-center gap-1.5 px-2.5 py-1 rounded-lg hover:bg-neutral-100 transition-colors"
+            >
+              {selectedIds.length === filteredOrders.length ? (
+                <>
+                  <CheckSquare className="h-3.5 w-3.5 text-emerald-600" />
+                  <span>Deselect All ({filteredOrders.length})</span>
+                </>
+              ) : (
+                <>
+                  <Square className="h-3.5 w-3.5 text-slate-400" />
+                  <span>Select All ({filteredOrders.length})</span>
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
+
+      {/* Floating Bulk Action Bar */}
+      {selectedIds.length > 0 && (
+        <div className="sticky top-20 z-20 bg-slate-900 text-white p-3.5 sm:p-4 rounded-2xl shadow-xl flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2">
+          <div className="flex items-center gap-2">
+            <span className="bg-emerald-500 text-slate-950 font-mono font-black text-xs px-2 py-0.5 rounded-full">
+              {selectedIds.length}
+            </span>
+            <span className="text-xs font-bold">Orders Selected</span>
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              disabled={isBulkUpdating}
+              onClick={() => handleBulkStatusChange("Confirmed")}
+              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all disabled:opacity-50"
+            >
+              Mark Confirmed
+            </button>
+            <button
+              disabled={isBulkUpdating}
+              onClick={() => handleBulkStatusChange("Shipped")}
+              className="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl transition-all disabled:opacity-50"
+            >
+              Mark Shipped
+            </button>
+            <button
+              onClick={() => setSelectedIds([])}
+              className="px-2.5 py-1.5 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold rounded-xl transition-all"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* 2. Orders List Cards */}
       {filteredOrders.length === 0 ? (
@@ -224,11 +417,23 @@ export function AdminOrders({
             return (
               <div
                 key={order.id}
-                className="bg-white rounded-3xl border border-gray-200 p-5 sm:p-6 shadow-sm space-y-4 hover:border-gray-300 transition-all"
+                className={`bg-white rounded-3xl border p-5 sm:p-6 shadow-sm space-y-4 transition-all ${
+                  selectedIds.includes(order.id)
+                    ? "border-emerald-500 bg-emerald-50/20 shadow-md ring-1 ring-emerald-500/20"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
               >
-                {/* Order Top Bar: Order ID, Date, Amount & Status Dropdown */}
+                {/* Order Top Bar: Checkbox, Order ID, Date, Status & Courier */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-gray-100 gap-3">
                   <div className="flex items-center gap-3 flex-wrap">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.includes(order.id)}
+                      onChange={() => handleToggleSelectOrder(order.id)}
+                      className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                      title="Select order for bulk update"
+                    />
+
                     <span className="text-sm font-black font-mono text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100">
                       {order.orderNumber}
                     </span>
@@ -248,6 +453,26 @@ export function AdminOrders({
                     >
                       {order.status}
                     </span>
+
+                    {/* Courier Assignment Badge */}
+                    {order.courierTrackingCode ? (
+                      <button
+                        onClick={() => openCourierModal(order)}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold text-blue-800 bg-blue-50 border border-blue-200 hover:bg-blue-100 transition-colors"
+                        title="Click to edit courier tracking"
+                      >
+                        <Truck className="h-3 w-3 text-blue-600" />
+                        <span>{order.courierName || "Courier"}: {order.courierTrackingCode}</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => openCourierModal(order)}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium text-slate-500 bg-neutral-100 hover:bg-neutral-200 border border-gray-200 transition-colors"
+                      >
+                        <Truck className="h-3 w-3 text-slate-400" />
+                        <span>+ Assign Courier</span>
+                      </button>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-3">
@@ -375,11 +600,13 @@ export function AdminOrders({
                         key={item.id}
                         className="flex items-center gap-2.5 p-2 rounded-xl bg-neutral-50 border border-gray-100"
                       >
-                        <div className="w-10 h-10 rounded-lg bg-white overflow-hidden shrink-0 border border-gray-200">
-                          <img
+                        <div className="relative w-10 h-10 rounded-lg bg-white overflow-hidden shrink-0 border border-gray-200">
+                          <Image
                             src={item.productImage || "/placeholder-product.png"}
                             alt={item.productName}
-                            className="w-full h-full object-cover"
+                            fill
+                            sizes="40px"
+                            className="object-cover"
                           />
                         </div>
                         <div className="flex-1 min-w-0 text-xs">
@@ -482,6 +709,89 @@ export function AdminOrders({
               >
                 <Printer className="h-4 w-4" />
                 <span>Print Packing Slip</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Courier Assignment Modal */}
+      {courierModalOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in">
+          <div className="relative w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border border-gray-100 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                  <Truck className="h-4 w-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">
+                    Assign Courier Tracking
+                  </h3>
+                  <p className="text-[11px] text-slate-500">
+                    Order #{courierModalOrder.orderNumber}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setCourierModalOrder(null)}
+                className="p-1 rounded-lg hover:bg-neutral-100 text-slate-400 hover:text-slate-700"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  Courier Partner
+                </label>
+                <select
+                  value={courierNameInput}
+                  onChange={(e) => setCourierNameInput(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                >
+                  <option value="Steadfast">Steadfast Courier</option>
+                  <option value="Pathao">Pathao Courier</option>
+                  <option value="RedX">RedX Logistics</option>
+                  <option value="Paperfly">Paperfly</option>
+                  <option value="eCourier">eCourier</option>
+                  <option value="Other">Other / Self-Delivery</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  Consignment ID / Tracking Number
+                </label>
+                <input
+                  type="text"
+                  value={courierCodeInput}
+                  onChange={(e) => setCourierCodeInput(e.target.value)}
+                  placeholder="e.g. 260324-00123"
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 font-mono"
+                />
+                <p className="text-[10px] text-slate-400 mt-1">
+                  Customers can view this code on the Track Order page and click directly to track their parcel.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100">
+              <button
+                type="button"
+                onClick={() => setCourierModalOrder(null)}
+                className="px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-neutral-100 rounded-xl"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isSavingCourier}
+                onClick={handleSaveCourier}
+                className="px-4 py-2 text-xs font-bold text-white bg-slate-900 hover:bg-black rounded-xl transition-all shadow-sm disabled:opacity-50"
+              >
+                {isSavingCourier ? "Saving..." : "Save Courier Info"}
               </button>
             </div>
           </div>

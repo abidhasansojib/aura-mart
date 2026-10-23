@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   ShoppingBag,
@@ -84,10 +85,12 @@ function ProductCard({
         onClick={() => onOpenModal(product)}
         className="relative aspect-square w-full bg-neutral-100 overflow-hidden cursor-pointer"
       >
-        <img
+        <Image
           src={product.imageUrl || "/placeholder-product.png"}
           alt={product.name}
-          className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
+          fill
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          className="object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
           loading="lazy"
         />
 
@@ -736,11 +739,13 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
                             onClick={() => setActiveModalProduct(p)}
                             className="bg-neutral-50 rounded-2xl p-2.5 cursor-pointer hover:bg-neutral-100 border border-black/5 transition-all text-center group"
                           >
-                            <div className="aspect-square w-full rounded-xl overflow-hidden bg-white mb-2 border border-black/5">
-                              <img
+                            <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-white mb-2 border border-black/5">
+                              <Image
                                 src={p.imageUrl || "/placeholder-product.png"}
                                 alt={p.name}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                fill
+                                sizes="(max-width: 640px) 50vw, 25vw"
+                                className="object-cover group-hover:scale-105 transition-transform"
                               />
                             </div>
                             <p className="text-xs font-bold text-slate-900 truncate">{p.name}</p>

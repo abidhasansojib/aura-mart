@@ -122,6 +122,8 @@ model Order {
   trxId           String?
   orderNote       String?
   status          String      @default("Pending")
+  courierName     String?
+  courierTrackingCode String?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
   items           OrderItem[]

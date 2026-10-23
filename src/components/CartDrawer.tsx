@@ -2,6 +2,7 @@
 
 import React, { useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { X, Trash2, Plus, Minus, ShoppingBag, ArrowRight, Sparkles } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/utils";
@@ -115,10 +116,12 @@ export function CartDrawer({ currencySymbol = "৳", freeShippingThreshold = 0 }
                 >
                   {/* Thumbnail */}
                   <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-white shrink-0 border border-gray-200">
-                    <img
+                    <Image
                       src={item.imageUrl || "/placeholder-product.png"}
                       alt={item.name}
-                      className="w-full h-full object-cover object-center"
+                      fill
+                      sizes="80px"
+                      className="object-cover object-center"
                     />
                   </div>
 
