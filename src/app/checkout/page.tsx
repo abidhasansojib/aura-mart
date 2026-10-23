@@ -1,0 +1,973 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import {
+  ShoppingBag,
+  Truck,
+  ShieldCheck,
+  CheckCircle2,
+  Copy,
+  Check,
+  Printer,
+  ArrowLeft,
+  AlertCircle,
+  Phone,
+  MapPin,
+  CreditCard,
+  Banknote,
+} from "lucide-react";
+import { useCart } from "@/context/CartContext";
+import { formatPrice } from "@/lib/utils";
+
+interface StoreSettings {
+  storeName: string;
+  tagline: string;
+  announcementText: string;
+  supportPhone: string;
+  bkashNumber: string;
+  nagadNumber: string;
+  insideCityDelivery: number;
+  outsideCityDelivery: number;
+  currencySymbol: string;
+}
+
+interface OrderItemData {
+  id: string;
+  productName: string;
+  productImage: string;
+  quantity: number;
+  priceAtPurchase: number;
+}
+
+interface CompletedOrder {
+  id: string;
+  orderNumber: string;
+  customerName: string;
+  customerPhone: string;
+  shippingAddress: string;
+  deliveryZone: string;
+  deliveryCharge: number;
+  subtotal: number;
+  totalAmount: number;
+  paymentMethod: string;
+  paymentSenderNo?: string | null;
+  trxId?: string | null;
+  orderNote?: string | null;
+  createdAt: string;
+  items: OrderItemData[];
+}
+
+export default function CheckoutPage() {
+  const { cart, subtotal, totalItems, clearCart } = useCart();
+
+  // Settings
+  const [settings, setSettings] = useState<StoreSettings>({
+    storeName: "Aura Mart",
+    tagline: "Quality Products Delivered to Your Doorstep",
+    announcementText: "🚚 Cash on Delivery Available Nationwide! Fast Express Shipping.",
+    supportPhone: "01700000000",
+    bkashNumber: "01700000000 (Personal/Send Money)",
+    nagadNumber: "01700000000 (Personal/Send Money)",
+    insideCityDelivery: 60,
+    outsideCityDelivery: 120,
+    currencySymbol: "৳",
+  });
+
+  // Form State
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [deliveryZone, setDeliveryZone] = useState<"Inside City" | "Outside City">("Inside City");
+  const [orderNote, setOrderNote] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<"COD" | "bKash" | "Nagad">("COD");
+  const [paymentSenderNo, setPaymentSenderNo] = useState("");
+  const [trxId, setTrxId] = useState("");
+
+  // UI state
+  const [copiedNumber, setCopiedNumber] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [completedOrder, setCompletedOrder] = useState<CompletedOrder | null>(null);
+
+  // Fetch latest settings on mount
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data) {
+          setSettings((prev) => ({ ...prev, ...data }));
+        }
+      })
+      .catch((err) => console.warn("Could not load dynamic store settings:", err));
+  }, []);
+
+  const deliveryCharge =
+    deliveryZone === "Inside City" ? settings.insideCityDelivery : settings.outsideCityDelivery;
+  const grandTotal = subtotal + deliveryCharge;
+  const currencySymbol = settings.currencySymbol || "৳";
+
+  const handleCopyPaymentNumber = (text: string) => {
+    const rawNumber = text.split(" ")[0].replace(/[^0-9+]/g, "");
+    navigator.clipboard.writeText(rawNumber);
+    setCopiedNumber(true);
+    setTimeout(() => setCopiedNumber(false), 2500);
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage(null);
+
+    // Validation
+    if (!name.trim()) {
+      setErrorMessage("Please enter your full name.");
+      return;
+    }
+    if (!phone.trim() || phone.trim().length < 10) {
+      setErrorMessage("Please enter a valid 11-digit mobile number.");
+      return;
+    }
+    if (!address.trim() || address.trim().length < 5) {
+      setErrorMessage("Please provide your full delivery address (Road/Street, Area, City).");
+      return;
+    }
+    if (cart.length === 0) {
+      setErrorMessage("Your cart is empty. Please add items before checking out.");
+      return;
+    }
+
+    if (paymentMethod !== "COD") {
+      if (!paymentSenderNo.trim()) {
+        setErrorMessage(`Please enter your ${paymentMethod} sender number.`);
+        return;
+      }
+      if (!trxId.trim()) {
+        setErrorMessage(`Please enter the ${paymentMethod} Transaction ID (TrxID).`);
+        return;
+      }
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const payload = {
+        customerName: name.trim(),
+        customerPhone: phone.trim(),
+        shippingAddress: address.trim(),
+        deliveryZone,
+        paymentMethod,
+        paymentSenderNo: paymentMethod !== "COD" ? paymentSenderNo.trim() : null,
+        trxId: paymentMethod !== "COD" ? trxId.trim() : null,
+        orderNote: orderNote.trim() || null,
+        items: cart.map((item) => ({
+          productId: item.productId,
+          quantity: item.quantity,
+        })),
+      };
+
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to place order.");
+      }
+
+      // Success
+      clearCart();
+      setCompletedOrder(data);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (err) {
+      console.error("Order checkout error:", err);
+      const msg = err instanceof Error ? err.message : "Something went wrong while placing your order.";
+      setErrorMessage(msg);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // ---------------------------------------------------------------------------
+  // 1. ORDER CONFIRMATION / PRINTABLE RECEIPT VIEW
+  // ---------------------------------------------------------------------------
+  if (completedOrder) {
+    return (
+      <div className="min-h-screen bg-[#FAFAFA] py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-2xl mx-auto space-y-6">
+          {/* Action Bar (hidden when printing) */}
+          <div className="print:hidden flex items-center justify-between">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>Back to Store</span>
+            </Link>
+
+            <button
+              onClick={() => window.print()}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-xs font-semibold rounded-xl hover:bg-slate-800 transition-colors shadow-sm min-h-[44px]"
+            >
+              <Printer className="h-4 w-4" />
+              <span>Print / Save Receipt (PDF)</span>
+            </button>
+          </div>
+
+          {/* Celebratory Banner (hidden when printing) */}
+          <div className="print:hidden text-center space-y-2 py-4">
+            <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-md">
+              <CheckCircle2 className="h-10 w-10 text-emerald-600" />
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+              Order Confirmed!
+            </h1>
+            <p className="text-sm text-slate-600 max-w-md mx-auto">
+              Thank you, <span className="font-semibold text-slate-900">{completedOrder.customerName}</span>! Your order has been placed successfully and will be dispatched shortly.
+            </p>
+          </div>
+
+          {/* Printable Thermal / A4 Packing Slip Card */}
+          <div className="bg-white rounded-3xl border border-gray-200 shadow-xl overflow-hidden print:shadow-none print:border print:rounded-none p-6 sm:p-8 space-y-6">
+            {/* Invoice Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-gray-200 gap-4">
+              <div>
+                <h2 className="text-xl font-black text-slate-900 tracking-tight">
+                  {settings.storeName}
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">{settings.tagline}</p>
+                {settings.supportPhone && (
+                  <p className="text-xs text-slate-600 font-medium mt-1">
+                    Hotline: {settings.supportPhone}
+                  </p>
+                )}
+              </div>
+
+              <div className="sm:text-right">
+                <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
+                  Order Number
+                </span>
+                <span className="text-lg font-black text-emerald-700 font-mono">
+                  {completedOrder.orderNumber}
+                </span>
+                <span className="text-xs text-slate-500 block mt-0.5">
+                  {new Date(completedOrder.createdAt).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
+              </div>
+            </div>
+
+            {/* Customer & Delivery Snapshot */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-slate-600 bg-neutral-50 p-4 rounded-2xl border border-gray-100">
+              <div className="space-y-1">
+                <span className="font-bold text-slate-900 block text-xs">Customer Details:</span>
+                <p className="text-slate-800 font-medium">{completedOrder.customerName}</p>
+                <p className="text-slate-700 flex items-center gap-1">
+                  <Phone className="h-3 w-3 text-slate-400" />
+                  {completedOrder.customerPhone}
+                </p>
+              </div>
+
+              <div className="space-y-1">
+                <span className="font-bold text-slate-900 block text-xs">Delivery Address:</span>
+                <p className="text-slate-800 flex items-start gap-1">
+                  <MapPin className="h-3 w-3 text-slate-400 shrink-0 mt-0.5" />
+                  <span>
+                    {completedOrder.shippingAddress} ({completedOrder.deliveryZone})
+                  </span>
+                </p>
+                {completedOrder.orderNote && (
+                  <p className="text-slate-500 italic mt-1">
+                    Note: &quot;{completedOrder.orderNote}&quot;
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Payment Badge info */}
+            <div className="flex items-center justify-between p-3.5 bg-emerald-50/60 rounded-xl border border-emerald-100 text-xs">
+              <div className="flex items-center gap-2">
+                <Banknote className="h-4 w-4 text-emerald-600" />
+                <span className="font-semibold text-emerald-950">
+                  Payment Method: {completedOrder.paymentMethod}
+                </span>
+              </div>
+              {completedOrder.paymentMethod !== "COD" && (
+                <div className="text-right">
+                  <span className="text-slate-500 block text-[11px]">
+                    Sender: {completedOrder.paymentSenderNo}
+                  </span>
+                  <span className="font-mono font-bold text-emerald-800 text-xs">
+                    TrxID: {completedOrder.trxId}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Ordered Items Table */}
+            <div className="space-y-3">
+              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                Order Summary ({completedOrder.items.length} items)
+              </h3>
+              <div className="divide-y divide-gray-100 border-y border-gray-100">
+                {completedOrder.items.map((item) => (
+                  <div key={item.id} className="py-3 flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-lg bg-neutral-100 overflow-hidden shrink-0 border border-gray-200">
+                        <img
+                          src={item.productImage || "/placeholder-product.png"}
+                          alt={item.productName}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-slate-900 line-clamp-1">
+                          {item.productName}
+                        </p>
+                        <p className="text-slate-500 text-[11px]">
+                          {formatPrice(item.priceAtPurchase, currencySymbol)} × {item.quantity}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="font-bold text-slate-900 font-mono">
+                      {formatPrice(item.priceAtPurchase * item.quantity, currencySymbol)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Grand Total Calculation */}
+            <div className="space-y-2 pt-2 border-t border-gray-100 text-xs">
+              <div className="flex justify-between text-slate-500">
+                <span>Subtotal</span>
+                <span className="font-mono font-semibold text-slate-800">
+                  {formatPrice(completedOrder.subtotal, currencySymbol)}
+                </span>
+              </div>
+              <div className="flex justify-between text-slate-500">
+                <span>Delivery Charge ({completedOrder.deliveryZone})</span>
+                <span className="font-mono font-semibold text-slate-800">
+                  {formatPrice(completedOrder.deliveryCharge, currencySymbol)}
+                </span>
+              </div>
+              <div className="flex justify-between text-base font-black text-slate-900 pt-3 border-t border-gray-200">
+                <span>Total Payable</span>
+                <span className="text-emerald-700 font-mono text-lg">
+                  {formatPrice(completedOrder.totalAmount, currencySymbol)}
+                </span>
+              </div>
+            </div>
+
+            {/* Footer Trust Note on Slip */}
+            <div className="text-center pt-4 border-t border-dashed border-gray-200 text-[11px] text-slate-400">
+              <p>For questions regarding your delivery, contact our customer hotline at {settings.supportPhone}.</p>
+              <p className="mt-1">Please inspect parcel upon delivery. Thank you for shopping with {settings.storeName}!</p>
+            </div>
+          </div>
+
+          {/* Navigation link back */}
+          <div className="print:hidden text-center pt-4">
+            <Link
+              href="/"
+              className="inline-flex items-center justify-center gap-2 bg-[#FF6448] hover:bg-[#e8553b] text-white font-black py-3.5 px-8 rounded-2xl shadow-lg shadow-[#FF6448]/25 transition-all min-h-[44px]"
+            >
+              <span>Continue Shopping</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // 2. EMPTY CART VIEW
+  // ---------------------------------------------------------------------------
+  if (cart.length === 0) {
+    return (
+      <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-3xl border border-gray-200 p-8 sm:p-10 text-center space-y-4 shadow-xl">
+          <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
+            <ShoppingBag className="h-8 w-8" />
+          </div>
+          <h2 className="text-xl font-bold text-slate-900">Your Cart is Empty</h2>
+          <p className="text-xs text-slate-500 leading-relaxed">
+            You don&apos;t have any products in your cart yet. Browse our store catalog to select your favorite items!
+          </p>
+          <div className="pt-2">
+            <Link
+              href="/"
+              className="inline-flex items-center justify-center gap-2 w-full py-3 px-4 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-xl transition-colors min-h-[44px]"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>Explore Products</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // 3. 1-PAGE FRICTIONLESS CHECKOUT FORM
+  // ---------------------------------------------------------------------------
+  return (
+    <div className="min-h-screen bg-[#FAFAFA] text-slate-900">
+      {/* Top Simple Header */}
+      <header className="bg-white border-b border-gray-200 py-4 px-4 sm:px-6 sticky top-0 z-20 backdrop-blur-md bg-white/95">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <Link href="/" className="inline-flex items-center gap-2 group">
+            <ArrowLeft className="h-4 w-4 text-slate-500 group-hover:-translate-x-1 transition-transform" />
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
+              Return to Catalog
+            </span>
+          </Link>
+
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-sm">
+              {settings.storeName.charAt(0)}
+            </div>
+            <span className="text-sm font-black text-slate-900">{settings.storeName}</span>
+          </div>
+
+          <div className="flex items-center gap-1.5 text-xs text-emerald-700 font-semibold">
+            <ShieldCheck className="h-4 w-4" />
+            <span className="hidden sm:inline">Secure 256-bit Checkout</span>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content Form */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+        <form onSubmit={handleFormSubmit}>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {/* Left Column: Customer Details, Delivery Zone & Payment Method */}
+            <div className="lg:col-span-7 space-y-6">
+              {/* Error Alert Box */}
+              {errorMessage && (
+                <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-start gap-2.5 shadow-sm animate-in fade-in">
+                  <AlertCircle className="h-4 w-4 shrink-0 text-rose-600 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="font-bold">Please check the following error:</p>
+                    <p className="mt-0.5">{errorMessage}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* 1. Customer Information Card */}
+              <div className="bg-white rounded-3xl border border-gray-200 p-6 sm:p-7 shadow-sm space-y-5">
+                <div className="flex items-center gap-2.5 pb-3 border-b border-gray-100">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                    <MapPin className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <h2 className="text-base font-bold text-slate-900">1. Delivery Address</h2>
+                    <p className="text-xs text-slate-500">
+                      Where should our courier deliver your package?
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {/* Full Name */}
+                  <div>
+                    <label
+                      htmlFor="customerName"
+                      className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5"
+                    >
+                      Full Name <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      id="customerName"
+                      type="text"
+                      required
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="e.g. Tanvir Rahman"
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 min-h-[44px]"
+                    />
+                  </div>
+
+                  {/* Phone Number */}
+                  <div>
+                    <label
+                      htmlFor="customerPhone"
+                      className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5"
+                    >
+                      Phone Number <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      id="customerPhone"
+                      type="tel"
+                      required
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="e.g. 01712345678"
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 min-h-[44px]"
+                    />
+                    <p className="text-[11px] text-slate-400 mt-1">
+                      Our delivery courier will call this number before arrival.
+                    </p>
+                  </div>
+
+                  {/* Delivery Area Selection (Radio Cards) */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                      Select Delivery Area <span className="text-rose-500">*</span>
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {/* Inside City Card */}
+                      <label
+                        className={`flex items-center justify-between p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                          deliveryZone === "Inside City"
+                            ? "border-emerald-600 bg-emerald-50/40 text-emerald-950"
+                            : "border-gray-200 hover:border-gray-300 bg-white"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="radio"
+                            name="deliveryZone"
+                            value="Inside City"
+                            checked={deliveryZone === "Inside City"}
+                            onChange={() => setDeliveryZone("Inside City")}
+                            className="w-4 h-4 text-emerald-600 focus:ring-emerald-500"
+                          />
+                          <div>
+                            <span className="text-xs font-bold block">Inside City</span>
+                            <span className="text-[11px] text-slate-500 block">
+                              Fast Express Delivery
+                            </span>
+                          </div>
+                        </div>
+                        <span className="text-xs font-black font-mono text-emerald-700">
+                          {formatPrice(settings.insideCityDelivery, currencySymbol)}
+                        </span>
+                      </label>
+
+                      {/* Outside City Card */}
+                      <label
+                        className={`flex items-center justify-between p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                          deliveryZone === "Outside City"
+                            ? "border-emerald-600 bg-emerald-50/40 text-emerald-950"
+                            : "border-gray-200 hover:border-gray-300 bg-white"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="radio"
+                            name="deliveryZone"
+                            value="Outside City"
+                            checked={deliveryZone === "Outside City"}
+                            onChange={() => setDeliveryZone("Outside City")}
+                            className="w-4 h-4 text-emerald-600 focus:ring-emerald-500"
+                          />
+                          <div>
+                            <span className="text-xs font-bold block">Outside City / Nationwide</span>
+                            <span className="text-[11px] text-slate-500 block">
+                              Courier to any district
+                            </span>
+                          </div>
+                        </div>
+                        <span className="text-xs font-black font-mono text-emerald-700">
+                          {formatPrice(settings.outsideCityDelivery, currencySymbol)}
+                        </span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Street Address */}
+                  <div>
+                    <label
+                      htmlFor="shippingAddress"
+                      className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5"
+                    >
+                      Full Street Address <span className="text-rose-500">*</span>
+                    </label>
+                    <textarea
+                      id="shippingAddress"
+                      required
+                      rows={3}
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      placeholder="House / Flat No., Road, Sector / Area, Thana & District"
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600"
+                    />
+                  </div>
+
+                  {/* Optional Note */}
+                  <div>
+                    <label
+                      htmlFor="orderNote"
+                      className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5"
+                    >
+                      Order Note (Optional)
+                    </label>
+                    <input
+                      id="orderNote"
+                      type="text"
+                      value={orderNote}
+                      onChange={(e) => setOrderNote(e.target.value)}
+                      placeholder="e.g. Call before delivery or deliver after 5 PM"
+                      className="w-full px-4 py-2 rounded-xl border border-gray-200 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 min-h-[40px]"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. Payment Method Selector Card */}
+              <div className="bg-white rounded-3xl border border-gray-200 p-6 sm:p-7 shadow-sm space-y-5">
+                <div className="flex items-center gap-2.5 pb-3 border-b border-gray-100">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                    <CreditCard className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <h2 className="text-base font-bold text-slate-900">2. Payment Method</h2>
+                    <p className="text-xs text-slate-500">
+                      Choose how you would like to pay for your order.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  {/* Option 1: Cash on Delivery */}
+                  <label
+                    className={`flex items-start gap-3.5 p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                      paymentMethod === "COD"
+                        ? "border-emerald-600 bg-emerald-50/30"
+                        : "border-gray-200 hover:border-gray-300 bg-white"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="COD"
+                      checked={paymentMethod === "COD"}
+                      onChange={() => setPaymentMethod("COD")}
+                      className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 mt-1"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                          <Banknote className="h-4 w-4 text-emerald-600" />
+                          Cash on Delivery (COD)
+                        </span>
+                        <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">
+                          Default & Most Popular
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                        Pay in cash directly to the courier when you receive your parcel at your doorstep.
+                      </p>
+                    </div>
+                  </label>
+
+                  {/* Option 2: bKash */}
+                  <label
+                    className={`flex items-start gap-3.5 p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                      paymentMethod === "bKash"
+                        ? "border-[#E2136E] bg-[#E2136E]/5"
+                        : "border-gray-200 hover:border-gray-300 bg-white"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="bKash"
+                      checked={paymentMethod === "bKash"}
+                      onChange={() => setPaymentMethod("bKash")}
+                      className="w-4 h-4 text-[#E2136E] focus:ring-[#E2136E] mt-1"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#E2136E]" />
+                          bKash (Send Money)
+                        </span>
+                        <span className="text-[11px] font-bold text-[#E2136E] bg-[#E2136E]/10 px-2 py-0.5 rounded-full">
+                          bKash
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Send payment directly from your bKash app and enter TrxID.
+                      </p>
+                    </div>
+                  </label>
+
+                  {/* bKash Instructions Box (revealed when selected) */}
+                  {paymentMethod === "bKash" && (
+                    <div className="p-4 rounded-2xl bg-white border border-[#E2136E]/30 shadow-inner space-y-3 animate-in fade-in">
+                      <div className="flex items-center justify-between bg-[#E2136E]/10 p-3 rounded-xl border border-[#E2136E]/20">
+                        <div>
+                          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">
+                            bKash Number:
+                          </span>
+                          <span className="text-sm font-black font-mono text-[#E2136E]">
+                            {settings.bkashNumber}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleCopyPaymentNumber(settings.bkashNumber)}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-white text-slate-800 text-xs font-semibold rounded-lg shadow-sm border border-gray-200 hover:bg-slate-50 transition-colors"
+                        >
+                          {copiedNumber ? (
+                            <>
+                              <Check className="h-3.5 w-3.5 text-emerald-600" />
+                              <span className="text-emerald-700">Copied!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="h-3.5 w-3.5 text-slate-500" />
+                              <span>Copy</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+
+                      <div className="text-[11px] text-slate-600 space-y-1 bg-neutral-50 p-3 rounded-xl">
+                        <p className="font-bold text-slate-800">Payment Steps:</p>
+                        <p>1. Open your bKash App and select <b>Send Money</b>.</p>
+                        <p>2. Enter the bKash Number above and the Exact Total Amount: <b>{formatPrice(grandTotal, currencySymbol)}</b>.</p>
+                        <p>3. Copy your <b>Transaction ID (TrxID)</b> and enter it below.</p>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                            bKash Sender Number <span className="text-rose-500">*</span>
+                          </label>
+                          <input
+                            type="tel"
+                            required
+                            value={paymentSenderNo}
+                            onChange={(e) => setPaymentSenderNo(e.target.value)}
+                            placeholder="01XXXXXXXXX"
+                            className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#E2136E]/20 focus:border-[#E2136E]"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                            Transaction ID (TrxID) <span className="text-rose-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={trxId}
+                            onChange={(e) => setTrxId(e.target.value)}
+                            placeholder="e.g. BL92A8ZK1"
+                            className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs text-slate-900 uppercase font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#E2136E]/20 focus:border-[#E2136E]"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Option 3: Nagad */}
+                  <label
+                    className={`flex items-start gap-3.5 p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                      paymentMethod === "Nagad"
+                        ? "border-[#F7941D] bg-[#F7941D]/5"
+                        : "border-gray-200 hover:border-gray-300 bg-white"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="Nagad"
+                      checked={paymentMethod === "Nagad"}
+                      onChange={() => setPaymentMethod("Nagad")}
+                      className="w-4 h-4 text-[#F7941D] focus:ring-[#F7941D] mt-1"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#F7941D]" />
+                          Nagad (Send Money)
+                        </span>
+                        <span className="text-[11px] font-bold text-[#F7941D] bg-[#F7941D]/10 px-2 py-0.5 rounded-full">
+                          Nagad
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Send payment directly from your Nagad app and enter TrxID.
+                      </p>
+                    </div>
+                  </label>
+
+                  {/* Nagad Instructions Box (revealed when selected) */}
+                  {paymentMethod === "Nagad" && (
+                    <div className="p-4 rounded-2xl bg-white border border-[#F7941D]/30 shadow-inner space-y-3 animate-in fade-in">
+                      <div className="flex items-center justify-between bg-[#F7941D]/10 p-3 rounded-xl border border-[#F7941D]/20">
+                        <div>
+                          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">
+                            Nagad Number:
+                          </span>
+                          <span className="text-sm font-black font-mono text-[#F7941D]">
+                            {settings.nagadNumber}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleCopyPaymentNumber(settings.nagadNumber)}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-white text-slate-800 text-xs font-semibold rounded-lg shadow-sm border border-gray-200 hover:bg-slate-50 transition-colors"
+                        >
+                          {copiedNumber ? (
+                            <>
+                              <Check className="h-3.5 w-3.5 text-emerald-600" />
+                              <span className="text-emerald-700">Copied!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="h-3.5 w-3.5 text-slate-500" />
+                              <span>Copy</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+
+                      <div className="text-[11px] text-slate-600 space-y-1 bg-neutral-50 p-3 rounded-xl">
+                        <p className="font-bold text-slate-800">Payment Steps:</p>
+                        <p>1. Open your Nagad App and select <b>Send Money</b>.</p>
+                        <p>2. Enter the Nagad Number above and the Exact Total Amount: <b>{formatPrice(grandTotal, currencySymbol)}</b>.</p>
+                        <p>3. Copy your <b>Transaction ID (TrxID)</b> and enter it below.</p>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                            Nagad Sender Number <span className="text-rose-500">*</span>
+                          </label>
+                          <input
+                            type="tel"
+                            required
+                            value={paymentSenderNo}
+                            onChange={(e) => setPaymentSenderNo(e.target.value)}
+                            placeholder="01XXXXXXXXX"
+                            className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#F7941D]/20 focus:border-[#F7941D]"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                            Transaction ID (TrxID) <span className="text-rose-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={trxId}
+                            onChange={(e) => setTrxId(e.target.value)}
+                            placeholder="e.g. 7GA619B0"
+                            className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs text-slate-900 uppercase font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#F7941D]/20 focus:border-[#F7941D]"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Sticky Live Order Summary */}
+            <div className="lg:col-span-5 sticky top-24 space-y-6">
+              <div className="bg-white rounded-3xl border border-gray-200 p-6 sm:p-7 shadow-lg space-y-5">
+                <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+                  <h3 className="text-base font-bold text-slate-900">Order Summary</h3>
+                  <span className="text-xs font-semibold text-slate-500">
+                    {totalItems} {totalItems === 1 ? "Item" : "Items"}
+                  </span>
+                </div>
+
+                {/* Cart Items List */}
+                <div className="max-h-72 overflow-y-auto space-y-3 pr-1 divide-y divide-gray-100">
+                  {cart.map((item) => (
+                    <div key={item.productId} className="pt-3 first:pt-0 flex items-center gap-3">
+                      <div className="w-14 h-14 rounded-xl bg-neutral-100 overflow-hidden shrink-0 border border-gray-200">
+                        <img
+                          src={item.imageUrl || "/placeholder-product.png"}
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold text-slate-900 truncate">
+                          {item.name}
+                        </p>
+                        <p className="text-[11px] text-slate-500 mt-0.5">
+                          {formatPrice(item.price, currencySymbol)} × {item.quantity}
+                        </p>
+                      </div>
+                      <span className="text-xs font-bold font-mono text-slate-900 shrink-0">
+                        {formatPrice(item.price * item.quantity, currencySymbol)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Subtotal & Delivery Calculation */}
+                <div className="space-y-2 pt-4 border-t border-gray-100 text-xs">
+                  <div className="flex justify-between text-slate-600">
+                    <span>Subtotal</span>
+                    <span className="font-semibold font-mono text-slate-900">
+                      {formatPrice(subtotal, currencySymbol)}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between text-slate-600">
+                    <span>Delivery Charge ({deliveryZone})</span>
+                    <span className="font-semibold font-mono text-slate-900">
+                      {formatPrice(deliveryCharge, currencySymbol)}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between text-base font-black text-slate-900 pt-3 border-t border-gray-200">
+                    <span>Total Amount</span>
+                    <span className="text-emerald-700 font-mono text-xl">
+                      {formatPrice(grandTotal, currencySymbol)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Submit Action Button */}
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full flex items-center justify-center gap-2 bg-[#FF6448] hover:bg-[#e8553b] disabled:bg-[#FF6448]/50 text-white font-black py-4 px-6 rounded-2xl shadow-xl shadow-[#FF6448]/25 transition-all text-sm min-h-[48px]"
+                >
+                  {isSubmitting ? (
+                    <div className="flex items-center gap-2">
+                      <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Confirming Order...</span>
+                    </div>
+                  ) : (
+                    <span>Confirm Order — {formatPrice(grandTotal, currencySymbol)}</span>
+                  )}
+                </button>
+
+                {/* Trust Badges under CTA */}
+                <div className="pt-2 border-t border-gray-100 flex items-center justify-around text-[11px] text-slate-400">
+                  <span className="flex items-center gap-1">
+                    <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                    Verified Store
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Truck className="h-3.5 w-3.5 text-emerald-600" />
+                    Nationwide Delivery
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </main>
+    </div>
+  );
+}
