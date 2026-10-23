@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { X, Plus, Minus, ShoppingBag, Zap, CheckCircle2, AlertTriangle, ShieldCheck } from "lucide-react";
+import { X, Plus, Minus, ShoppingBag, Zap, CheckCircle2, ShieldCheck, Truck, Star } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/utils";
 
@@ -60,16 +60,16 @@ export function ProductDetailModal({
     <div className="fixed inset-0 z-50 overflow-y-auto">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
 
       <div className="flex min-h-full items-center justify-center p-4 sm:p-6">
-        <div className="relative w-full max-w-3xl rounded-3xl bg-white shadow-2xl overflow-hidden border border-gray-100 transition-all animate-in zoom-in-95">
+        <div className="relative w-full max-w-3xl rounded-[32px] bg-white shadow-2xl overflow-hidden border border-black/5 transition-all animate-in zoom-in-95 bento-card">
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/80 backdrop-blur-md text-slate-500 hover:text-slate-900 shadow-sm border border-gray-100 transition-colors"
+            className="absolute top-4 right-4 z-10 p-2.5 rounded-full bg-white/80 backdrop-blur-md text-slate-700 hover:text-black shadow-md border border-black/5 transition-colors"
             aria-label="Close modal"
           >
             <X className="h-5 w-5" />
@@ -77,14 +77,14 @@ export function ProductDetailModal({
 
           <div className="grid grid-cols-1 md:grid-cols-2">
             {/* Image Section */}
-            <div className="relative bg-neutral-100 aspect-square md:aspect-auto h-72 md:h-full flex items-center justify-center p-4">
+            <div className="relative bg-neutral-100 aspect-square md:aspect-auto h-72 md:h-full flex items-center justify-center p-6 overflow-hidden">
               <img
                 src={product.imageUrl || "/placeholder-product.png"}
                 alt={product.name}
-                className="max-h-full max-w-full object-contain rounded-2xl"
+                className="max-h-full max-w-full object-cover rounded-2xl shadow-sm"
               />
               {discountPercent && (
-                <div className="absolute top-4 left-4 bg-rose-600 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-md">
+                <div className="absolute top-4 left-4 bg-[#FF6448] text-white text-xs font-black px-3 py-1 rounded-full shadow-md">
                   {discountPercent}% OFF
                 </div>
               )}
@@ -92,78 +92,88 @@ export function ProductDetailModal({
 
             {/* Content Section */}
             <div className="p-6 sm:p-8 flex flex-col justify-between space-y-6">
-              <div className="space-y-3">
+              <div className="space-y-3.5">
                 {/* Category & Stock Tag */}
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 font-mono uppercase tracking-wider">
                     {product.category}
                   </span>
 
+                  <span className="flex items-center gap-1 text-xs font-bold text-amber-500 bg-amber-50 px-2.5 py-0.5 rounded-full">
+                    <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                    <span>4.9 (Verified)</span>
+                  </span>
+
                   {isOutOfStock ? (
-                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-gray-100 text-slate-500 border border-gray-200">
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700">
                       Out of Stock
                     </span>
                   ) : isLowStock ? (
-                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1">
-                      <AlertTriangle className="h-3 w-3" />
-                      Only {product.stock} left in stock!
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#F5B738]/20 text-amber-800">
+                      Only {product.stock} units left!
                     </span>
                   ) : (
-                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 flex items-center gap-1">
                       <CheckCircle2 className="h-3 w-3" />
-                      In Stock
+                      <span>In Stock</span>
                     </span>
                   )}
                 </div>
 
                 {/* Title */}
-                <h2 className="text-xl sm:text-2xl font-bold text-slate-900 leading-snug">
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-snug">
                   {product.name}
                 </h2>
 
-                {/* Pricing */}
+                {/* Price Display */}
                 <div className="flex items-baseline gap-3 pt-1">
                   <span className="text-2xl sm:text-3xl font-black text-slate-900 font-mono">
                     {formatPrice(product.price, currencySymbol)}
                   </span>
                   {product.compareAtPrice && product.compareAtPrice > product.price && (
-                    <span className="text-base text-slate-400 line-through font-mono">
+                    <span className="text-sm text-slate-400 line-through font-mono">
                       {formatPrice(product.compareAtPrice, currencySymbol)}
                     </span>
                   )}
                 </div>
 
                 {/* Description */}
-                <div className="pt-2">
-                  <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-line">
-                    {product.description || "Premium quality product guaranteed."}
-                  </p>
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
+                  {product.description}
+                </p>
+
+                {/* Value Propositions */}
+                <div className="pt-2 grid grid-cols-2 gap-2 text-[11px] text-slate-600 font-medium">
+                  <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-50">
+                    <Truck className="h-3.5 w-3.5 text-[#5256FF]" />
+                    <span>24-48h Delivery</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-50">
+                    <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                    <span>Cash on Delivery</span>
+                  </div>
                 </div>
               </div>
 
-              {/* Action Controls */}
+              {/* Actions Section */}
               <div className="space-y-4 pt-4 border-t border-gray-100">
                 {!isOutOfStock && (
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                      Quantity:
-                    </span>
-                    <div className="flex items-center border border-gray-200 rounded-xl bg-neutral-50 p-1">
+                    <span className="text-xs font-bold text-slate-700">Quantity:</span>
+                    <div className="flex items-center border border-gray-200 rounded-2xl bg-slate-50 p-1">
                       <button
                         onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                        disabled={quantity <= 1}
-                        className="p-1.5 text-slate-600 hover:text-slate-900 disabled:opacity-30"
+                        className="p-1.5 text-slate-600 hover:text-black transition-colors rounded-xl hover:bg-white"
                         aria-label="Decrease quantity"
                       >
                         <Minus className="h-4 w-4" />
                       </button>
-                      <span className="px-4 text-sm font-bold text-slate-900 min-w-[32px] text-center">
+                      <span className="w-10 text-center font-bold text-sm text-slate-900 font-mono">
                         {quantity}
                       </span>
                       <button
                         onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
-                        disabled={quantity >= product.stock}
-                        className="p-1.5 text-slate-600 hover:text-slate-900 disabled:opacity-30"
+                        className="p-1.5 text-slate-600 hover:text-black transition-colors rounded-xl hover:bg-white"
                         aria-label="Increase quantity"
                       >
                         <Plus className="h-4 w-4" />
@@ -172,31 +182,33 @@ export function ProductDetailModal({
                   </div>
                 )}
 
-                {/* Buttons */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {/* Primary & Secondary Action Buttons */}
+                {isOutOfStock ? (
                   <button
-                    onClick={handleAddToCart}
-                    disabled={isOutOfStock}
-                    className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 border-slate-900 text-slate-900 font-semibold hover:bg-slate-900 hover:text-white disabled:border-gray-200 disabled:text-gray-400 disabled:hover:bg-transparent transition-colors min-h-[44px]"
+                    disabled
+                    className="w-full py-3.5 rounded-2xl bg-gray-100 text-slate-400 font-bold text-sm cursor-not-allowed min-h-[48px]"
                   >
-                    <ShoppingBag className="h-4 w-4" />
-                    <span>{isOutOfStock ? "Out of Stock" : "Add to Cart"}</span>
+                    Sold Out
                   </button>
+                ) : (
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      onClick={handleAddToCart}
+                      className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl border-2 border-[#181A1D] text-[#181A1D] font-bold text-xs hover:bg-[#181A1D] hover:text-white transition-all active:scale-95 min-h-[48px]"
+                    >
+                      <ShoppingBag className="h-4 w-4" />
+                      <span>Add to Cart</span>
+                    </button>
 
-                  <button
-                    onClick={handleBuyNow}
-                    disabled={isOutOfStock}
-                    className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#FF6448] hover:bg-[#e8553b] text-white font-bold shadow-lg shadow-[#FF6448]/20 disabled:bg-gray-200 disabled:text-gray-400 disabled:shadow-none transition-all min-h-[44px]"
-                  >
-                    <Zap className="h-4 w-4 fill-white" />
-                    <span>Order Now</span>
-                  </button>
-                </div>
-
-                <div className="flex items-center justify-center gap-2 text-[11px] text-slate-400">
-                  <ShieldCheck className="h-4 w-4 text-emerald-600" />
-                  <span>Cash on Delivery & Easy Inspection at Doorstep</span>
-                </div>
+                    <button
+                      onClick={handleBuyNow}
+                      className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-[#FF6448] hover:bg-[#e8553b] text-white font-bold text-xs shadow-lg shadow-[#FF6448]/25 transition-all active:scale-95 min-h-[48px]"
+                    >
+                      <Zap className="h-4 w-4 fill-white" />
+                      <span>Buy Now (COD)</span>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>

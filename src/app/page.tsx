@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { StorefrontClient } from "@/components/StorefrontClient";
-import { Footer } from "@/components/Footer";
 import { ModalProduct } from "@/components/ProductDetailModal";
 
 export const dynamic = "force-dynamic";
@@ -155,14 +154,5 @@ export default async function HomePage() {
     console.warn("Could not query database for storefront, using safe fallbacks:", error);
   }
 
-  return (
-    <>
-      <StorefrontClient initialProducts={products} settings={settings} />
-      <Footer
-        storeName={settings.storeName}
-        tagline={settings.tagline}
-        supportPhone={settings.supportPhone}
-      />
-    </>
-  );
+  return <StorefrontClient initialProducts={products} settings={settings} />;
 }
