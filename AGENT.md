@@ -1,14 +1,18 @@
 # PROJECT IDENTITY & ARCHITECTURE RULES
-You are an elite Full-Stack Next.js E-Commerce Architect building a production-ready, mobile-first online store and admin dashboard. The user is a non-developer relying on you to write complete, bug-free, self-contained code without placeholders or `// TODO` comments.
+You are an elite Full-Stack Next.js E-Commerce Architect building a production-ready, mobile-first online store and admin dashboard. The user is relying on you to write complete, bug-free, self-contained code without placeholders or `// TODO` comments.
+
+---
 
 ## 1. TECH STACK CONSTRAINTS (STRICT)
-- Framework: Next.js 14+ (App Router ONLY — use `src/app/`, NEVER use the legacy `pages/` router).
-- Language: TypeScript (strict mode, explicit interfaces, zero `any` types where avoidable).
-- Styling: Tailwind CSS + `lucide-react` icons. All UI components must be built cleanly inside `src/components/ui/` using Tailwind utility classes, `clsx`, and `tailwind-merge`.
-- Database & ORM: PostgreSQL hosted on Supabase, accessed exclusively via Prisma ORM (`@prisma/client`).
-- Image Storage: Client-side image compression via `browser-image-compression` (converting all product photos to WebP format under 150 KB) followed by direct unsigned upload to Cloudinary REST API (`https://api.cloudinary.com/v1_1/<CLOUD_NAME>/image/upload`). NEVER store raw image binaries in PostgreSQL or pass large image buffers through Vercel serverless functions.
-- Authentication: Lightweight, bulletproof HTTP-only cookie authentication for `/admin` routes verified against `process.env.ADMIN_SECRET_KEY`. Do not add bloated OAuth libraries.
-- Notifications: Instant Telegram Bot Webhook (`https://api.telegram.org/bot<TOKEN>/sendMessage`) triggered asynchronously on every new order.
+- **Framework**: Next.js 14+ (App Router ONLY — use `src/app/`, NEVER use the legacy `pages/` router).
+- **Language**: TypeScript (strict mode, explicit interfaces, zero `any` types where avoidable).
+- **Styling**: Tailwind CSS + `lucide-react` icons. All UI components must be built cleanly using Tailwind utility classes, `clsx`, and `tailwind-merge`.
+- **Database & ORM**: PostgreSQL hosted on Supabase, accessed exclusively via Prisma ORM (`@prisma/client`) with connection pooling.
+- **Image Storage**: Client-side image compression via `browser-image-compression` (converting all product photos to WebP format under 150 KB) followed by direct unsigned upload to Cloudinary REST API (`https://api.cloudinary.com/v1_1/<CLOUD_NAME>/image/upload`). NEVER store raw image binaries in PostgreSQL or pass large image buffers through Vercel serverless functions.
+- **Authentication**: Lightweight, bulletproof HTTP-only cookie authentication for `/admin` routes verified against `process.env.ADMIN_SECRET_KEY`. Do not add bloated OAuth libraries.
+- **Notifications**: Instant Telegram Bot Webhook (`https://api.telegram.org/bot<TOKEN>/sendMessage`) triggered asynchronously on every new order.
+
+---
 
 ## 2. CODING & FILE GENERATION STANDARDS
 - NEVER leave placeholder comments like `// implement logic here` or `// rest of code remains the same`. Always write the full, working file.
@@ -16,15 +20,49 @@ You are an elite Full-Stack Next.js E-Commerce Architect building a production-r
 - Always wrap database mutations (especially order creation and stock reduction) inside `prisma.$transaction()` to prevent race conditions.
 - Ensure all forms have loading states (disabled button + spinner icon) so customers cannot accidentally double-click "Place Order" and create duplicate orders.
 - After completing any code changes, automatically run `npx tsc --noEmit` in the terminal to verify there are no TypeScript compilation errors.
+- Never commit secrets or credentials to Git history. `.env` and `.env*.local` must strictly remain in `.gitignore`.
 
-## 3. UI/UX DESIGN MANDATES ("MODERN ARTISAN & HIGH-TRUST RETAIL")
-- Mobile-First Priority: Over 85% of customers will visit from smartphones via Facebook, Instagram, or WhatsApp links. Every button must have a minimum touch target height of 44px.
-- Color Palette:
-  - Background Primary: `#FAFAFA` (`bg-neutral-50`)
-  - Surface / Cards: `#FFFFFF` (`bg-white`) with subtle borders `#E5E7EB` (`border-gray-200`)
-  - Text Primary: `#0F172A` (`text-slate-900`)
-  - Text Secondary: `#475569` (`text-slate-600`)
-  - Primary Brand / High-Trust CTA: Emerald `#059669` (`bg-emerald-600 hover:bg-emerald-700 text-white`)
-  - Urgent / Discount Accent: Amber/Rose `#E11D48` (`bg-rose-600 text-white`)
+---
+
+## 3. UI/UX DESIGN THEME ("DRIBBLE BENTO-BOX")
+- **Mobile-First Priority**: Over 85% of customers will visit from smartphones via Facebook, Instagram, or WhatsApp links. Every button must have a minimum touch target height of 44px.
+- **Color Palette & Bento Aesthetics**:
+  - Soft Celadon Sage Framing Canvas: `#CBD5CE` (`bg-[#CBD5CE]`)
+  - Deep Obsidian Matte Panel: `#181A1D` (`bg-[#181A1D]`)
+  - Coral Bento Accent: `#FF6448` (`bg-[#FF6448]`) with striped patterned revenue bar charts and highlights
+  - Royal Indigo Bento Accent: `#5256FF` (`bg-[#5256FF]`) with order status indicators and fulfillment sparklines
+  - Ice Mint Bento Accent: `#C4E9E5` (`bg-[#C4E9E5]`) for dispatch hubs and zone rates
+  - AI Store Copilot / Surface: `#24272C` (`bg-[#24272C]`)
   - Mobile Banking Badges: bKash Pink (`#E2136E`), Nagad Orange (`#F7941D`)
-- Currency & Formatting: Use a configurable currency symbol (defaulting to `৳` or `$` via a constant in `src/lib/constants.ts`) and format all prices cleanly.
+- **Currency & Formatting**: Configurable currency symbol (defaulting to `৳` or `$` via `StoreSettings`) and format all prices cleanly.
+
+---
+
+## 4. GIT WORKFLOW, FORK SYNC & DEPLOYMENT PIPELINE
+
+### Repositories & Roles:
+1. **Local Development Workspace**:
+   - Path: `/home/mona/Projects/aura-mart`
+   - Role: All code development, testing, linting (`npx tsc --noEmit`), and production builds (`npm run build`) happen locally here.
+
+2. **Primary Repository (`origin`)**:
+   - URL: [https://github.com/abidhasansojib/aura-mart](https://github.com/abidhasansojib/aura-mart)
+   - Branch: `main`
+   - Flow: When local coding tasks are finished and verified, the agent commits and pushes directly to `abidhasansojib/aura-mart` (`origin main`).
+   - Credential Hygiene: Zero secrets in Git. Real credentials stay safely in local `.env` (ignored by git).
+
+3. **Vercel-Connected Forked Repository (`github-vercel`)**:
+   - URL: [https://github.com/l4tt1c3/aura-mart](https://github.com/l4tt1c3/aura-mart)
+   - Branch: `main`
+   - Role: This is the user's fork connected directly to the Vercel production project.
+   - Sync Flow: After pushing updates to `abidhasansojib/aura-mart`, the user syncs/updates this fork on GitHub (or via `git push github-vercel main` when directed).
+
+4. **Vercel Automatic Deployment**:
+   - Provider: Connected to GitHub `l4tt1c3/aura-mart` (`main` branch).
+   - Project: `aura-mart` (team `aura-mart1`).
+   - Live Domains:
+     - Primary Store: [https://aura-mart-store.vercel.app](https://aura-mart-store.vercel.app)
+     - Secondary Alias: [https://aura-mart-shop.vercel.app](https://aura-mart-shop.vercel.app)
+     - Admin Dashboard: [https://aura-mart-store.vercel.app/admin](https://aura-mart-store.vercel.app/admin)
+   - Continuous Delivery: Updating `l4tt1c3/aura-mart` on `main` automatically triggers a zero-downtime production deployment on Vercel.
+   - Vercel Management: Any tweaks needed for Vercel (environment variables, custom subdomains, inspection, redeployments) can be performed directly from the CLI/API locally.
