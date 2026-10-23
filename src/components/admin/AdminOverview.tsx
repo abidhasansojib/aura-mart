@@ -41,6 +41,7 @@ interface AdminOverviewProps {
   orders: Order[];
   products: Product[];
   currencySymbol?: string;
+  storeName?: string;
   onRefreshData: () => void;
   onGoToTab: (tab: "overview" | "orders" | "products" | "settings") => void;
 }
@@ -49,6 +50,7 @@ export function AdminOverview({
   orders,
   products,
   currencySymbol = "৳",
+  storeName = "Store",
   onRefreshData,
   onGoToTab,
 }: AdminOverviewProps) {
@@ -174,7 +176,7 @@ export function AdminOverview({
       );
     } else {
       setCopilotReply(
-        `Analyzing Aura Mart: Store conversion is active. Top priority is fulfilling ${metrics.pendingOrdersCount} pending orders.`
+        `Analyzing ${storeName}: Store conversion is active. Top priority is fulfilling ${metrics.pendingOrdersCount} pending orders.`
       );
     }
     setCopilotPrompt("");
@@ -487,7 +489,7 @@ export function AdminOverview({
           <div className="bg-[#1C1E22] p-3.5 rounded-2xl border border-white/5 space-y-2 text-xs">
             <p className="text-slate-300 leading-relaxed">
               {copilotReply ||
-                `Hi Admin! Aura Mart is operating smoothly. You have ${metrics.pendingOrdersCount} pending orders and ${products.length} products listed. Ready to assist with inventory or analytics.`}
+                `Hi Admin! ${storeName} is operating smoothly. You have ${metrics.pendingOrdersCount} pending orders and ${products.length} products listed. Ready to assist with inventory or analytics.`}
             </p>
 
             {/* Quick Action Pills */}
