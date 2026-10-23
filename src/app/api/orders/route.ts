@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { verifyAdminAuth } from "@/lib/auth";
 import { generateOrderNumber } from "@/lib/utils";
 import { sendTelegramOrderAlert } from "@/lib/telegram";
+import { verifyAdminAuth } from "@/lib/auth";
 import { Prisma } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
@@ -98,6 +98,8 @@ export async function POST(req: NextRequest) {
       trxId,
       orderNote,
       items,
+      couponCode,
+      discountAmount: requestedDiscount,
     } = body;
 
     // Validation
@@ -114,12 +116,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Your shopping cart is empty" }, { status: 400 });
     }
 
-    const validPaymentMethod = paymentMethod === "bKash" || paymentMethod === "Nagad" ? paymentMethod : "COD";
+    const cleanPaymentMethod =
+      paymentMethod === "bKash" || paymentMethod === "Nagad" || paymentMethod === "Rocket"
+        ? paymentMethod
+        : "COD";
 
-    if (validPaymentMethod !== "COD") {
+    if (cleanPaymentMethod !== "COD") {
       if (!trxId || String(trxId).trim() === "") {
         return NextResponse.json(
-          { error: `Transaction ID (TrxID) is required for ${validPaymentMethod} payments.` },
+          { error: `Transaction ID (TrxID) is required for ${cleanPaymentMethod} payments.` },
           { status: 400 }
         );
       }
@@ -127,15 +132,19 @@ export async function POST(req: NextRequest) {
 
     // Interactive Prisma Transaction for Atomic Stock Management
     const transactionResult = await prisma.$transaction(async (tx) => {
-      // a. Fetch current StoreSettings for delivery charges
+      // a. Fetch current StoreSettings
       const settings = await tx.storeSettings.upsert({
         where: { id: "default" },
         update: {},
         create: { id: "default" },
       });
 
-      const isInside = deliveryZone === "Inside City" || deliveryZone === "inside";
-      const deliveryCharge = isInside ? settings.insideCityDelivery : settings.outsideCityDelivery;
+      // Check if store is open
+      if (settings.isStoreOpen === false) {
+        throw new Error(
+          settings.storeClosedNotice || "The store is temporarily paused. Please check back later."
+        );
+      }
 
       let subtotal = 0;
       const verifiedItems: {
@@ -188,10 +197,59 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      const totalAmount = subtotal + deliveryCharge;
+      // d. Delivery charge calculation with Free Shipping threshold support
+      const isInside = deliveryZone === "Inside City" || deliveryZone === "inside";
+      let deliveryCharge = isInside ? settings.insideCityDelivery : settings.outsideCityDelivery;
+
+      if (settings.freeShippingThreshold > 0 && subtotal >= settings.freeShippingThreshold) {
+        deliveryCharge = 0;
+      }
+
+      // e. Coupon validation & deduction
+      let calculatedDiscount = 0;
+      let appliedCouponCode: string | null = null;
+
+      if (couponCode && typeof couponCode === "string" && couponCode.trim()) {
+        const cleanCode = couponCode.trim().toUpperCase();
+        try {
+          const coupon = await tx.coupon.findUnique({
+            where: { code: cleanCode },
+          });
+
+          if (
+            coupon &&
+            coupon.isActive &&
+            (!coupon.expiresAt || new Date(coupon.expiresAt) > new Date()) &&
+            (!coupon.maxUses || coupon.usedCount < coupon.maxUses) &&
+            subtotal >= coupon.minOrderValue
+          ) {
+            appliedCouponCode = coupon.code;
+            if (coupon.discountType === "PERCENTAGE") {
+              calculatedDiscount = Math.round((subtotal * coupon.discountValue) / 100);
+            } else {
+              calculatedDiscount = Math.min(coupon.discountValue, subtotal);
+            }
+
+            // Increment coupon usage
+            await tx.coupon.update({
+              where: { id: coupon.id },
+              data: { usedCount: { increment: 1 } },
+            });
+          }
+        } catch (couponErr) {
+          console.warn("Coupon transaction check skipped fallback:", couponErr);
+          // If fallback coupon was passed from validated client
+          if (requestedDiscount && Number(requestedDiscount) > 0) {
+            calculatedDiscount = Math.min(Number(requestedDiscount), subtotal);
+            appliedCouponCode = cleanCode;
+          }
+        }
+      }
+
+      const totalAmount = Math.max(0, subtotal - calculatedDiscount + deliveryCharge);
       const orderNumber = generateOrderNumber();
 
-      // e. Create Order and nested OrderItems
+      // f. Create Order and nested OrderItems
       const createdOrder = await tx.order.create({
         data: {
           orderNumber,
@@ -201,8 +259,10 @@ export async function POST(req: NextRequest) {
           deliveryZone: isInside ? "Inside City" : "Outside City",
           deliveryCharge,
           subtotal,
+          discountAmount: calculatedDiscount,
+          couponCode: appliedCouponCode,
           totalAmount,
-          paymentMethod: validPaymentMethod,
+          paymentMethod: cleanPaymentMethod,
           paymentSenderNo: paymentSenderNo ? String(paymentSenderNo).trim() : null,
           trxId: trxId ? String(trxId).trim() : null,
           orderNote: orderNote ? String(orderNote).trim() : null,

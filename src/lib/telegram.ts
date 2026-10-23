@@ -12,6 +12,8 @@ export interface OrderWithItems {
   deliveryZone: string;
   deliveryCharge: number;
   subtotal: number;
+  discountAmount?: number;
+  couponCode?: string | null;
   totalAmount: number;
   paymentMethod: string;
   paymentSenderNo?: string | null;
@@ -56,6 +58,9 @@ export async function sendTelegramOrderAlert(
       itemsText,
       `━━━━━━━━━━━━━━━━━━`,
       `💵 <b>Subtotal:</b> ${currencySymbol}${order.subtotal}`,
+      order.discountAmount && order.discountAmount > 0
+        ? `🎟️ <b>Discount (${order.couponCode || "Coupon"}):</b> -${currencySymbol}${order.discountAmount}`
+        : "",
       `🚚 <b>Delivery:</b> ${currencySymbol}${order.deliveryCharge}`,
       `💰 <b>Total Amount:</b> <b>${currencySymbol}${order.totalAmount}</b>`,
       `💳 <b>Payment Method:</b> ${order.paymentMethod}${paymentDetails}`,

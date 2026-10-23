@@ -16,6 +16,8 @@ import {
   MapPin,
   CreditCard,
   Banknote,
+  Ticket,
+  Sparkles,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/utils";
@@ -30,6 +32,14 @@ interface StoreSettings {
   insideCityDelivery: number;
   outsideCityDelivery: number;
   currencySymbol: string;
+  enableCod?: boolean;
+  enableBkash?: boolean;
+  enableNagad?: boolean;
+  enableRocket?: boolean;
+  rocketNumber?: string;
+  freeShippingThreshold?: number;
+  isStoreOpen?: boolean;
+  storeClosedNotice?: string;
 }
 
 interface OrderItemData {
@@ -72,6 +82,14 @@ export default function CheckoutPage() {
     insideCityDelivery: 60,
     outsideCityDelivery: 120,
     currencySymbol: "৳",
+    enableCod: true,
+    enableBkash: true,
+    enableNagad: true,
+    enableRocket: false,
+    rocketNumber: "01700000000 (Personal)",
+    freeShippingThreshold: 0,
+    isStoreOpen: true,
+    storeClosedNotice: "We are currently restocking our inventory. Orders will resume shortly!",
   });
 
   // Form State
@@ -80,9 +98,15 @@ export default function CheckoutPage() {
   const [address, setAddress] = useState("");
   const [deliveryZone, setDeliveryZone] = useState<"Inside City" | "Outside City">("Inside City");
   const [orderNote, setOrderNote] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<"COD" | "bKash" | "Nagad">("COD");
+  const [paymentMethod, setPaymentMethod] = useState<"COD" | "bKash" | "Nagad" | "Rocket">("COD");
   const [paymentSenderNo, setPaymentSenderNo] = useState("");
   const [trxId, setTrxId] = useState("");
+
+  // Coupon state
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discountAmount: number } | null>(null);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
 
   // UI state
   const [copiedNumber, setCopiedNumber] = useState(false);
@@ -97,15 +121,57 @@ export default function CheckoutPage() {
       .then((data) => {
         if (data) {
           setSettings((prev) => ({ ...prev, ...data }));
+          if (data.enableCod === false && data.enableBkash) {
+            setPaymentMethod("bKash");
+          } else if (data.enableCod === false && data.enableNagad) {
+            setPaymentMethod("Nagad");
+          }
         }
       })
       .catch((err) => console.warn("Could not load dynamic store settings:", err));
   }, []);
 
-  const deliveryCharge =
-    deliveryZone === "Inside City" ? settings.insideCityDelivery : settings.outsideCityDelivery;
-  const grandTotal = subtotal + deliveryCharge;
+  const isFreeShipping = Boolean(
+    settings.freeShippingThreshold &&
+    settings.freeShippingThreshold > 0 &&
+    subtotal >= settings.freeShippingThreshold
+  );
+
+  const deliveryCharge = isFreeShipping
+    ? 0
+    : deliveryZone === "Inside City"
+    ? settings.insideCityDelivery
+    : settings.outsideCityDelivery;
+
+  const discountAmount = appliedCoupon?.discountAmount || 0;
+  const grandTotal = Math.max(0, subtotal - discountAmount + deliveryCharge);
   const currencySymbol = settings.currencySymbol || "৳";
+
+  const handleApplyCoupon = async () => {
+    if (!couponInput.trim()) return;
+    setValidatingCoupon(true);
+    setCouponError(null);
+
+    try {
+      const res = await fetch("/api/coupons/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: couponInput.trim(), subtotal }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Invalid coupon code");
+      }
+
+      setAppliedCoupon({ code: data.code, discountAmount: data.discountAmount });
+      setCouponInput("");
+    } catch (err) {
+      setCouponError(err instanceof Error ? err.message : "Failed to apply coupon");
+    } finally {
+      setValidatingCoupon(false);
+    }
+  };
 
   const handleCopyPaymentNumber = (text: string) => {
     const rawNumber = text.split(" ")[0].replace(/[^0-9+]/g, "");
@@ -159,6 +225,8 @@ export default function CheckoutPage() {
         paymentSenderNo: paymentMethod !== "COD" ? paymentSenderNo.trim() : null,
         trxId: paymentMethod !== "COD" ? trxId.trim() : null,
         orderNote: orderNote.trim() || null,
+        couponCode: appliedCoupon?.code || null,
+        discountAmount: appliedCoupon?.discountAmount || 0,
         items: cart.map((item) => ({
           productId: item.productId,
           quantity: item.quantity,
@@ -519,9 +587,17 @@ export default function CheckoutPage() {
 
                   {/* Delivery Area Selection (Radio Cards) */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                      Select Delivery Area <span className="text-rose-500">*</span>
-                    </label>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                        Select Delivery Area <span className="text-rose-500">*</span>
+                      </label>
+                      {isFreeShipping && (
+                        <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+                          <Sparkles className="h-3 w-3 text-emerald-600" />
+                          <span>Free Delivery Unlocked</span>
+                        </span>
+                      )}
+                    </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {/* Inside City Card */}
                       <label
@@ -548,7 +624,7 @@ export default function CheckoutPage() {
                           </div>
                         </div>
                         <span className="text-xs font-black font-mono text-emerald-700">
-                          {formatPrice(settings.insideCityDelivery, currencySymbol)}
+                          {isFreeShipping ? "FREE" : formatPrice(settings.insideCityDelivery, currencySymbol)}
                         </span>
                       </label>
 
@@ -577,7 +653,7 @@ export default function CheckoutPage() {
                           </div>
                         </div>
                         <span className="text-xs font-black font-mono text-emerald-700">
-                          {formatPrice(settings.outsideCityDelivery, currencySymbol)}
+                          {isFreeShipping ? "FREE" : formatPrice(settings.outsideCityDelivery, currencySymbol)}
                         </span>
                       </label>
                     </div>
@@ -638,68 +714,72 @@ export default function CheckoutPage() {
 
                 <div className="space-y-3">
                   {/* Option 1: Cash on Delivery */}
-                  <label
-                    className={`flex items-start gap-3.5 p-4 rounded-2xl border-2 cursor-pointer transition-all ${
-                      paymentMethod === "COD"
-                        ? "border-emerald-600 bg-emerald-50/30"
-                        : "border-gray-200 hover:border-gray-300 bg-white"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="COD"
-                      checked={paymentMethod === "COD"}
-                      onChange={() => setPaymentMethod("COD")}
-                      className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 mt-1"
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                          <Banknote className="h-4 w-4 text-emerald-600" />
-                          Cash on Delivery (COD)
-                        </span>
-                        <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">
-                          Default & Most Popular
-                        </span>
+                  {settings.enableCod !== false && (
+                    <label
+                      className={`flex items-start gap-3.5 p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                        paymentMethod === "COD"
+                          ? "border-emerald-600 bg-emerald-50/30"
+                          : "border-gray-200 hover:border-gray-300 bg-white"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="COD"
+                        checked={paymentMethod === "COD"}
+                        onChange={() => setPaymentMethod("COD")}
+                        className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 mt-1"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                            <Banknote className="h-4 w-4 text-emerald-600" />
+                            Cash on Delivery (COD)
+                          </span>
+                          <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">
+                            Default & Most Popular
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                          Pay in cash directly to the courier when you receive your parcel at your doorstep.
+                        </p>
                       </div>
-                      <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                        Pay in cash directly to the courier when you receive your parcel at your doorstep.
-                      </p>
-                    </div>
-                  </label>
+                    </label>
+                  )}
 
                   {/* Option 2: bKash */}
-                  <label
-                    className={`flex items-start gap-3.5 p-4 rounded-2xl border-2 cursor-pointer transition-all ${
-                      paymentMethod === "bKash"
-                        ? "border-[#E2136E] bg-[#E2136E]/5"
-                        : "border-gray-200 hover:border-gray-300 bg-white"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="bKash"
-                      checked={paymentMethod === "bKash"}
-                      onChange={() => setPaymentMethod("bKash")}
-                      className="w-4 h-4 text-[#E2136E] focus:ring-[#E2136E] mt-1"
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                          <span className="w-2.5 h-2.5 rounded-full bg-[#E2136E]" />
-                          bKash (Send Money)
-                        </span>
-                        <span className="text-[11px] font-bold text-[#E2136E] bg-[#E2136E]/10 px-2 py-0.5 rounded-full">
-                          bKash
-                        </span>
+                  {settings.enableBkash !== false && (
+                    <label
+                      className={`flex items-start gap-3.5 p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                        paymentMethod === "bKash"
+                          ? "border-[#E2136E] bg-[#E2136E]/5"
+                          : "border-gray-200 hover:border-gray-300 bg-white"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="bKash"
+                        checked={paymentMethod === "bKash"}
+                        onChange={() => setPaymentMethod("bKash")}
+                        className="w-4 h-4 text-[#E2136E] focus:ring-[#E2136E] mt-1"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                            <span className="w-2.5 h-2.5 rounded-full bg-[#E2136E]" />
+                            bKash (Send Money)
+                          </span>
+                          <span className="text-[11px] font-bold text-[#E2136E] bg-[#E2136E]/10 px-2 py-0.5 rounded-full">
+                            bKash
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          Send payment directly from your bKash app and enter TrxID.
+                        </p>
                       </div>
-                      <p className="text-xs text-slate-500 mt-0.5">
-                        Send payment directly from your bKash app and enter TrxID.
-                      </p>
-                    </div>
-                  </label>
+                    </label>
+                  )}
 
                   {/* bKash Instructions Box (revealed when selected) */}
                   {paymentMethod === "bKash" && (
@@ -772,52 +852,160 @@ export default function CheckoutPage() {
                   )}
 
                   {/* Option 3: Nagad */}
-                  <label
-                    className={`flex items-start gap-3.5 p-4 rounded-2xl border-2 cursor-pointer transition-all ${
-                      paymentMethod === "Nagad"
-                        ? "border-[#F7941D] bg-[#F7941D]/5"
-                        : "border-gray-200 hover:border-gray-300 bg-white"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="Nagad"
-                      checked={paymentMethod === "Nagad"}
-                      onChange={() => setPaymentMethod("Nagad")}
-                      className="w-4 h-4 text-[#F7941D] focus:ring-[#F7941D] mt-1"
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                          <span className="w-2.5 h-2.5 rounded-full bg-[#F7941D]" />
-                          Nagad (Send Money)
-                        </span>
-                        <span className="text-[11px] font-bold text-[#F7941D] bg-[#F7941D]/10 px-2 py-0.5 rounded-full">
-                          Nagad
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-500 mt-0.5">
-                        Send payment directly from your Nagad app and enter TrxID.
-                      </p>
-                    </div>
-                  </label>
+                  {settings.enableNagad !== false && (
+                    <>
+                      <label
+                        className={`flex items-start gap-3.5 p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                          paymentMethod === "Nagad"
+                            ? "border-[#F7941D] bg-[#F7941D]/5"
+                            : "border-gray-200 hover:border-gray-300 bg-white"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="paymentMethod"
+                          value="Nagad"
+                          checked={paymentMethod === "Nagad"}
+                          onChange={() => setPaymentMethod("Nagad")}
+                          className="w-4 h-4 text-[#F7941D] focus:ring-[#F7941D] mt-1"
+                        />
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                              <span className="w-2.5 h-2.5 rounded-full bg-[#F7941D]" />
+                              Nagad (Send Money)
+                            </span>
+                            <span className="text-[11px] font-bold text-[#F7941D] bg-[#F7941D]/10 px-2 py-0.5 rounded-full">
+                              Nagad
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            Send payment directly from your Nagad app and enter TrxID.
+                          </p>
+                        </div>
+                      </label>
 
-                  {/* Nagad Instructions Box (revealed when selected) */}
-                  {paymentMethod === "Nagad" && (
-                    <div className="p-4 rounded-2xl bg-white border border-[#F7941D]/30 shadow-inner space-y-3 animate-in fade-in">
-                      <div className="flex items-center justify-between bg-[#F7941D]/10 p-3 rounded-xl border border-[#F7941D]/20">
+                      {/* Nagad Instructions Box (revealed when selected) */}
+                      {paymentMethod === "Nagad" && (
+                        <div className="p-4 rounded-2xl bg-white border border-[#F7941D]/30 shadow-inner space-y-3 animate-in fade-in">
+                          <div className="flex items-center justify-between bg-[#F7941D]/10 p-3 rounded-xl border border-[#F7941D]/20">
+                            <div>
+                              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">
+                                Nagad Number:
+                              </span>
+                              <span className="text-sm font-black font-mono text-[#F7941D]">
+                                {settings.nagadNumber}
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleCopyPaymentNumber(settings.nagadNumber)}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-white text-slate-800 text-xs font-semibold rounded-lg shadow-sm border border-gray-200 hover:bg-slate-50 transition-colors"
+                            >
+                              {copiedNumber ? (
+                                <>
+                                  <Check className="h-3.5 w-3.5 text-emerald-600" />
+                                  <span className="text-emerald-700">Copied!</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Copy className="h-3.5 w-3.5 text-slate-500" />
+                                  <span>Copy</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+
+                          <div className="text-[11px] text-slate-600 space-y-1 bg-neutral-50 p-3 rounded-xl">
+                            <p className="font-bold text-slate-800">Payment Steps:</p>
+                            <p>1. Open your Nagad App and select <b>Send Money</b>.</p>
+                            <p>2. Enter the Nagad Number above and the Exact Total Amount: <b>{formatPrice(grandTotal, currencySymbol)}</b>.</p>
+                            <p>3. Copy your <b>Transaction ID (TrxID)</b> and enter it below.</p>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                            <div>
+                              <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                                Nagad Sender Number <span className="text-rose-500">*</span>
+                              </label>
+                              <input
+                                type="tel"
+                                required
+                                value={paymentSenderNo}
+                                onChange={(e) => setPaymentSenderNo(e.target.value)}
+                                placeholder="01XXXXXXXXX"
+                                className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#F7941D]/20 focus:border-[#F7941D]"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
+                                Transaction ID (TrxID) <span className="text-rose-500">*</span>
+                              </label>
+                              <input
+                                type="text"
+                                required
+                                value={trxId}
+                                onChange={(e) => setTrxId(e.target.value)}
+                                placeholder="e.g. 7GA619B0"
+                                className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs text-slate-900 uppercase font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#F7941D]/20 focus:border-[#F7941D]"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {/* Option 4: Dutch-Bangla Rocket */}
+                  {settings.enableRocket && (
+                    <label
+                      className={`flex items-start gap-3.5 p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+                        paymentMethod === "Rocket"
+                          ? "border-purple-600 bg-purple-50/20"
+                          : "border-gray-200 hover:border-gray-300 bg-white"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="Rocket"
+                        checked={paymentMethod === "Rocket"}
+                        onChange={() => setPaymentMethod("Rocket")}
+                        className="w-4 h-4 text-purple-600 focus:ring-purple-500 mt-1"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                            <span className="w-2.5 h-2.5 rounded-full bg-purple-600" />
+                            Dutch-Bangla Rocket
+                          </span>
+                          <span className="text-[11px] font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full">
+                            Rocket
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          Send payment from your Rocket account and enter TrxID.
+                        </p>
+                      </div>
+                    </label>
+                  )}
+
+                  {/* Rocket Instructions Box */}
+                  {paymentMethod === "Rocket" && settings.enableRocket && (
+                    <div className="p-4 rounded-2xl bg-white border border-purple-300 shadow-inner space-y-3 animate-in fade-in">
+                      <div className="flex items-center justify-between bg-purple-50 p-3 rounded-xl border border-purple-200">
                         <div>
                           <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">
-                            Nagad Number:
+                            Rocket 12-Digit Number:
                           </span>
-                          <span className="text-sm font-black font-mono text-[#F7941D]">
-                            {settings.nagadNumber}
+                          <span className="text-sm font-black font-mono text-purple-700">
+                            {settings.rocketNumber || "01XXXXXXXXXX"}
                           </span>
                         </div>
                         <button
                           type="button"
-                          onClick={() => handleCopyPaymentNumber(settings.nagadNumber)}
+                          onClick={() => handleCopyPaymentNumber(settings.rocketNumber || "")}
                           className="flex items-center gap-1 px-3 py-1.5 bg-white text-slate-800 text-xs font-semibold rounded-lg shadow-sm border border-gray-200 hover:bg-slate-50 transition-colors"
                         >
                           {copiedNumber ? (
@@ -836,23 +1024,23 @@ export default function CheckoutPage() {
 
                       <div className="text-[11px] text-slate-600 space-y-1 bg-neutral-50 p-3 rounded-xl">
                         <p className="font-bold text-slate-800">Payment Steps:</p>
-                        <p>1. Open your Nagad App and select <b>Send Money</b>.</p>
-                        <p>2. Enter the Nagad Number above and the Exact Total Amount: <b>{formatPrice(grandTotal, currencySymbol)}</b>.</p>
+                        <p>1. Open your DBBL Rocket App or dial *322# and select <b>Send Money</b>.</p>
+                        <p>2. Enter the 12-digit Rocket Number above and Amount: <b>{formatPrice(grandTotal, currencySymbol)}</b>.</p>
                         <p>3. Copy your <b>Transaction ID (TrxID)</b> and enter it below.</p>
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                         <div>
                           <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">
-                            Nagad Sender Number <span className="text-rose-500">*</span>
+                            Rocket Sender Number <span className="text-rose-500">*</span>
                           </label>
                           <input
                             type="tel"
                             required
                             value={paymentSenderNo}
                             onChange={(e) => setPaymentSenderNo(e.target.value)}
-                            placeholder="01XXXXXXXXX"
-                            className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#F7941D]/20 focus:border-[#F7941D]"
+                            placeholder="01XXXXXXXXXX"
+                            className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600"
                           />
                         </div>
 
@@ -866,7 +1054,7 @@ export default function CheckoutPage() {
                             value={trxId}
                             onChange={(e) => setTrxId(e.target.value)}
                             placeholder="e.g. 7GA619B0"
-                            className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs text-slate-900 uppercase font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#F7941D]/20 focus:border-[#F7941D]"
+                            className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs text-slate-900 uppercase font-mono font-bold focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600"
                           />
                         </div>
                       </div>
@@ -912,6 +1100,57 @@ export default function CheckoutPage() {
                   ))}
                 </div>
 
+                {/* Promo Code / Coupon Section */}
+                <div className="p-4 bg-neutral-50 rounded-2xl border border-gray-200 space-y-2.5">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
+                    <Ticket className="h-4 w-4 text-amber-500" />
+                    <span>Have a Promo Code?</span>
+                  </div>
+
+                  {appliedCoupon ? (
+                    <div className="flex items-center justify-between p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-bold">
+                      <div className="flex items-center gap-1.5 text-emerald-800">
+                        <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                        <span className="font-mono">{appliedCoupon.code}</span>
+                        <span className="text-emerald-700">(-{formatPrice(appliedCoupon.discountAmount, currencySymbol)})</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setAppliedCoupon(null)}
+                        className="text-[11px] font-bold text-rose-600 hover:text-rose-800"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-1.5">
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={couponInput}
+                          onChange={(e) => {
+                            setCouponInput(e.target.value);
+                            setCouponError(null);
+                          }}
+                          placeholder="e.g. WELCOME10 or FLAT100"
+                          className="flex-1 px-3 py-2 rounded-xl border border-gray-200 text-xs font-mono font-bold uppercase text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/20 focus:border-[#FF6448] bg-white min-h-[38px]"
+                        />
+                        <button
+                          type="button"
+                          disabled={validatingCoupon || !couponInput.trim()}
+                          onClick={handleApplyCoupon}
+                          className="px-4 py-2 bg-[#181A1D] hover:bg-black disabled:bg-gray-200 disabled:text-slate-400 text-white font-bold text-xs rounded-xl shadow-sm transition-all min-h-[38px]"
+                        >
+                          {validatingCoupon ? "Checking..." : "Apply"}
+                        </button>
+                      </div>
+                      {couponError && (
+                        <p className="text-[11px] font-semibold text-rose-600">{couponError}</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+
                 {/* Subtotal & Delivery Calculation */}
                 <div className="space-y-2 pt-4 border-t border-gray-100 text-xs">
                   <div className="flex justify-between text-slate-600">
@@ -921,10 +1160,21 @@ export default function CheckoutPage() {
                     </span>
                   </div>
 
+                  {discountAmount > 0 && (
+                    <div className="flex justify-between text-emerald-700 font-bold">
+                      <span>Discount ({appliedCoupon?.code || "Coupon"})</span>
+                      <span className="font-mono">-{formatPrice(discountAmount, currencySymbol)}</span>
+                    </div>
+                  )}
+
                   <div className="flex justify-between text-slate-600">
                     <span>Delivery Charge ({deliveryZone})</span>
                     <span className="font-semibold font-mono text-slate-900">
-                      {formatPrice(deliveryCharge, currencySymbol)}
+                      {isFreeShipping ? (
+                        <span className="text-emerald-700 font-bold">FREE (Promo Unlocked)</span>
+                      ) : (
+                        formatPrice(deliveryCharge, currencySymbol)
+                      )}
                     </span>
                   </div>
 
@@ -936,11 +1186,18 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
+                {/* Maintenance Warning if store is paused */}
+                {settings.isStoreOpen === false && (
+                  <div className="p-3 bg-amber-50 border border-amber-300 rounded-xl text-xs font-bold text-amber-900">
+                    {settings.storeClosedNotice || "Store is temporarily paused. Checkout disabled."}
+                  </div>
+                )}
+
                 {/* Submit Action Button */}
                 <button
                   type="submit"
-                  disabled={isSubmitting}
-                  className="w-full flex items-center justify-center gap-2 bg-[#FF6448] hover:bg-[#e8553b] disabled:bg-[#FF6448]/50 text-white font-black py-4 px-6 rounded-2xl shadow-xl shadow-[#FF6448]/25 transition-all text-sm min-h-[48px]"
+                  disabled={isSubmitting || settings.isStoreOpen === false}
+                  className="w-full flex items-center justify-center gap-2 bg-[#FF6448] hover:bg-[#e8553b] disabled:bg-gray-300 disabled:text-slate-500 text-white font-black py-4 px-6 rounded-2xl shadow-xl shadow-[#FF6448]/25 transition-all text-sm min-h-[48px]"
                 >
                   {isSubmitting ? (
                     <div className="flex items-center gap-2">

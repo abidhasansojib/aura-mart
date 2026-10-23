@@ -19,7 +19,56 @@ model StoreSettings {
   insideCityDelivery  Float    @default(60)
   outsideCityDelivery Float    @default(120)
   currencySymbol      String   @default("৳")
+
+  // Hero & Bento Promotional Content
+  heroBadgeText       String   @default("Featured Collection 2026")
+  heroTitle           String   @default("Aura Mart")
+  heroTagline         String   @default("Quality Products Delivered to Your Doorstep. Zero advance payment required.")
+  heroCtaText         String   @default("Shop Catalog")
+  heroBadgeSecondary  String   @default("Cash on Delivery Available")
+
+  // Bento Cards Content
+  expressCardTitle    String   @default("Fast Doorstep Delivery")
+  expressCardSubtitle String   @default("All 64 Districts Dispatched in 24-48 Hours")
+  guaranteeCardTitle  String   @default("Open-Box Inspection")
+  guaranteeCardSubtitle String @default("Check your parcel in front of the delivery agent before paying cash.")
+
+  // Social & WhatsApp Integration
+  whatsappNumber      String   @default("01700000000")
+  facebookUrl         String   @default("")
+  instagramUrl        String   @default("")
+
+  // Payment Gateways Toggles
+  enableCod           Boolean  @default(true)
+  enableBkash         Boolean  @default(true)
+  enableNagad         Boolean  @default(true)
+  enableRocket        Boolean  @default(false)
+  rocketNumber        String   @default("")
+
+  // Free Shipping & Inventory Rules
+  freeShippingThreshold Float  @default(0)
+  lowStockThreshold     Int    @default(5)
+
+  // Store Status
+  isStoreOpen         Boolean  @default(true)
+  storeClosedNotice   String   @default("We are currently restocking our inventory. Orders will resume shortly!")
+
   updatedAt           DateTime @updatedAt
+}
+
+model Coupon {
+  id            String    @id @default(uuid())
+  code          String    @unique
+  discountType  String    @default("PERCENTAGE") // PERCENTAGE or FIXED
+  discountValue Float
+  minOrderValue Float     @default(0)
+  maxUses       Int?
+  usedCount     Int       @default(0)
+  isActive      Boolean   @default(true)
+  expiresAt     DateTime?
+  createdAt     DateTime  @default(now())
+
+  @@index([code, isActive])
 }
 
 model Product {
@@ -50,6 +99,8 @@ model Order {
   deliveryZone    String      @default("Inside City")
   deliveryCharge  Float       @default(60)
   subtotal        Float
+  discountAmount  Float       @default(0)
+  couponCode      String?
   totalAmount     Float
   paymentMethod   String      @default("COD")
   paymentSenderNo String?

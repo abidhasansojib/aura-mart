@@ -18,6 +18,8 @@ import {
   PhoneCall,
   SlidersHorizontal,
   CheckCircle2,
+  MessageCircle,
+  AlertCircle,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { Navbar } from "@/components/Navbar";
@@ -37,6 +39,27 @@ interface StoreSettingsData {
   insideCityDelivery?: number;
   outsideCityDelivery?: number;
   currencySymbol?: string;
+  heroBadgeText?: string;
+  heroTitle?: string;
+  heroTagline?: string;
+  heroCtaText?: string;
+  heroBadgeSecondary?: string;
+  expressCardTitle?: string;
+  expressCardSubtitle?: string;
+  guaranteeCardTitle?: string;
+  guaranteeCardSubtitle?: string;
+  whatsappNumber?: string;
+  facebookUrl?: string;
+  instagramUrl?: string;
+  enableCod?: boolean;
+  enableBkash?: boolean;
+  enableNagad?: boolean;
+  enableRocket?: boolean;
+  rocketNumber?: string;
+  freeShippingThreshold?: number;
+  lowStockThreshold?: number;
+  isStoreOpen?: boolean;
+  storeClosedNotice?: string;
 }
 
 interface StorefrontClientProps {
@@ -111,6 +134,22 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8 sm:space-y-10">
+        {/* Temporary Store Vacation / Maintenance Banner */}
+        {settings.isStoreOpen === false && (
+          <div className="p-4 rounded-2xl bg-amber-500/15 border-2 border-amber-500 text-amber-950 flex items-center gap-3 shadow-md animate-in fade-in">
+            <AlertCircle className="h-5 w-5 text-amber-600 shrink-0" />
+            <div className="text-xs sm:text-sm font-bold">
+              <span className="font-black uppercase tracking-wider block sm:inline mr-2 text-amber-800">
+                [NOTICE]
+              </span>
+              <span>
+                {settings.storeClosedNotice ||
+                  "We are currently restocking our inventory. Orders will resume shortly!"}
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* =====================================================================
             2. MODERN BENTO HERO SHOWCASE (Matching Dribbble Bento Aesthetic)
             ===================================================================== */}
@@ -121,7 +160,7 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
               <div className="flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-xs font-bold border border-white/20 shadow-sm">
                   <Sparkles className="h-3.5 w-3.5" />
-                  <span>Featured Collection 2026</span>
+                  <span>{settings.heroBadgeText || "Featured Collection 2026"}</span>
                 </span>
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-950/30 backdrop-blur-md text-white text-[11px] font-bold">
                   <Star className="h-3 w-3 fill-amber-300 text-amber-300" />
@@ -130,11 +169,13 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
               </div>
 
               <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.08]">
-                {settings.storeName || "Aura Mart"}
+                {settings.heroTitle || settings.storeName || "Aura Mart"}
               </h1>
 
               <p className="text-sm sm:text-base text-white/95 max-w-lg leading-relaxed font-medium">
-                {settings.tagline || "Quality Products Delivered to Your Doorstep. Zero advance payment required."}
+                {settings.heroTagline ||
+                  settings.tagline ||
+                  "Quality Products Delivered to Your Doorstep. Zero advance payment required."}
               </p>
             </div>
 
@@ -143,13 +184,13 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
                 href="#catalog"
                 className="inline-flex items-center gap-2 bg-[#181A1D] hover:bg-black text-white text-xs sm:text-sm font-bold px-7 py-3.5 rounded-2xl shadow-xl transition-all hover:scale-[1.02] active:scale-95 min-h-[44px]"
               >
-                <span>Shop Catalog</span>
+                <span>{settings.heroCtaText || "Shop Catalog"}</span>
                 <ArrowRight className="h-4 w-4" />
               </a>
 
               <span className="inline-flex items-center gap-1.5 text-xs font-bold bg-white/25 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/30 text-white shadow-sm">
                 <CheckCircle2 className="h-4 w-4 text-white" />
-                <span>Cash on Delivery Nationwide</span>
+                <span>{settings.heroBadgeSecondary || "Cash on Delivery Available"}</span>
               </span>
             </div>
 
@@ -171,7 +212,9 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
                 </div>
               </div>
               <div className="my-3">
-                <div className="text-xl font-black tracking-tight">Fast Doorstep Delivery</div>
+                <div className="text-xl font-black tracking-tight">
+                  {settings.expressCardTitle || "Fast Doorstep Delivery"}
+                </div>
                 <p className="text-xs text-white/85 mt-1 font-medium">
                   Inside City: ৳{settings.insideCityDelivery || 60} • Nationwide: ৳{settings.outsideCityDelivery || 120}
                 </p>
@@ -181,7 +224,7 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
                 </span>
-                <span>All 64 Districts Dispatched in 24-48 Hours</span>
+                <span>{settings.expressCardSubtitle || "All 64 Districts Dispatched in 24-48 Hours"}</span>
               </div>
             </div>
 
@@ -196,9 +239,12 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
                 </div>
               </div>
               <div className="my-2">
-                <div className="text-lg font-black tracking-tight">Open-Box Inspection</div>
+                <div className="text-lg font-black tracking-tight">
+                  {settings.guaranteeCardTitle || "Open-Box Inspection"}
+                </div>
                 <p className="text-xs text-slate-700 mt-1 font-medium">
-                  Check your parcel in front of the delivery agent before paying cash.
+                  {settings.guaranteeCardSubtitle ||
+                    "Check your parcel in front of the delivery agent before paying cash."}
                 </p>
               </div>
               <div className="text-[11px] font-bold text-slate-900 flex items-center gap-1.5 pt-1">
@@ -534,8 +580,31 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
         currencySymbol={currencySymbol}
       />
 
-      {/* 9. Slide-Over Cart Drawer */}
-      <CartDrawer currencySymbol={currencySymbol} />
+      {/* 9. Floating WhatsApp Direct Order Bubble */}
+      {settings.whatsappNumber && (
+        <a
+          href={`https://wa.me/${
+            settings.whatsappNumber.replace(/[^0-9]/g, "").startsWith("88")
+              ? settings.whatsappNumber.replace(/[^0-9]/g, "")
+              : `88${settings.whatsappNumber.replace(/[^0-9]/g, "")}`
+          }?text=${encodeURIComponent(
+            `Hello ${settings.storeName || "Aura Mart"}, I want to place an order!`
+          )}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="fixed bottom-20 sm:bottom-6 right-5 z-40 flex items-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white px-4 py-3 rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all text-xs font-bold border-2 border-white/20"
+          title="Chat or Order via WhatsApp"
+        >
+          <MessageCircle className="h-5 w-5 fill-white" />
+          <span className="hidden sm:inline">WhatsApp Order</span>
+        </a>
+      )}
+
+      {/* 10. Slide-Over Cart Drawer */}
+      <CartDrawer
+        currencySymbol={currencySymbol}
+        freeShippingThreshold={settings.freeShippingThreshold || 0}
+      />
     </div>
   );
 }
