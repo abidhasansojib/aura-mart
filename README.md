@@ -108,7 +108,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ## 🔐 Admin Dashboard Access
 
 - **Discreet Access**: Click the top-left website logo on the homepage or visit `/admin`.
-- **Authentication**: Log in with your admin credentials or passcode (`ADMIN_SECRET_KEY`).
+- **Authentication**: Log in with your admin credentials. Password management is supported via current-password verification or Telegram OTP reset.
 - **Review Moderation**: Incoming buyer reviews are held in **Pending Moderation** by default. Click **Accept Review** in the Reviews tab to publish them live to your storefront.
 
 ---

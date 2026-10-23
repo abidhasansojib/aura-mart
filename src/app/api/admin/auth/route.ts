@@ -23,7 +23,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { emailOrUsername, password, passcode } = body;
+    const { emailOrUsername, password } = body;
     const fallbackSecret = process.env.ADMIN_SECRET_KEY || "admin123";
 
     // 1. Database-backed credentials login (Username/Email + Password)
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
         });
 
         if (user) {
-          const isValid = verifyPassword(inputPass, user.password) || inputPass === fallbackSecret;
+          const isValid = verifyPassword(inputPass, user.password);
           if (isValid) {
             setAdminSessionCookie({
               id: user.id,
@@ -103,19 +103,6 @@ export async function POST(req: NextRequest) {
       }
 
       return NextResponse.json({ error: "Invalid username or password" }, { status: 401 });
-    }
-
-    // 2. Passcode-based login (for quick secret key entry or backwards compatibility)
-    if (passcode) {
-      if (String(passcode) !== fallbackSecret) {
-        return NextResponse.json({ error: "Invalid admin passcode" }, { status: 401 });
-      }
-
-      setAdminSessionCookie();
-      return NextResponse.json({
-        success: true,
-        user: { name: "Store Admin", email: "admin@auramart.com", username: "admin", role: "superadmin" },
-      });
     }
 
     return NextResponse.json({ error: "Please enter your username/email and password" }, { status: 400 });

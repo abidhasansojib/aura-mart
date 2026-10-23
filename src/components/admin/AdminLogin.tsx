@@ -17,7 +17,6 @@ import {
   CheckCircle2,
   Lock,
   Clock,
-  Key,
 } from "lucide-react";
 
 interface AdminLoginProps {
@@ -26,7 +25,7 @@ interface AdminLoginProps {
   logoUrl?: string;
 }
 
-type AuthMode = "login" | "forgot-request" | "forgot-verify" | "master-recovery";
+type AuthMode = "login" | "forgot-request" | "forgot-verify";
 
 function getPasswordStrength(pass: string): {
   label: "Weak" | "Fair" | "Strong";
@@ -66,8 +65,6 @@ export function AdminLogin({
 
   // Forgot password & reset fields
   const [otp, setOtp] = useState("");
-  const [masterKey, setMasterKey] = useState("");
-  const [showMasterKey, setShowMasterKey] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -166,19 +163,14 @@ export function AdminLogin({
     }
   };
 
-  // 3. Verify OTP / Master Key & Set New Password
+  // 3. Verify OTP & Set New Password
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccessMessage(null);
 
-    if (mode === "forgot-verify" && (!otp || otp.trim().length !== 6)) {
+    if (!otp || otp.trim().length !== 6) {
       setError("Please enter the 6-digit verification code sent to Telegram.");
-      return;
-    }
-
-    if (mode === "master-recovery" && !masterKey.trim()) {
-      setError("Please enter your server Master Recovery Key.");
       return;
     }
 
@@ -194,21 +186,14 @@ export function AdminLogin({
 
     setLoading(true);
     try {
-      const payload: Record<string, string> = {
-        emailOrUsername: usernameOrEmail.trim(),
-        newPassword,
-      };
-
-      if (mode === "forgot-verify") {
-        payload.otp = otp.trim();
-      } else if (mode === "master-recovery") {
-        payload.masterKey = masterKey.trim();
-      }
-
       const res = await fetch("/api/admin/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          emailOrUsername: usernameOrEmail.trim(),
+          otp: otp.trim(),
+          newPassword,
+        }),
       });
 
       const data = await res.json();
@@ -269,7 +254,6 @@ export function AdminLogin({
             {mode === "login" && "Sign in with your database credentials to manage your store."}
             {mode === "forgot-request" && "Enter your admin username to receive a 6-digit Telegram OTP."}
             {mode === "forgot-verify" && "Enter the verification code sent to your Telegram bot."}
-            {mode === "master-recovery" && "Emergency reset using your server ADMIN_SECRET_KEY."}
           </p>
         </div>
 
@@ -384,7 +368,7 @@ export function AdminLogin({
                 <span>Telegram Bot Verification</span>
               </div>
               <p className="text-[11px] text-amber-800 leading-relaxed">
-                We will send an instant 6-digit one-time code to your connected Telegram bot (<code>@aura_mart_bot</code>).
+                We will send an instant 6-digit one-time code to your connected Telegram bot.
               </p>
             </div>
 
@@ -423,22 +407,6 @@ export function AdminLogin({
                 </>
               )}
             </button>
-
-            {/* Alternative: Master Recovery Key Option */}
-            <div className="pt-2 text-center">
-              <button
-                type="button"
-                onClick={() => {
-                  setError(null);
-                  setSuccessMessage(null);
-                  setMode("master-recovery");
-                }}
-                className="text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors flex items-center justify-center gap-1.5 mx-auto"
-              >
-                <Key className="h-3.5 w-3.5 text-slate-400" />
-                <span>Or use Master Recovery Key</span>
-              </button>
-            </div>
           </form>
         )}
 
@@ -580,115 +548,6 @@ export function AdminLogin({
               ) : (
                 <>
                   <span>Reset Password & Sign In</span>
-                  <CheckCircle2 className="h-4 w-4" />
-                </>
-              )}
-            </button>
-          </form>
-        )}
-
-        {/* =====================================================================
-            VIEW 4: MASTER RECOVERY KEY RESET
-            ===================================================================== */}
-        {mode === "master-recovery" && (
-          <form onSubmit={handleResetPassword} className="space-y-4 animate-in fade-in">
-            <div className="p-3 rounded-2xl bg-indigo-50/80 border border-indigo-200 text-indigo-900 text-xs font-medium space-y-1">
-              <div className="font-bold flex items-center gap-1.5">
-                <Key className="h-3.5 w-3.5 text-indigo-600" />
-                <span>Emergency Master Recovery</span>
-              </div>
-              <p className="text-[11px] text-indigo-800 leading-relaxed">
-                Enter the secret <code>ADMIN_SECRET_KEY</code> defined in your server environment to immediately reset credentials.
-              </p>
-            </div>
-
-            <div>
-              <label
-                htmlFor="masterSecretKey"
-                className="block text-[11px] font-black uppercase tracking-wider text-slate-700 mb-1.5"
-              >
-                Master Secret Key
-              </label>
-              <div className="relative">
-                <Key className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <input
-                  id="masterSecretKey"
-                  type={showMasterKey ? "text" : "password"}
-                  required
-                  value={masterKey}
-                  onChange={(e) => setMasterKey(e.target.value)}
-                  placeholder="Enter ADMIN_SECRET_KEY"
-                  className="w-full pl-10 pr-10 py-2.5 rounded-2xl border border-black/10 bg-white text-base sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/30 focus:border-[#FF6448] transition-all min-h-[46px]"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowMasterKey(!showMasterKey)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
-                >
-                  {showMasterKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="masterNewPassword"
-                className="block text-[11px] font-black uppercase tracking-wider text-slate-700 mb-1.5"
-              >
-                New Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <input
-                  id="masterNewPassword"
-                  type={showNewPassword ? "text" : "password"}
-                  required
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="At least 6 characters"
-                  className="w-full pl-10 pr-10 py-2.5 rounded-2xl border border-black/10 bg-white text-base sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/30 focus:border-[#FF6448] transition-all min-h-[46px]"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowNewPassword(!showNewPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
-                >
-                  {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="masterConfirmPassword"
-                className="block text-[11px] font-black uppercase tracking-wider text-slate-700 mb-1.5"
-              >
-                Confirm New Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <input
-                  id="masterConfirmPassword"
-                  type={showNewPassword ? "text" : "password"}
-                  required
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Re-type new password"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-black/10 bg-white text-base sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/30 focus:border-[#FF6448] transition-all min-h-[46px]"
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex items-center justify-center gap-2 bg-[#181A1D] hover:bg-black disabled:bg-slate-400 text-white font-bold py-3.5 px-6 rounded-2xl shadow-lg hover:scale-[1.01] active:scale-95 transition-all text-sm min-h-[46px]"
-            >
-              {loading ? (
-                <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>
-                  <span>Reset with Master Key & Sign In</span>
                   <CheckCircle2 className="h-4 w-4" />
                 </>
               )}

@@ -21,7 +21,6 @@ import {
   ShieldCheck,
   Eye,
   EyeOff,
-  Key,
   Upload,
   Image as ImageIcon,
 } from "lucide-react";
@@ -1609,25 +1608,25 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
               </div>
             </div>
 
-            {/* Telegram & Master Key Info Card */}
+            {/* Security Channels Info Card */}
             <div className="bg-white rounded-3xl border border-gray-200 p-6 sm:p-8 shadow-sm space-y-4">
               <h4 className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-2">
-                <Key className="h-4 w-4 text-indigo-600" />
-                <span>Security Channels & Emergency Recovery</span>
+                <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                <span>Password Management & Recovery Channels</span>
               </h4>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-4 rounded-2xl bg-neutral-50 border border-gray-200 space-y-1.5">
-                  <span className="font-bold text-xs text-slate-900 block">Telegram Bot Alerts</span>
+                  <span className="font-bold text-xs text-slate-900 block">Current Password Verification</span>
                   <p className="text-[11px] text-slate-500 leading-relaxed">
-                    Security alerts (password changes & OTP requests) are routed in real-time to your configured Telegram bot (<code>@aura_mart_bot</code>).
+                    Update your admin credentials anytime from this settings tab by validating your existing password.
                   </p>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-neutral-50 border border-gray-200 space-y-1.5">
-                  <span className="font-bold text-xs text-slate-900 block">Master Recovery Key</span>
+                  <span className="font-bold text-xs text-slate-900 block">Telegram Bot OTP Reset</span>
                   <p className="text-[11px] text-slate-500 leading-relaxed">
-                    In emergencies where Telegram is inaccessible, you can reset your password using the secret <code>ADMIN_SECRET_KEY</code> set in your environment variables.
+                    Forgot your password? Request an instant 6-digit one-time passcode delivered directly to your Telegram alerts bot.
                   </p>
                 </div>
               </div>
