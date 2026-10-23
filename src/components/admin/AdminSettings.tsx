@@ -27,6 +27,46 @@ import {
 } from "lucide-react";
 import { compressAndUploadImage } from "@/lib/image-upload";
 
+export type PaymentAccountType = "Personal" | "Agent" | "Merchant";
+
+export function parsePaymentField(value: string | undefined): { phone: string; type: PaymentAccountType } {
+  if (!value) return { phone: "", type: "Personal" };
+
+  const match = value.match(/^([0-9+]+)\s*(?:\(([^)]+)\))?/);
+  if (match) {
+    const phone = match[1] || "";
+    const rawType = (match[2] || "").toLowerCase();
+    let type: PaymentAccountType = "Personal";
+    if (rawType.includes("agent") || rawType.includes("cash in") || rawType.includes("cash out")) {
+      type = "Agent";
+    } else if (rawType.includes("merchant") || rawType.includes("payment")) {
+      type = "Merchant";
+    }
+    return { phone, type };
+  }
+
+  const digits = value.replace(/[^0-9+]/g, "");
+  return { phone: digits, type: "Personal" };
+}
+
+export function formatPaymentField(
+  phone: string,
+  type: PaymentAccountType,
+  gateway: "bKash" | "Nagad" | "Rocket"
+): string {
+  const cleanPhone = phone.trim();
+  if (!cleanPhone) return "";
+
+  if (type === "Agent") {
+    const action = gateway === "bKash" ? "Cash In" : "Cash Out";
+    return `${cleanPhone} (Agent/${action})`;
+  }
+  if (type === "Merchant") {
+    return `${cleanPhone} (Merchant/Payment)`;
+  }
+  return `${cleanPhone} (Personal/Send Money)`;
+}
+
 export interface StoreSettingsData {
   id?: string;
   storeName: string;
@@ -149,6 +189,46 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
     } finally {
       setIsUploadingLogo(false);
     }
+  };
+
+  // Structured Payment Gateways State (Phone Number + Account Type Dropdown)
+  const initialBkashParsed = parsePaymentField(initialSettings.bkashNumber);
+  const [bkashPhone, setBkashPhone] = useState(initialBkashParsed.phone || "01700000000");
+  const [bkashType, setBkashType] = useState<PaymentAccountType>(initialBkashParsed.type);
+
+  const initialNagadParsed = parsePaymentField(initialSettings.nagadNumber);
+  const [nagadPhone, setNagadPhone] = useState(initialNagadParsed.phone || "01700000000");
+  const [nagadType, setNagadType] = useState<PaymentAccountType>(initialNagadParsed.type);
+
+  const initialRocketParsed = parsePaymentField(initialSettings.rocketNumber);
+  const [rocketPhone, setRocketPhone] = useState(initialRocketParsed.phone || "");
+  const [rocketType, setRocketType] = useState<PaymentAccountType>(initialRocketParsed.type);
+
+  const handleBkashChange = (newPhone: string, newType: PaymentAccountType) => {
+    setBkashPhone(newPhone);
+    setBkashType(newType);
+    setSettings((prev) => ({
+      ...prev,
+      bkashNumber: formatPaymentField(newPhone, newType, "bKash"),
+    }));
+  };
+
+  const handleNagadChange = (newPhone: string, newType: PaymentAccountType) => {
+    setNagadPhone(newPhone);
+    setNagadType(newType);
+    setSettings((prev) => ({
+      ...prev,
+      nagadNumber: formatPaymentField(newPhone, newType, "Nagad"),
+    }));
+  };
+
+  const handleRocketChange = (newPhone: string, newType: PaymentAccountType) => {
+    setRocketPhone(newPhone);
+    setRocketType(newType);
+    setSettings((prev) => ({
+      ...prev,
+      rocketNumber: formatPaymentField(newPhone, newType, "Rocket"),
+    }));
   };
 
   // Security & Password states
@@ -299,10 +379,17 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
     setErrorMsg(null);
 
     try {
+      const payload = {
+        ...settings,
+        bkashNumber: formatPaymentField(bkashPhone, bkashType, "bKash"),
+        nagadNumber: formatPaymentField(nagadPhone, nagadType, "Nagad"),
+        rocketNumber: formatPaymentField(rocketPhone, rocketType, "Rocket"),
+      };
+
       const res = await fetch("/api/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(settings),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
@@ -988,10 +1075,13 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
                 </div>
               </div>
 
-              {/* bKash Toggle & Details */}
-              <div className="p-4 rounded-2xl border border-[#E2136E]/20 bg-[#E2136E]/5 space-y-3">
+              {/* bKash Mobile Payment Box */}
+              <div className="p-4 sm:p-5 rounded-2xl border border-[#E2136E]/20 bg-[#E2136E]/5 space-y-3.5">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-xs text-[#E2136E]">bKash Mobile Payment</span>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#E2136E]" />
+                    <span className="font-bold text-xs sm:text-sm text-[#E2136E]">bKash Mobile Payment</span>
+                  </div>
                   <input
                     type="checkbox"
                     checked={settings.enableBkash}
@@ -999,24 +1089,62 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
                     className="w-5 h-5 accent-[#E2136E] cursor-pointer"
                   />
                 </div>
-                <div>
-                  <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">
-                    bKash Number & Account Type
-                  </label>
-                  <input
-                    type="text"
-                    value={settings.bkashNumber}
-                    onChange={(e) => setSettings({ ...settings, bkashNumber: e.target.value })}
-                    placeholder="01XXXXXXXXX (Personal / Send Money)"
-                    className="w-full px-3 py-2 rounded-xl border border-gray-200 text-slate-900 font-mono text-xs"
-                  />
+
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+                  {/* Dedicated Phone Input (7 cols desktop, full width mobile) */}
+                  <div className="sm:col-span-7">
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                      bKash Phone Number
+                    </label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                      <input
+                        type="tel"
+                        inputMode="numeric"
+                        pattern="[0-9+]*"
+                        value={bkashPhone}
+                        onChange={(e) => handleBkashChange(e.target.value.replace(/[^0-9+]/g, ""), bkashType)}
+                        placeholder="01XXXXXXXXX"
+                        className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-gray-200 text-slate-900 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-[#E2136E]/20 focus:border-[#E2136E] min-h-[42px] bg-white shadow-xs"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Account Type Dropdown (5 cols desktop, full width mobile) */}
+                  <div className="sm:col-span-5">
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                      Account Type
+                    </label>
+                    <select
+                      value={bkashType}
+                      onChange={(e) => handleBkashChange(bkashPhone, e.target.value as PaymentAccountType)}
+                      className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-slate-900 font-bold text-xs focus:outline-none focus:ring-2 focus:ring-[#E2136E]/20 focus:border-[#E2136E] min-h-[42px] bg-white shadow-xs cursor-pointer"
+                    >
+                      <option value="Personal">Personal (Send Money)</option>
+                      <option value="Agent">Agent (Cash In)</option>
+                      <option value="Merchant">Merchant (Payment)</option>
+                    </select>
+                  </div>
                 </div>
+
+                {/* Customer View Live Preview Badge */}
+                {bkashPhone && (
+                  <div className="text-[11px] text-slate-600 flex items-center gap-1.5 pt-0.5 flex-wrap">
+                    <span className="text-slate-400 text-[10px] font-medium">Customer View:</span>
+                    <span className="font-mono font-bold text-[#E2136E] bg-white px-2 py-0.5 rounded-md border border-[#E2136E]/20 text-[11px]">
+                      {formatPaymentField(bkashPhone, bkashType, "bKash")}
+                    </span>
+                  </div>
+                )}
               </div>
 
-              {/* Nagad Toggle & Details */}
-              <div className="p-4 rounded-2xl border border-[#F7941D]/20 bg-[#F7941D]/5 space-y-3">
+              {/* Nagad Mobile Payment Box */}
+              <div className="p-4 sm:p-5 rounded-2xl border border-[#F7941D]/20 bg-[#F7941D]/5 space-y-3.5">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-xs text-[#F7941D]">Nagad Mobile Payment</span>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#F7941D]" />
+                    <span className="font-bold text-xs sm:text-sm text-[#F7941D]">Nagad Mobile Payment</span>
+                  </div>
                   <input
                     type="checkbox"
                     checked={settings.enableNagad}
@@ -1024,24 +1152,62 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
                     className="w-5 h-5 accent-[#F7941D] cursor-pointer"
                   />
                 </div>
-                <div>
-                  <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">
-                    Nagad Number & Account Type
-                  </label>
-                  <input
-                    type="text"
-                    value={settings.nagadNumber}
-                    onChange={(e) => setSettings({ ...settings, nagadNumber: e.target.value })}
-                    placeholder="01XXXXXXXXX (Personal / Send Money)"
-                    className="w-full px-3 py-2 rounded-xl border border-gray-200 text-slate-900 font-mono text-xs"
-                  />
+
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+                  {/* Dedicated Phone Input (7 cols desktop, full width mobile) */}
+                  <div className="sm:col-span-7">
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                      Nagad Phone Number
+                    </label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                      <input
+                        type="tel"
+                        inputMode="numeric"
+                        pattern="[0-9+]*"
+                        value={nagadPhone}
+                        onChange={(e) => handleNagadChange(e.target.value.replace(/[^0-9+]/g, ""), nagadType)}
+                        placeholder="01XXXXXXXXX"
+                        className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-gray-200 text-slate-900 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-[#F7941D]/20 focus:border-[#F7941D] min-h-[42px] bg-white shadow-xs"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Account Type Dropdown (5 cols desktop, full width mobile) */}
+                  <div className="sm:col-span-5">
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                      Account Type
+                    </label>
+                    <select
+                      value={nagadType}
+                      onChange={(e) => handleNagadChange(nagadPhone, e.target.value as PaymentAccountType)}
+                      className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-slate-900 font-bold text-xs focus:outline-none focus:ring-2 focus:ring-[#F7941D]/20 focus:border-[#F7941D] min-h-[42px] bg-white shadow-xs cursor-pointer"
+                    >
+                      <option value="Personal">Personal (Send Money)</option>
+                      <option value="Agent">Agent (Cash Out)</option>
+                      <option value="Merchant">Merchant (Payment)</option>
+                    </select>
+                  </div>
                 </div>
+
+                {/* Customer View Live Preview Badge */}
+                {nagadPhone && (
+                  <div className="text-[11px] text-slate-600 flex items-center gap-1.5 pt-0.5 flex-wrap">
+                    <span className="text-slate-400 text-[10px] font-medium">Customer View:</span>
+                    <span className="font-mono font-bold text-[#F7941D] bg-white px-2 py-0.5 rounded-md border border-[#F7941D]/20 text-[11px]">
+                      {formatPaymentField(nagadPhone, nagadType, "Nagad")}
+                    </span>
+                  </div>
+                )}
               </div>
 
-              {/* Rocket Toggle & Details */}
-              <div className="p-4 rounded-2xl border border-purple-200 bg-purple-50 space-y-3">
+              {/* Rocket Mobile Payment Box */}
+              <div className="p-4 sm:p-5 rounded-2xl border border-purple-200 bg-purple-50 space-y-3.5">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-xs text-purple-700">Dutch-Bangla Rocket</span>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-purple-600" />
+                    <span className="font-bold text-xs sm:text-sm text-purple-700">Dutch-Bangla Rocket</span>
+                  </div>
                   <input
                     type="checkbox"
                     checked={settings.enableRocket}
@@ -1049,18 +1215,53 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
                     className="w-5 h-5 accent-purple-600 cursor-pointer"
                   />
                 </div>
-                <div>
-                  <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">
-                    Rocket 12-Digit Number
-                  </label>
-                  <input
-                    type="text"
-                    value={settings.rocketNumber || ""}
-                    onChange={(e) => setSettings({ ...settings, rocketNumber: e.target.value })}
-                    placeholder="01XXXXXXXXXX (12 Digits)"
-                    className="w-full px-3 py-2 rounded-xl border border-gray-200 text-slate-900 font-mono text-xs"
-                  />
+
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+                  {/* Dedicated 12-Digit Number Input (7 cols desktop, full width mobile) */}
+                  <div className="sm:col-span-7">
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                      Rocket 12-Digit Account Number
+                    </label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                      <input
+                        type="tel"
+                        inputMode="numeric"
+                        pattern="[0-9+]*"
+                        value={rocketPhone}
+                        onChange={(e) => handleRocketChange(e.target.value.replace(/[^0-9+]/g, ""), rocketType)}
+                        placeholder="01XXXXXXXXXX (12 digits)"
+                        className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-gray-200 text-slate-900 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 min-h-[42px] bg-white shadow-xs"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Account Type Dropdown (5 cols desktop, full width mobile) */}
+                  <div className="sm:col-span-5">
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                      Account Type
+                    </label>
+                    <select
+                      value={rocketType}
+                      onChange={(e) => handleRocketChange(rocketPhone, e.target.value as PaymentAccountType)}
+                      className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-slate-900 font-bold text-xs focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 min-h-[42px] bg-white shadow-xs cursor-pointer"
+                    >
+                      <option value="Personal">Personal (Send Money)</option>
+                      <option value="Agent">Agent (Cash Out)</option>
+                      <option value="Merchant">Merchant (Payment)</option>
+                    </select>
+                  </div>
                 </div>
+
+                {/* Customer View Live Preview Badge */}
+                {rocketPhone && (
+                  <div className="text-[11px] text-slate-600 flex items-center gap-1.5 pt-0.5 flex-wrap">
+                    <span className="text-slate-400 text-[10px] font-medium">Customer View:</span>
+                    <span className="font-mono font-bold text-purple-700 bg-white px-2 py-0.5 rounded-md border border-purple-200 text-[11px]">
+                      {formatPaymentField(rocketPhone, rocketType, "Rocket")}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </div>

@@ -1135,7 +1135,20 @@ export default function CheckoutPage() {
 
                       <div className="text-[11px] text-slate-600 space-y-1 bg-neutral-50 p-3 rounded-xl">
                         <p className="font-bold text-slate-800">Payment Steps:</p>
-                        <p>1. Open your bKash App and select <b>Send Money</b>.</p>
+                        <p>
+                          1. Open your bKash App and select{" "}
+                          <b>
+                            {settings.bkashNumber.toLowerCase().includes("agent")
+                              ? "Cash In"
+                              : settings.bkashNumber.toLowerCase().includes("merchant")
+                              ? "Make Payment"
+                              : "Send Money"}
+                          </b>
+                          {settings.bkashNumber.toLowerCase().includes("agent")
+                            ? " (or visit any nearby bKash agent)"
+                            : ""}
+                          .
+                        </p>
                         <p>2. Enter the bKash Number above and the Exact Total Amount: <b>{formatPrice(grandTotal, currencySymbol)}</b>.</p>
                         <p>3. Copy your <b>Transaction ID (TrxID)</b> and enter it below.</p>
                       </div>
@@ -1239,7 +1252,20 @@ export default function CheckoutPage() {
 
                           <div className="text-[11px] text-slate-600 space-y-1 bg-neutral-50 p-3 rounded-xl">
                             <p className="font-bold text-slate-800">Payment Steps:</p>
-                            <p>1. Open your Nagad App and select <b>Send Money</b>.</p>
+                            <p>
+                              1. Open your Nagad App and select{" "}
+                              <b>
+                                {settings.nagadNumber.toLowerCase().includes("agent")
+                                  ? "Cash Out"
+                                  : settings.nagadNumber.toLowerCase().includes("merchant")
+                                  ? "Merchant Payment"
+                                  : "Send Money"}
+                              </b>
+                              {settings.nagadNumber.toLowerCase().includes("agent")
+                                ? " (or visit any nearby Nagad agent)"
+                                : ""}
+                              .
+                            </p>
                             <p>2. Enter the Nagad Number above and the Exact Total Amount: <b>{formatPrice(grandTotal, currencySymbol)}</b>.</p>
                             <p>3. Copy your <b>Transaction ID (TrxID)</b> and enter it below.</p>
                           </div>
@@ -1345,7 +1371,20 @@ export default function CheckoutPage() {
 
                       <div className="text-[11px] text-slate-600 space-y-1 bg-neutral-50 p-3 rounded-xl">
                         <p className="font-bold text-slate-800">Payment Steps:</p>
-                        <p>1. Open your DBBL Rocket App or dial *322# and select <b>Send Money</b>.</p>
+                        <p>
+                          1. Open your DBBL Rocket App or dial *322# and select{" "}
+                          <b>
+                            {settings.rocketNumber?.toLowerCase().includes("agent")
+                              ? "Cash Out"
+                              : settings.rocketNumber?.toLowerCase().includes("merchant")
+                              ? "Payment"
+                              : "Send Money"}
+                          </b>
+                          {settings.rocketNumber?.toLowerCase().includes("agent")
+                            ? " (or visit any nearby Rocket agent)"
+                            : ""}
+                          .
+                        </p>
                         <p>2. Enter the 12-digit Rocket Number above and Amount: <b>{formatPrice(grandTotal, currencySymbol)}</b>.</p>
                         <p>3. Copy your <b>Transaction ID (TrxID)</b> and enter it below.</p>
                       </div>
