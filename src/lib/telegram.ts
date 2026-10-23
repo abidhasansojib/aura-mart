@@ -150,3 +150,86 @@ export async function sendTelegramOrderCancellationAlert(
     return false;
   }
 }
+
+export async function sendTelegramPasswordResetOtp(
+  otp: string,
+  usernameOrEmail: string,
+  expiryMinutes: number = 10
+): Promise<boolean> {
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+
+  if (!botToken || !chatId || botToken === "your-telegram-bot-token") {
+    console.warn("Telegram OTP alert skipped: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID is not configured.");
+    return false;
+  }
+
+  try {
+    const timeString = new Date().toLocaleString("en-US", { timeZone: "Asia/Dhaka" });
+    const messageHtml = [
+      `🔐 <b>AURA MART SECURITY: Password Reset Code</b>`,
+      `━━━━━━━━━━━━━━━━━━`,
+      `👤 <b>Account:</b> <code>${usernameOrEmail}</code>`,
+      `🔑 <b>Verification OTP:</b> <code>${otp}</code>`,
+      `⏳ <b>Valid For:</b> ${expiryMinutes} minutes`,
+      `🕒 <b>Time:</b> ${timeString} (BST)`,
+      `━━━━━━━━━━━━━━━━━━`,
+      `⚠️ <i>If you did not request a password reset, your store account is safe. Do not share this OTP with anyone.</i>`,
+    ].join("\n");
+
+    const endpoint = `https://api.telegram.org/bot${botToken}/sendMessage`;
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: messageHtml,
+        parse_mode: "HTML",
+      }),
+    });
+
+    return res.ok;
+  } catch (error) {
+    console.error("Failed to send Telegram password reset OTP:", error);
+    return false;
+  }
+}
+
+export async function sendTelegramPasswordChangedAlert(
+  username: string
+): Promise<boolean> {
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+
+  if (!botToken || !chatId || botToken === "your-telegram-bot-token") {
+    return false;
+  }
+
+  try {
+    const timeString = new Date().toLocaleString("en-US", { timeZone: "Asia/Dhaka" });
+    const messageHtml = [
+      `🛡️ <b>AURA MART SECURITY NOTICE: Password Changed</b>`,
+      `━━━━━━━━━━━━━━━━━━`,
+      `👤 <b>Admin Username:</b> <code>${username}</code>`,
+      `🕒 <b>Timestamp:</b> ${timeString} (BST)`,
+      `━━━━━━━━━━━━━━━━━━`,
+      `✅ <i>Your store admin password was successfully updated. If this was not you, reset your password or use your Master Key immediately.</i>`,
+    ].join("\n");
+
+    const endpoint = `https://api.telegram.org/bot${botToken}/sendMessage`;
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: messageHtml,
+        parse_mode: "HTML",
+      }),
+    });
+
+    return res.ok;
+  } catch (error) {
+    console.error("Failed to send Telegram password changed alert:", error);
+    return false;
+  }
+}
