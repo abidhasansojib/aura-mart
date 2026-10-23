@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { verifyAdminAuth } from "@/lib/auth";
+import { verifyAdminAuth, hashPassword } from "@/lib/auth";
 import { generateSlug } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -56,7 +56,7 @@ const SAMPLE_PRODUCTS = [
     category: "Workstation",
     price: 1200,
     compareAtPrice: 1600,
-    stock: 4, // Demonstrates low-stock alert (< 5)
+    stock: 4,
     imageUrl: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=800&auto=format&fit=crop&q=80",
     isFeatured: true,
     isActive: true,
@@ -80,8 +80,34 @@ export async function POST() {
   }
 
   try {
-    const existingCount = await prisma.product.count();
+    // 1. Ensure Admin User exists in DB
+    const adminExists = await prisma.adminUser.findFirst({
+      where: { username: "admin" },
+    });
+    if (!adminExists) {
+      await prisma.adminUser.create({
+        data: {
+          username: "admin",
+          email: "admin@auramart.com",
+          password: hashPassword("admin123"),
+          name: "Super Admin",
+          role: "superadmin",
+        },
+      });
+    }
 
+    // 2. Ensure StoreSettings exists
+    const settingsExists = await prisma.storeSettings.findUnique({
+      where: { id: "default" },
+    });
+    if (!settingsExists) {
+      await prisma.storeSettings.create({
+        data: { id: "default" },
+      });
+    }
+
+    // 3. Seed Products if none exist
+    const existingCount = await prisma.product.count();
     if (existingCount > 0) {
       return NextResponse.json(
         {
@@ -106,7 +132,7 @@ export async function POST() {
     return NextResponse.json(
       {
         success: true,
-        message: `Successfully seeded ${created.length} sample products.`,
+        message: `Successfully initialized database: created superadmin user and seeded ${created.length} products.`,
         products: created,
       },
       { status: 201 }

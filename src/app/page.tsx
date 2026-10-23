@@ -142,6 +142,33 @@ export default async function HomePage() {
 
     if (dbProducts.status === "fulfilled" && dbProducts.value.length > 0) {
       products = dbProducts.value;
+    } else if (dbProducts.status === "fulfilled" && dbProducts.value.length === 0) {
+      // Database connected but empty: auto-seed starter products into DB
+      try {
+        const seeded = [];
+        for (const p of FALLBACK_PRODUCTS) {
+          const created = await prisma.product.create({
+            data: {
+              name: p.name,
+              slug: p.slug,
+              description: p.description,
+              category: p.category,
+              price: p.price,
+              compareAtPrice: p.compareAtPrice,
+              stock: p.stock,
+              imageUrl: p.imageUrl,
+              isFeatured: p.isFeatured,
+              isActive: true,
+            },
+          });
+          seeded.push(created);
+        }
+        if (seeded.length > 0) {
+          products = seeded;
+        }
+      } catch (seedErr) {
+        console.warn("Auto-seeding products into empty database skipped:", seedErr);
+      }
     }
 
     if (dbSettings.status === "fulfilled" && dbSettings.value) {
