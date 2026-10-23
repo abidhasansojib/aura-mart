@@ -412,43 +412,43 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
         {/* =====================================================================
             2. MODERN BENTO HERO SHOWCASE (Matching Dribbble Bento Aesthetic)
             ===================================================================== */}
-        <section className="grid grid-cols-1 md:grid-cols-12 gap-4">
+        <section className="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4">
           {/* Main Hero Card: Coral `#FF6448` (Span 7 Cols) */}
-          <div className="md:col-span-7 bg-[#FF6448] text-white rounded-[28px] sm:rounded-[32px] p-5 xs:p-7 sm:p-10 shadow-xl flex flex-col justify-between bento-card relative overflow-hidden group">
-            <div className="space-y-3 sm:space-y-4 relative z-10">
+          <div className="md:col-span-7 bg-[#FF6448] text-white rounded-[24px] sm:rounded-[32px] p-4 xs:p-6 sm:p-10 shadow-xl flex flex-col justify-between bento-card relative overflow-hidden group">
+            <div className="space-y-2.5 sm:space-y-4 relative z-10">
               <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-[11px] sm:text-xs font-bold border border-white/20 shadow-sm">
+                <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-[10px] sm:text-xs font-bold border border-white/20 shadow-xs">
                   <Sparkles className="h-3 sm:h-3.5 w-3 sm:w-3.5" />
                   <span>{settings.heroBadgeText || "Featured Collection 2026"}</span>
                 </span>
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-950/30 backdrop-blur-md text-white text-[10px] sm:text-[11px] font-bold">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 sm:py-1 rounded-full bg-slate-950/30 backdrop-blur-md text-white text-[10px] sm:text-[11px] font-bold">
                   <Star className="h-3 w-3 fill-amber-300 text-amber-300" />
                   <span>4.9/5 (2,400+ Orders)</span>
                 </span>
               </div>
 
-              <h1 className="text-2xl xs:text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.08]">
+              <h1 className="text-xl xs:text-2xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight">
                 {settings.heroTitle || settings.storeName || "Aura Mart"}
               </h1>
 
-              <p className="text-xs sm:text-base text-white/95 max-w-lg leading-relaxed font-medium">
+              <p className="text-[11px] xs:text-xs sm:text-base text-white/95 max-w-lg leading-relaxed font-medium line-clamp-2 sm:line-clamp-none">
                 {settings.heroTagline ||
                   settings.tagline ||
                   "Quality Products Delivered to Your Doorstep. Zero advance payment required."}
               </p>
             </div>
 
-            <div className="pt-6 sm:pt-8 relative z-10 flex flex-col xs:flex-row items-stretch xs:items-center gap-2.5 sm:gap-3">
+            <div className="pt-4 sm:pt-8 relative z-10 flex flex-row items-center gap-2 sm:gap-3 flex-wrap">
               <a
                 href="#catalog"
-                className="inline-flex items-center justify-center gap-2 bg-[#181A1D] hover:bg-black text-white text-xs sm:text-sm font-bold px-6 sm:px-7 py-3 sm:py-3.5 rounded-2xl shadow-xl transition-all hover:scale-[1.02] active:scale-95 min-h-[44px]"
+                className="inline-flex items-center justify-center gap-1.5 bg-[#181A1D] hover:bg-black text-white text-xs sm:text-sm font-bold px-4 xs:px-6 sm:px-7 py-2.5 sm:py-3.5 rounded-xl sm:rounded-2xl shadow-xl transition-all hover:scale-[1.02] active:scale-95 min-h-[38px] sm:min-h-[44px]"
               >
                 <span>{settings.heroCtaText || "Shop Catalog"}</span>
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-3.5 sm:h-4 w-3.5 sm:w-4" />
               </a>
 
-              <span className="inline-flex items-center justify-center gap-1.5 text-[11px] sm:text-xs font-bold bg-white/25 backdrop-blur-md px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-2xl border border-white/30 text-white shadow-sm">
-                <CheckCircle2 className="h-3.5 sm:h-4 w-3.5 sm:w-4 text-white" />
+              <span className="inline-flex items-center justify-center gap-1 sm:gap-1.5 text-[10px] xs:text-[11px] sm:text-xs font-semibold bg-white/20 backdrop-blur-md px-2.5 sm:px-4 py-2 sm:py-3 rounded-xl sm:rounded-2xl border border-white/25 text-white shadow-xs">
+                <CheckCircle2 className="h-3 sm:h-4 w-3 sm:w-4 text-white" />
                 <span>{settings.heroBadgeSecondary || "Cash on Delivery Available"}</span>
               </span>
             </div>
@@ -458,57 +458,57 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
             <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl pointer-events-none" />
           </div>
 
-          {/* Right Bento Column: Indigo, Mint & Dark Cards (Span 5 Cols) */}
-          <div className="md:col-span-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 gap-4">
+          {/* Right Bento Column: 2-Column Mini Grid on Mobile (Saves >250px vertical scroll) */}
+          <div className="md:col-span-5 grid grid-cols-2 md:grid-cols-1 gap-2 sm:gap-4">
             {/* Indigo Blue Card: Nationwide Express */}
-            <div className="bg-[#5256FF] text-white rounded-[28px] p-6 shadow-xl flex flex-col justify-between bento-card relative overflow-hidden">
+            <div className="bg-[#5256FF] text-white rounded-[20px] sm:rounded-[28px] p-3.5 sm:p-6 shadow-xl flex flex-col justify-between bento-card relative overflow-hidden">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-black uppercase tracking-wider text-white/85">
+                <span className="text-[9px] sm:text-[11px] font-black uppercase tracking-wider text-white/85 truncate">
                   EXPRESS SHIPPING
                 </span>
-                <div className="w-9 h-9 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                  <Truck className="h-4 w-4 text-white" />
+                <div className="w-6 h-6 sm:w-9 sm:h-9 rounded-xl sm:rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
+                  <Truck className="h-3 sm:h-4 w-3 sm:w-4 text-white" />
                 </div>
               </div>
-              <div className="my-3">
-                <div className="text-xl font-black tracking-tight">
+              <div className="my-2 sm:my-3">
+                <div className="text-xs xs:text-sm sm:text-xl font-black tracking-tight leading-snug">
                   {settings.expressCardTitle || "Fast Doorstep Delivery"}
                 </div>
-                <p className="text-xs text-white/85 mt-1 font-medium">
-                  Inside City: ৳{settings.insideCityDelivery || 60} • Nationwide: ৳{settings.outsideCityDelivery || 120}
+                <p className="text-[10px] sm:text-xs text-white/85 mt-0.5 sm:mt-1 font-medium leading-tight">
+                  ৳{settings.insideCityDelivery || 60} City • ৳{settings.outsideCityDelivery || 120} Nationwide
                 </p>
               </div>
-              <div className="text-[11px] font-bold text-white/95 flex items-center gap-2">
-                <span className="relative flex h-2 w-2">
+              <div className="text-[9px] sm:text-[11px] font-bold text-white/95 flex items-center gap-1 sm:gap-2">
+                <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2 shrink-0">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 bg-emerald-400" />
                 </span>
-                <span>{settings.expressCardSubtitle || "All 64 Districts Dispatched in 24-48 Hours"}</span>
+                <span className="truncate">{settings.expressCardSubtitle || "24-48h Dispatched"}</span>
               </div>
             </div>
 
             {/* Ice Mint Card: 100% Authentic & Inspection */}
-            <div className="bg-[#C4E9E5] text-slate-950 rounded-[28px] p-6 shadow-xl flex flex-col justify-between bento-card">
+            <div className="bg-[#C4E9E5] text-slate-950 rounded-[20px] sm:rounded-[28px] p-3.5 sm:p-6 shadow-xl flex flex-col justify-between bento-card">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-black uppercase tracking-wider text-slate-700">
-                  ASSURANCE & GUARANTEE
+                <span className="text-[9px] sm:text-[11px] font-black uppercase tracking-wider text-slate-700 truncate">
+                  INSPECTION & TRUST
                 </span>
-                <div className="w-9 h-9 rounded-2xl bg-[#181A1D] text-white flex items-center justify-center shadow-md">
-                  <ShieldCheck className="h-4 w-4 text-emerald-400" />
+                <div className="w-6 h-6 sm:w-9 sm:h-9 rounded-xl sm:rounded-2xl bg-[#181A1D] text-white flex items-center justify-center shadow-md shrink-0">
+                  <ShieldCheck className="h-3 sm:h-4 w-3 sm:w-4 text-emerald-400" />
                 </div>
               </div>
-              <div className="my-2">
-                <div className="text-lg font-black tracking-tight">
+              <div className="my-1.5 sm:my-2">
+                <div className="text-xs xs:text-sm sm:text-lg font-black tracking-tight leading-snug">
                   {settings.guaranteeCardTitle || "Open-Box Inspection"}
                 </div>
-                <p className="text-xs text-slate-700 mt-1 font-medium">
+                <p className="text-[10px] sm:text-xs text-slate-700 mt-0.5 sm:mt-1 font-medium leading-tight line-clamp-2 sm:line-clamp-none">
                   {settings.guaranteeCardSubtitle ||
-                    "Check your parcel in front of the delivery agent before paying cash."}
+                    "Inspect parcel in front of delivery agent before cash."}
                 </p>
               </div>
-              <div className="text-[11px] font-bold text-slate-900 flex items-center gap-1.5 pt-1">
-                <RotateCcw className="h-3.5 w-3.5 text-emerald-700" />
-                <span>7-Day Replacement Guarantee</span>
+              <div className="text-[9px] sm:text-[11px] font-bold text-slate-900 flex items-center gap-1 sm:gap-1.5 pt-0.5 sm:pt-1 truncate">
+                <RotateCcw className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-emerald-700 shrink-0" />
+                <span className="truncate">7-Day Replacement</span>
               </div>
             </div>
           </div>
@@ -582,22 +582,25 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
         )}
 
         {/* =====================================================================
-            3. CATEGORY PILL FILTER & SORT BAR
+            3. CATEGORY PILL FILTER & SORT BAR (Streamlined Single-Row Controls)
             ===================================================================== */}
-        <section id="catalog" className="space-y-4 pt-2">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                {isSearching
-                  ? "Search Results"
-                  : selectedCategory === "All"
-                  ? "Explore Catalog"
-                  : selectedCategory === "Viral"
-                  ? "🔥 Mostly Sold & Viral Products"
-                  : selectedCategory === "Featured"
-                  ? "⭐ Pushed by Store Admin"
-                  : selectedCategory}
-                <span className="text-xs font-bold text-slate-600 ml-2 px-2.5 py-0.5 rounded-full bg-white/70 border border-black/5">
+        <section id="catalog" className="space-y-3 sm:space-y-4 pt-1 sm:pt-2">
+          {/* Consolidated Single-Row Header & Sort */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <h2 className="text-base sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-1.5 sm:gap-2">
+                <span className="truncate">
+                  {isSearching
+                    ? "Search Results"
+                    : selectedCategory === "All"
+                    ? "Explore Catalog"
+                    : selectedCategory === "Viral"
+                    ? "🔥 Viral Products"
+                    : selectedCategory === "Featured"
+                    ? "⭐ Admin Picks"
+                    : selectedCategory}
+                </span>
+                <span className="text-[10px] sm:text-xs font-bold text-slate-600 px-2 py-0.5 rounded-full bg-white/80 border border-black/5 shrink-0">
                   {isSearching
                     ? exactSearchResults.length + similarSearchResults.length
                     : standardFilteredProducts.length}{" "}
@@ -609,15 +612,15 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
                 </span>
               </h2>
               {isSearching && (
-                <p className="text-xs font-medium text-slate-600 mt-0.5">
+                <p className="text-[11px] sm:text-xs font-medium text-slate-600 mt-0.5 truncate">
                   Showing matches for &quot;{searchQuery}&quot;
                 </p>
               )}
             </div>
 
-            {/* Sort Dropdown */}
-            <div className="flex items-center gap-2 shrink-0">
-              <span className="text-xs font-bold text-slate-600 hidden xs:inline flex items-center gap-1">
+            {/* Compact Sort Dropdown */}
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+              <span className="text-xs font-bold text-slate-600 hidden md:inline flex items-center gap-1">
                 <SlidersHorizontal className="h-3.5 w-3.5" />
                 <span>Sort by:</span>
               </span>
@@ -629,10 +632,10 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
                   )
                 }
                 aria-label="Sort products by"
-                className="bg-white/90 backdrop-blur-sm border border-black/10 rounded-2xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/30 min-h-[40px] shadow-sm cursor-pointer"
+                className="bg-white/95 backdrop-blur-sm border border-black/10 rounded-xl sm:rounded-2xl px-2.5 sm:px-3 py-1.5 sm:py-2 text-[11px] sm:text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/30 min-h-[34px] sm:min-h-[40px] shadow-xs cursor-pointer"
               >
                 <option value="featured">Featured / Default</option>
-                <option value="viral">🔥 Mostly Sold / Viral First</option>
+                <option value="viral">🔥 Mostly Sold / Viral</option>
                 <option value="price-asc">Price: Low to High</option>
                 <option value="price-desc">Price: High to Low</option>
                 <option value="discount">Biggest Savings</option>
@@ -641,22 +644,22 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
           </div>
 
           {/* Category Pill Horizontal Scroller */}
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
             {categories.map((cat) => {
               const isActive = selectedCategory === cat;
               return (
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
-                  className={`px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all min-h-[42px] flex items-center gap-1.5 shadow-sm active:scale-95 ${
+                  className={`px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl text-[11px] sm:text-xs font-bold whitespace-nowrap transition-all min-h-[36px] sm:min-h-[42px] flex items-center gap-1 sm:gap-1.5 shadow-xs active:scale-95 shrink-0 ${
                     isActive
                       ? "bg-[#181A1D] text-white shadow-md shadow-black/15"
-                      : "bg-white/80 backdrop-blur-sm text-slate-700 hover:bg-white hover:text-slate-950 border border-black/5"
+                      : "bg-white/85 backdrop-blur-sm text-slate-700 hover:bg-white hover:text-slate-950 border border-black/5"
                   }`}
                 >
-                  {cat === "Viral" && <Flame className="h-3.5 w-3.5 text-[#FF6448] fill-[#FF6448]" />}
-                  {cat === "Featured" && <Sparkles className="h-3.5 w-3.5 text-amber-500" />}
-                  {cat === "All" && <Sparkles className="h-3.5 w-3.5 text-slate-500" />}
+                  {cat === "Viral" && <Flame className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-[#FF6448] fill-[#FF6448]" />}
+                  {cat === "Featured" && <Sparkles className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-amber-500" />}
+                  {cat === "All" && <Sparkles className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-slate-500" />}
                   <span>{cat === "Viral" ? "Viral Hits" : cat === "Featured" ? "Admin Picks" : cat}</span>
                 </button>
               );

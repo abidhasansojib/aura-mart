@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Phone, Search, ShoppingBag, Truck, ShieldCheck, Sparkles } from "lucide-react";
 import { useCart } from "@/context/CartContext";
@@ -34,6 +34,25 @@ export function Navbar({
   const { totalItems, setIsCartOpen } = useCart();
   const [isTrackModalOpen, setIsTrackModalOpen] = useState(false);
   const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
+  const [isScrolledDown, setIsScrolledDown] = useState(false);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > 70 && currentScrollY > lastScrollY.current + 6) {
+        // Scrolling down past 70px -> condense mobile search to give screen estate to products
+        setIsScrolledDown(true);
+      } else if (currentScrollY < lastScrollY.current - 6 || currentScrollY <= 40) {
+        // Scrolling up or at top -> smoothly reveal search bar
+        setIsScrolledDown(false);
+      }
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <>
@@ -42,7 +61,8 @@ export function Navbar({
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 sm:gap-2 truncate text-slate-300 min-w-0">
             <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#FF6448] animate-pulse shrink-0" />
-            <span className="truncate">{announcementText}</span>
+            <span className="truncate hidden sm:inline">{announcementText}</span>
+            <span className="truncate sm:hidden">🚚 Cash on Delivery Nationwide • Fast Express</span>
           </div>
 
           <div className="flex items-center gap-2.5 sm:gap-4 shrink-0 text-slate-400">
@@ -68,20 +88,20 @@ export function Navbar({
         </div>
       </div>
 
-      {/* 2. Floating Bento Glass Header */}
-      <header className="sticky top-0 z-30 backdrop-blur-xl bg-white/90 border-b border-black/5 shadow-sm transition-all">
-        <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-2.5 sm:py-0">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between sm:h-20 gap-2.5 sm:gap-6">
+      {/* 2. Floating Bento Glass Header (Auto-condenses on mobile scroll) */}
+      <header className="sticky top-0 z-30 backdrop-blur-xl bg-white/90 border-b border-black/5 shadow-sm transition-all duration-300">
+        <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-2 sm:py-0">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between sm:h-20 gap-2 sm:gap-6">
             {/* Top row on mobile / Left Brand on desktop */}
             <div className="flex items-center justify-between gap-3">
               {/* Brand Logo & Name */}
-              <Link href="/" className="flex items-center gap-2.5 sm:gap-3 shrink-0 group">
-                <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-[#181A1D] flex items-center justify-center text-white font-black text-base sm:text-lg shadow-md group-hover:scale-105 transition-transform border border-white/10 relative overflow-hidden">
+              <Link href="/" className="flex items-center gap-2 sm:gap-3 shrink-0 group">
+                <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-[#181A1D] flex items-center justify-center text-white font-black text-sm sm:text-lg shadow-md group-hover:scale-105 transition-transform border border-white/10 relative overflow-hidden">
                   <span className="relative z-10">{storeName.charAt(0) || "A"}</span>
                   <div className="absolute inset-0 bg-gradient-to-tr from-[#FF6448]/30 to-transparent pointer-events-none" />
                 </div>
                 <div>
-                  <span className="text-base sm:text-lg font-black text-slate-900 tracking-tight block leading-none">
+                  <span className="text-sm sm:text-lg font-black text-slate-900 tracking-tight block leading-none">
                     {storeName}
                   </span>
                   <span className="text-[9px] sm:text-[10px] text-[#FF6448] font-bold uppercase tracking-wider block mt-0.5 sm:mt-1 flex items-center gap-1">
@@ -91,11 +111,22 @@ export function Navbar({
                 </div>
               </Link>
 
-              {/* Mobile Actions: Track Order & Cart (Visible on < sm) */}
-              <div className="flex items-center gap-2 sm:hidden">
+              {/* Mobile Actions: Search Trigger, Track Order & Cart (Visible on < sm) */}
+              <div className="flex items-center gap-1.5 sm:hidden">
+                {isScrolledDown && (
+                  <button
+                    onClick={() => setIsScrolledDown(false)}
+                    className="flex items-center justify-center w-8.5 h-8.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors active:scale-95 animate-in fade-in"
+                    title="Search catalog"
+                    aria-label="Search"
+                  >
+                    <Search className="h-4 w-4" />
+                  </button>
+                )}
+
                 <button
                   onClick={() => setIsTrackModalOpen(true)}
-                  className="flex items-center justify-center w-10 h-10 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors active:scale-95 min-h-[40px] min-w-[40px]"
+                  className="flex items-center justify-center w-8.5 h-8.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors active:scale-95"
                   title="Track Order Status"
                   aria-label="Track Order"
                 >
@@ -104,12 +135,12 @@ export function Navbar({
 
                 <button
                   onClick={() => setIsCartOpen(true)}
-                  className="relative flex items-center justify-center w-10 h-10 rounded-2xl bg-[#181A1D] hover:bg-black text-white shadow-md active:scale-95 transition-all min-h-[40px] min-w-[40px]"
+                  className="relative flex items-center justify-center w-8.5 h-8.5 rounded-xl bg-[#181A1D] hover:bg-black text-white shadow-md active:scale-95 transition-all"
                   aria-label={`Shopping cart containing ${totalItems} items`}
                 >
                   <ShoppingBag className="h-4 w-4" />
                   {totalItems > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 bg-[#FF6448] text-white text-[10px] font-black h-4.5 min-w-[18px] px-1 rounded-full flex items-center justify-center shadow-md animate-pulse">
+                    <span className="absolute -top-1 -right-1 bg-[#FF6448] text-white text-[9px] font-black h-4 min-w-[16px] px-1 rounded-full flex items-center justify-center shadow-md animate-pulse">
                       {totalItems}
                     </span>
                   )}
@@ -117,10 +148,16 @@ export function Navbar({
               </div>
             </div>
 
-            {/* Instant Search Bar with Live Autocomplete Popover (Full Width on Mobile) */}
-            <div className="flex-1 w-full sm:max-w-md md:max-w-lg relative">
+            {/* Instant Search Bar with Live Autocomplete Popover (Auto-condensed on mobile downward scroll) */}
+            <div
+              className={`flex-1 w-full sm:max-w-md md:max-w-lg relative transition-all duration-300 ease-in-out ${
+                isScrolledDown
+                  ? "max-h-0 opacity-0 -translate-y-2 pointer-events-none overflow-hidden sm:max-h-none sm:opacity-100 sm:translate-y-0 sm:pointer-events-auto sm:overflow-visible"
+                  : "max-h-14 opacity-100 translate-y-0"
+              }`}
+            >
               <div className="relative">
-                <Search className="absolute left-3.5 sm:left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 h-3.5 sm:h-4 w-3.5 sm:w-4 text-slate-400 pointer-events-none" />
                 <input
                   type="text"
                   value={searchQuery}
@@ -137,7 +174,7 @@ export function Navbar({
                     }
                   }}
                   placeholder="Search products, categories, or keywords..."
-                  className="w-full pl-10 sm:pl-11 pr-14 py-2 sm:py-2.5 rounded-2xl sm:rounded-full border border-black/10 bg-white/95 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#FF6448]/30 focus:border-[#FF6448] transition-all min-h-[42px] sm:min-h-[44px] shadow-sm"
+                  className="w-full pl-9 sm:pl-11 pr-12 sm:pr-14 py-1.5 sm:py-2.5 rounded-xl sm:rounded-full border border-black/10 bg-white/95 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#FF6448]/30 focus:border-[#FF6448] transition-all min-h-[36px] sm:min-h-[44px] shadow-sm"
                 />
                 {searchQuery && (
                   <button
@@ -145,7 +182,7 @@ export function Navbar({
                       onSearchChange("");
                       setIsSearchDropdownOpen(false);
                     }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400 hover:text-slate-700 bg-gray-100 hover:bg-gray-200 px-2 py-0.5 rounded-full"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[11px] font-semibold text-slate-400 hover:text-slate-700 bg-gray-100 hover:bg-gray-200 px-2 py-0.5 rounded-full"
                   >
                     Clear
                   </button>
