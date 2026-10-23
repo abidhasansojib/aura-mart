@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
@@ -12,6 +13,7 @@ import {
   RefreshCw,
   Bell,
   Store,
+  ShieldCheck,
 } from "lucide-react";
 import { AdminLogin } from "@/components/admin/AdminLogin";
 import { AdminOverview } from "@/components/admin/AdminOverview";
@@ -43,8 +45,20 @@ export default function AdminPage() {
   });
   const [isLoadingData, setIsLoadingData] = useState(false);
 
-  // Check auth on mount
+  // Load settings and check auth on mount
   useEffect(() => {
+    fetch("/api/settings")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data) {
+          setSettings(data);
+          if (data.storeName) {
+            document.title = `${data.storeName} — Admin Dashboard`;
+          }
+        }
+      })
+      .catch(() => {});
+
     fetch("/api/admin/auth")
       .then((res) => res.json())
       .then((data) => {
@@ -52,6 +66,13 @@ export default function AdminPage() {
       })
       .catch(() => setIsAuthenticated(false));
   }, []);
+
+  // Keep browser tab title dynamic whenever storeName changes
+  useEffect(() => {
+    if (settings.storeName) {
+      document.title = `${settings.storeName} — Admin Dashboard`;
+    }
+  }, [settings.storeName]);
 
   // Fetch orders, products, settings
   const fetchDashboardData = useCallback(async () => {
@@ -107,7 +128,13 @@ export default function AdminPage() {
   }
 
   if (!isAuthenticated) {
-    return <AdminLogin onSuccess={() => setIsAuthenticated(true)} />;
+    return (
+      <AdminLogin
+        onSuccess={() => setIsAuthenticated(true)}
+        storeName={settings.storeName}
+        logoUrl={settings.logoUrl}
+      />
+    );
   }
 
   const pendingOrdersCount = orders.filter((o) => o.status === "Pending").length;
@@ -140,10 +167,18 @@ export default function AdminPage() {
           <div className="space-y-4 flex flex-col items-center w-full">
             <Link
               href="/"
-              className="w-10 h-10 rounded-2xl bg-white text-slate-950 font-black text-sm flex items-center justify-center shadow-md hover:scale-105 transition-transform"
-              title="Storefront"
+              className="w-10 h-10 rounded-2xl bg-white text-slate-950 font-black text-xs flex items-center justify-center shadow-md hover:scale-105 transition-transform overflow-hidden p-1"
+              title={`Visit ${settings.storeName || "Storefront"}`}
             >
-              Am
+              {settings.logoUrl ? (
+                <img
+                  src={settings.logoUrl}
+                  alt={settings.storeName}
+                  className="max-h-full max-w-full object-contain"
+                />
+              ) : (
+                <span>{settings.storeName?.slice(0, 2).toUpperCase() || "AM"}</span>
+              )}
             </Link>
 
             {/* Nav Icons */}
@@ -226,9 +261,17 @@ export default function AdminPage() {
               <LogOut className="h-4 w-4" />
             </button>
 
-            {/* Avatar Pill */}
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#FF6448] to-[#F5B738] flex items-center justify-center text-slate-950 font-black text-xs shadow-inner">
-              👑
+            {/* Redesigned Executive Admin Profile Badge */}
+            <div className="relative group cursor-default" title="Super Admin Account (Verified)">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#2D3036] via-[#1F2126] to-[#141619] border border-white/10 shadow-lg flex items-center justify-center relative overflow-hidden group-hover:border-amber-400/50 transition-all">
+                <div className="absolute inset-0 bg-radial from-amber-400/15 via-transparent to-transparent pointer-events-none" />
+                <ShieldCheck className="h-4.5 w-4.5 text-amber-400 group-hover:scale-110 transition-transform" />
+              </div>
+              {/* Online Pulse Dot */}
+              <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 ring-2 ring-[#212429]" />
+              </span>
             </div>
           </div>
         </aside>
@@ -244,10 +287,18 @@ export default function AdminPage() {
               <div className="flex items-center gap-2.5">
                 <Link
                   href="/"
-                  className="sm:hidden w-7 h-7 rounded-xl bg-white text-slate-950 font-black text-xs flex items-center justify-center shadow-md shrink-0"
+                  className="sm:hidden w-7 h-7 rounded-xl bg-white text-slate-950 font-black text-[10px] flex items-center justify-center shadow-md shrink-0 overflow-hidden p-0.5"
                   title="Visit Store"
                 >
-                  Am
+                  {settings.logoUrl ? (
+                    <img
+                      src={settings.logoUrl}
+                      alt={settings.storeName}
+                      className="max-h-full max-w-full object-contain"
+                    />
+                  ) : (
+                    <span>{settings.storeName?.charAt(0) || "A"}</span>
+                  )}
                 </Link>
                 <h2 className="text-xs sm:text-sm font-semibold tracking-wide text-slate-400 font-mono truncate">
                   {getBreadcrumbTitle()}

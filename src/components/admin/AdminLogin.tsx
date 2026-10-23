@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -21,6 +22,8 @@ import {
 
 interface AdminLoginProps {
   onSuccess: () => void;
+  storeName?: string;
+  logoUrl?: string;
 }
 
 type AuthMode = "login" | "forgot-request" | "forgot-verify" | "master-recovery";
@@ -43,8 +46,18 @@ function getPasswordStrength(pass: string): {
   return { label: "Strong", score: 3, barColor: "bg-emerald-500" };
 }
 
-export function AdminLogin({ onSuccess }: AdminLoginProps) {
+export function AdminLogin({
+  onSuccess,
+  storeName = "Aura Mart",
+  logoUrl = "",
+}: AdminLoginProps) {
   const [mode, setMode] = useState<AuthMode>("login");
+
+  useEffect(() => {
+    if (storeName) {
+      document.title = `${storeName} — Admin Login`;
+    }
+  }, [storeName]);
 
   // Login credentials
   const [usernameOrEmail, setUsernameOrEmail] = useState("admin");
@@ -226,15 +239,25 @@ export function AdminLogin({ onSuccess }: AdminLoginProps) {
         {/* Brand Header */}
         <div className="text-center space-y-2">
           <Link href="/" className="inline-block group">
-            <div className="w-12 h-12 sm:w-13 sm:h-13 rounded-2xl bg-[#181A1D] text-white flex items-center justify-center mx-auto shadow-md group-hover:scale-105 transition-transform border border-white/10 relative overflow-hidden">
-              <span className="relative z-10 font-black text-xl">A</span>
-              <div className="absolute inset-0 bg-gradient-to-tr from-[#FF6448]/40 to-transparent pointer-events-none" />
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[#181A1D] text-white flex items-center justify-center mx-auto shadow-md group-hover:scale-105 transition-transform border border-white/10 relative overflow-hidden p-1.5">
+              {logoUrl ? (
+                <img
+                  src={logoUrl}
+                  alt={storeName}
+                  className="max-h-full max-w-full object-contain"
+                />
+              ) : (
+                <>
+                  <span className="relative z-10 font-black text-xl">{storeName.charAt(0) || "A"}</span>
+                  <div className="absolute inset-0 bg-gradient-to-tr from-[#FF6448]/40 to-transparent pointer-events-none" />
+                </>
+              )}
             </div>
           </Link>
 
           <div>
             <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-              Aura Mart
+              {storeName}
             </h1>
             <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#181A1D] text-white text-[10px] font-bold uppercase tracking-wider mt-1 shadow-sm">
               <ShieldCheck className="h-3 w-3 text-[#FF6448]" />
@@ -691,7 +714,7 @@ export function AdminLogin({ onSuccess }: AdminLoginProps) {
           ) : (
             <span className="text-slate-400 text-[11px] flex items-center gap-1">
               <Sparkles className="h-3 w-3 text-[#FF6448]" />
-              <span>Aura Mart OS v2.0</span>
+              <span>{storeName} Portal v2.0</span>
             </span>
           )}
 
