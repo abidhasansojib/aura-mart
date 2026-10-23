@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import React from "react";
 import Link from "next/link";
-import { ShieldCheck, Truck, RotateCcw, Headphones, Phone } from "lucide-react";
+import { ShieldCheck, Truck, PackageCheck, Headphones, Phone } from "lucide-react";
 
 interface FooterProps {
   storeName?: string;
@@ -42,17 +42,17 @@ export function Footer({
               </div>
               <div>
                 <h4 className="text-xs sm:text-sm font-black text-white">100% Authentic</h4>
-                <p className="text-[10px] sm:text-[11px] text-slate-400">Inspected parcel</p>
+                <p className="text-[10px] sm:text-[11px] text-slate-400">Direct genuine source</p>
               </div>
             </div>
 
             <div className="flex items-center gap-2.5 sm:gap-3.5 p-3 sm:p-4 rounded-2xl bg-[#24272C] border border-white/5 shadow-sm">
-              <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-[#FF6448]/20 text-[#FF6448] flex items-center justify-center shrink-0">
-                <RotateCcw className="h-4 sm:h-5 w-4 sm:w-5" />
+              <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                <PackageCheck className="h-4 sm:h-5 w-4 sm:w-5" />
               </div>
               <div>
-                <h4 className="text-xs sm:text-sm font-black text-white">Easy Returns</h4>
-                <p className="text-[10px] sm:text-[11px] text-slate-400">7-day replacement</p>
+                <h4 className="text-xs sm:text-sm font-black text-white">Doorstep Check</h4>
+                <p className="text-[10px] sm:text-[11px] text-slate-400">Inspect before payment</p>
               </div>
             </div>
 
