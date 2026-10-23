@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { X, Plus, Minus, ShoppingBag, Zap, CheckCircle2, ShieldCheck, Truck, Star } from "lucide-react";
+import { X, Plus, Minus, ShoppingBag, Zap, CheckCircle2, ShieldCheck, Truck, Star, Flame, Sparkles } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/utils";
 
@@ -18,6 +18,8 @@ export interface ModalProduct {
   stock: number;
   imageUrl: string;
   isFeatured?: boolean;
+  salesCount?: number;
+  isViral?: boolean;
 }
 
 interface ProductDetailModalProps {
@@ -142,6 +144,24 @@ export function ProductDetailModal({
                     </span>
                   )}
                 </div>
+
+                {/* Social Proof & Admin Pick Banner */}
+                {((product.salesCount !== undefined && product.salesCount > 0) || product.isFeatured) && (
+                  <div className="flex items-center gap-2 flex-wrap pt-0.5">
+                    {product.salesCount !== undefined && product.salesCount > 0 && (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-[#FF6448]/10 text-[#FF6448] border border-[#FF6448]/20 shadow-xs">
+                        <Flame className="h-3.5 w-3.5 fill-[#FF6448]" />
+                        <span>{product.salesCount}+ Sold • Viral Choice</span>
+                      </span>
+                    )}
+                    {product.isFeatured && (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 shadow-xs">
+                        <Sparkles className="h-3.5 w-3.5 text-amber-600" />
+                        <span>Admin Pushed • Featured Pick</span>
+                      </span>
+                    )}
+                  </div>
+                )}
 
                 {/* Description */}
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">

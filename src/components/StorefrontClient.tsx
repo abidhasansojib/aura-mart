@@ -95,10 +95,15 @@ function ProductCard({
         />
 
         {/* Top Badges */}
-        <div className="absolute top-2 sm:top-3 inset-x-2 sm:inset-x-3 flex items-center justify-between pointer-events-none">
+        <div className="absolute top-2 sm:top-3 inset-x-2 sm:inset-x-3 flex items-center justify-between pointer-events-none gap-1">
           {discountPercent ? (
             <span className="bg-[#FF6448] text-white text-[9px] sm:text-[10px] font-black px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full shadow-md">
               {discountPercent}% OFF
+            </span>
+          ) : product.salesCount && product.salesCount > 0 ? (
+            <span className="bg-[#181A1D]/85 backdrop-blur-sm text-white text-[9px] sm:text-[10px] font-black px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full shadow-md flex items-center gap-1">
+              <Flame className="h-2.5 w-2.5 text-[#FF6448] fill-[#FF6448]" />
+              <span>{product.salesCount}+ Sold</span>
             </span>
           ) : (
             <span />
@@ -111,12 +116,18 @@ function ProductCard({
                 <span className="hidden xs:inline">Related</span>
               </span>
             )}
-            {product.isFeatured && (
-              <span className="bg-[#181A1D]/80 backdrop-blur-sm text-white text-[9px] sm:text-[10px] font-black px-1.5 sm:px-2 py-0.5 rounded-full shadow-sm flex items-center gap-0.5">
-                <Flame className="h-2.5 w-2.5 text-[#FF6448] fill-[#FF6448]" />
-                <span className="hidden xs:inline">Hot</span>
+            {product.isFeatured ? (
+              <span className="bg-amber-400 text-slate-950 text-[9px] sm:text-[10px] font-black px-1.5 sm:px-2 py-0.5 rounded-full shadow-md flex items-center gap-0.5 border border-amber-500/20">
+                <Sparkles className="h-2.5 w-2.5 text-slate-950" />
+                <span className="hidden xs:inline">Staff Pick</span>
+                <span className="xs:hidden">Pick</span>
               </span>
-            )}
+            ) : product.isViral ? (
+              <span className="bg-emerald-600 text-white text-[9px] sm:text-[10px] font-black px-1.5 sm:px-2 py-0.5 rounded-full shadow-md flex items-center gap-0.5">
+                <Flame className="h-2.5 w-2.5 text-amber-300 fill-amber-300" />
+                <span className="hidden xs:inline">Viral</span>
+              </span>
+            ) : null}
           </div>
         </div>
 
@@ -142,10 +153,17 @@ function ProductCard({
         <div className="space-y-1 sm:space-y-1.5">
           <div className="flex items-center justify-between text-[9px] sm:text-[10px] font-bold text-slate-400">
             <span className="uppercase tracking-wider font-mono truncate pr-1">{product.category}</span>
-            <span className="flex items-center gap-0.5 text-amber-500 shrink-0">
-              <Star className="h-2.5 w-2.5 sm:h-3 sm:w-3 fill-amber-400 text-amber-400" />
-              <span>4.9</span>
-            </span>
+            <div className="flex items-center gap-1.5 shrink-0">
+              {product.salesCount !== undefined && product.salesCount > 0 ? (
+                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded-md">
+                  {product.salesCount} sold
+                </span>
+              ) : null}
+              <span className="flex items-center gap-0.5 text-amber-500">
+                <Star className="h-2.5 w-2.5 sm:h-3 sm:w-3 fill-amber-400 text-amber-400" />
+                <span>4.9</span>
+              </span>
+            </div>
           </div>
 
           <h3
@@ -253,23 +271,28 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
   // Filter & sort states
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [sortBy, setSortBy] = useState<"featured" | "price-asc" | "price-desc" | "discount">("featured");
+  const [sortBy, setSortBy] = useState<"featured" | "viral" | "price-asc" | "price-desc" | "discount">("featured");
   const [activeModalProduct, setActiveModalProduct] = useState<ModalProduct | null>(null);
 
-  // Extract unique categories
+  // Extract unique categories including Viral and Featured
   const categories = useMemo(() => {
     const set = new Set<string>();
     initialProducts.forEach((p) => {
       if (p.category) set.add(p.category);
     });
-    return ["All", "Featured", ...Array.from(set)];
+    return ["All", "Viral", "Featured", ...Array.from(set)];
   }, [initialProducts]);
 
-  // Helper to sort products
+  // Helper to sort products dynamically
   const sortProducts = useCallback(
     <T extends ModalProduct>(items: T[]): T[] => {
       const list = [...items];
       return list.sort((a, b) => {
+        if (sortBy === "viral") {
+          const scoreA = (a.isFeatured ? 500 : 0) + (a.salesCount || 0) * 10;
+          const scoreB = (b.isFeatured ? 500 : 0) + (b.salesCount || 0) * 10;
+          return scoreB - scoreA;
+        }
         if (sortBy === "price-asc") return a.price - b.price;
         if (sortBy === "price-desc") return b.price - a.price;
         if (sortBy === "discount") {
@@ -277,7 +300,10 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
           const discB = b.compareAtPrice && b.compareAtPrice > b.price ? b.compareAtPrice - b.price : 0;
           return discB - discA;
         }
-        return 0; // featured / default order
+        // Default "featured": dynamically prioritize admin-pushed (isFeatured) and mostly sold
+        const rankA = (a.isFeatured ? 1000 : 0) + (a.salesCount || 0) * 10;
+        const rankB = (b.isFeatured ? 1000 : 0) + (b.salesCount || 0) * 10;
+        return rankB - rankA;
       });
     },
     [sortBy]
@@ -291,11 +317,16 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
     return searchProducts(initialProducts, searchQuery);
   }, [initialProducts, searchQuery, isSearching]);
 
-  // Category filter helper
+  // Category filter helper (supports "Viral" and "Featured" admin pushed)
   const filterByCategory = useCallback(
     (items: ModalProduct[]) => {
       if (selectedCategory === "All") return items;
-      if (selectedCategory === "Featured") return items.filter((p) => Boolean(p.isFeatured));
+      if (selectedCategory === "Viral") {
+        return items.filter((p) => Boolean(p.isViral || (p.salesCount && p.salesCount >= 10)));
+      }
+      if (selectedCategory === "Featured") {
+        return items.filter((p) => Boolean(p.isFeatured));
+      }
       return items.filter((p) => p.category.toLowerCase() === selectedCategory.toLowerCase());
     },
     [selectedCategory]
@@ -318,6 +349,18 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
     if (isSearching) return [];
     return sortProducts(filterByCategory(initialProducts));
   }, [initialProducts, isSearching, filterByCategory, sortProducts]);
+
+  // Top Viral & Mostly Sold Products (or Admin Pushed)
+  const viralSpotlightProducts = useMemo(() => {
+    return [...initialProducts]
+      .filter((p) => (p.salesCount && p.salesCount > 0) || p.isFeatured || p.isViral)
+      .sort((a, b) => {
+        const scoreA = (a.isFeatured ? 500 : 0) + (a.salesCount || 0) * 10;
+        const scoreB = (b.isFeatured ? 500 : 0) + (b.salesCount || 0) * 10;
+        return scoreB - scoreA;
+      })
+      .slice(0, 4);
+  }, [initialProducts]);
 
   // Featured picks for smart fallback
   const featuredPicks = useMemo(() => {
@@ -472,6 +515,73 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
         </section>
 
         {/* =====================================================================
+            2.5. DYNAMIC VIRAL & BEST SELLERS SHOWCASE ("Mostly Sold & Admin Pushed")
+            ===================================================================== */}
+        {!isSearching && viralSpotlightProducts.length > 0 && (
+          <section className="space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gradient-to-r from-[#181A1D] via-[#212429] to-[#181A1D] text-white p-5 sm:p-7 rounded-[28px] sm:rounded-[32px] shadow-2xl relative overflow-hidden border border-white/5">
+              <div className="space-y-1.5 relative z-10">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FF6448] text-white text-xs font-black shadow-md shadow-[#FF6448]/30">
+                    <Flame className="h-3.5 w-3.5 fill-white" />
+                    <span>VIRAL & BEST SELLERS</span>
+                  </span>
+                  <span className="text-xs font-bold text-slate-300 hidden xs:inline flex items-center gap-1">
+                    <Sparkles className="h-3 w-3 text-amber-400" />
+                    <span>Mostly Sold & Admin Pushed</span>
+                  </span>
+                </div>
+                <h2 className="text-xl sm:text-3xl font-black tracking-tight text-white">
+                  Trending Hot Picks
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-300 max-w-xl font-medium">
+                  Products with the highest sales volume and hand-picked recommendations from our store admin.
+                </p>
+              </div>
+
+              <div className="relative z-10 shrink-0">
+                <button
+                  onClick={() => {
+                    setSelectedCategory("Viral");
+                    const el = document.getElementById("catalog");
+                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 sm:px-5 py-2.5 rounded-xl bg-white text-slate-950 font-bold text-xs hover:bg-slate-100 transition-all active:scale-95 shadow-md"
+                >
+                  <span>Explore All Trending</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </button>
+              </div>
+
+              {/* Decorative background glow */}
+              <div className="absolute -right-12 -top-12 w-48 h-48 bg-[#FF6448]/20 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute -left-12 -bottom-12 w-48 h-48 bg-[#5256FF]/20 rounded-full blur-3xl pointer-events-none" />
+            </div>
+
+            {/* Top 4 Viral Spotlight Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3.5 sm:gap-6">
+              {viralSpotlightProducts.map((product, idx) => (
+                <div key={product.id} className="relative">
+                  <div className="absolute -top-2 left-3 z-20 pointer-events-none">
+                    <span className="bg-gradient-to-r from-amber-500 to-[#FF6448] text-white text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-lg border border-white/20 flex items-center gap-1">
+                      <Flame className="h-3 w-3 fill-white" />
+                      <span>#{idx + 1} Viral</span>
+                    </span>
+                  </div>
+                  <ProductCard
+                    product={product}
+                    currencySymbol={currencySymbol}
+                    onOpenModal={setActiveModalProduct}
+                    onAddToCart={(p) => addItem(p, 1)}
+                    onQuickBuy={handleQuickBuy}
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* =====================================================================
             3. CATEGORY PILL FILTER & SORT BAR
             ===================================================================== */}
         <section id="catalog" className="space-y-4 pt-2">
@@ -482,8 +592,10 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
                   ? "Search Results"
                   : selectedCategory === "All"
                   ? "Explore Catalog"
+                  : selectedCategory === "Viral"
+                  ? "🔥 Mostly Sold & Viral Products"
                   : selectedCategory === "Featured"
-                  ? "Featured Selection"
+                  ? "⭐ Pushed by Store Admin"
                   : selectedCategory}
                 <span className="text-xs font-bold text-slate-600 ml-2 px-2.5 py-0.5 rounded-full bg-white/70 border border-black/5">
                   {isSearching
@@ -513,13 +625,14 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
                 value={sortBy}
                 onChange={(e) =>
                   setSortBy(
-                    e.target.value as "featured" | "price-asc" | "price-desc" | "discount"
+                    e.target.value as "featured" | "viral" | "price-asc" | "price-desc" | "discount"
                   )
                 }
                 aria-label="Sort products by"
                 className="bg-white/90 backdrop-blur-sm border border-black/10 rounded-2xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/30 min-h-[40px] shadow-sm cursor-pointer"
               >
                 <option value="featured">Featured / Default</option>
+                <option value="viral">🔥 Mostly Sold / Viral First</option>
                 <option value="price-asc">Price: Low to High</option>
                 <option value="price-desc">Price: High to Low</option>
                 <option value="discount">Biggest Savings</option>
@@ -541,9 +654,10 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
                       : "bg-white/80 backdrop-blur-sm text-slate-700 hover:bg-white hover:text-slate-950 border border-black/5"
                   }`}
                 >
-                  {cat === "Featured" && <Flame className="h-3.5 w-3.5 text-[#FF6448] fill-[#FF6448]" />}
+                  {cat === "Viral" && <Flame className="h-3.5 w-3.5 text-[#FF6448] fill-[#FF6448]" />}
+                  {cat === "Featured" && <Sparkles className="h-3.5 w-3.5 text-amber-500" />}
                   {cat === "All" && <Sparkles className="h-3.5 w-3.5 text-slate-500" />}
-                  <span>{cat}</span>
+                  <span>{cat === "Viral" ? "Viral Hits" : cat === "Featured" ? "Admin Picks" : cat}</span>
                 </button>
               );
             })}

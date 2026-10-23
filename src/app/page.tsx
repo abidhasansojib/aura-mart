@@ -18,18 +18,8 @@ const FALLBACK_PRODUCTS: ModalProduct[] = [
     stock: 15,
     imageUrl: "https://images.unsplash.com/photo-1627123424574-724758594e93?w=800&auto=format&fit=crop&q=80",
     isFeatured: true,
-  },
-  {
-    id: "sample-2",
-    name: "Matte Black Ceramic Coffee Mug (350ml)",
-    slug: "matte-black-ceramic-coffee-mug",
-    description: "Handcrafted stoneware mug with a velvety matte black glaze and comfortable ergonomic grip. Microwave and dishwasher safe.",
-    category: "Lifestyle",
-    price: 420,
-    compareAtPrice: 550,
-    stock: 24,
-    imageUrl: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=800&auto=format&fit=crop&q=80",
-    isFeatured: true,
+    salesCount: 48,
+    isViral: true,
   },
   {
     id: "sample-3",
@@ -42,18 +32,8 @@ const FALLBACK_PRODUCTS: ModalProduct[] = [
     stock: 8,
     imageUrl: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=800&auto=format&fit=crop&q=80",
     isFeatured: true,
-  },
-  {
-    id: "sample-4",
-    name: "Heavyweight 240 GSM Pure Cotton T-Shirt",
-    slug: "heavyweight-pure-cotton-tshirt",
-    description: "Relaxed boxy fit made with 100% pre-shrunk combed cotton. Ultra-durable ribbed collar that maintains its shape wash after wash.",
-    category: "Apparel",
-    price: 750,
-    compareAtPrice: 950,
-    stock: 30,
-    imageUrl: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800&auto=format&fit=crop&q=80",
-    isFeatured: false,
+    salesCount: 35,
+    isViral: true,
   },
   {
     id: "sample-5",
@@ -66,6 +46,36 @@ const FALLBACK_PRODUCTS: ModalProduct[] = [
     stock: 4,
     imageUrl: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=800&auto=format&fit=crop&q=80",
     isFeatured: true,
+    salesCount: 22,
+    isViral: true,
+  },
+  {
+    id: "sample-2",
+    name: "Matte Black Ceramic Coffee Mug (350ml)",
+    slug: "matte-black-ceramic-coffee-mug",
+    description: "Handcrafted stoneware mug with a velvety matte black glaze and comfortable ergonomic grip. Microwave and dishwasher safe.",
+    category: "Lifestyle",
+    price: 420,
+    compareAtPrice: 550,
+    stock: 24,
+    imageUrl: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=800&auto=format&fit=crop&q=80",
+    isFeatured: true,
+    salesCount: 16,
+    isViral: true,
+  },
+  {
+    id: "sample-4",
+    name: "Heavyweight 240 GSM Pure Cotton T-Shirt",
+    slug: "heavyweight-pure-cotton-tshirt",
+    description: "Relaxed boxy fit made with 100% pre-shrunk combed cotton. Ultra-durable ribbed collar that maintains its shape wash after wash.",
+    category: "Apparel",
+    price: 750,
+    compareAtPrice: 950,
+    stock: 30,
+    imageUrl: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800&auto=format&fit=crop&q=80",
+    isFeatured: false,
+    salesCount: 9,
+    isViral: false,
   },
   {
     id: "sample-6",
@@ -78,6 +88,8 @@ const FALLBACK_PRODUCTS: ModalProduct[] = [
     stock: 18,
     imageUrl: "https://images.unsplash.com/photo-1603006905003-be475563bc59?w=800&auto=format&fit=crop&q=80",
     isFeatured: false,
+    salesCount: 5,
+    isViral: false,
   },
 ];
 
@@ -132,7 +144,7 @@ export default async function HomePage() {
   let settings = DEFAULT_SETTINGS;
 
   try {
-    const [dbProducts, dbSettings] = await Promise.allSettled([
+    const [dbProducts, dbSettings, dbSales] = await Promise.allSettled([
       prisma.product.findMany({
         where: { isActive: true },
         orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
@@ -140,10 +152,66 @@ export default async function HomePage() {
       prisma.storeSettings.findUnique({
         where: { id: "default" },
       }),
+      prisma.orderItem.groupBy({
+        by: ["productId"],
+        _sum: {
+          quantity: true,
+        },
+        where: {
+          productId: { not: null },
+          order: {
+            status: { not: "Cancelled" },
+          },
+        },
+      }),
     ]);
 
+    const salesMap = new Map<string, number>();
+    if (dbSales.status === "fulfilled" && Array.isArray(dbSales.value)) {
+      for (const item of dbSales.value) {
+        if (item.productId && item._sum?.quantity) {
+          salesMap.set(item.productId, item._sum.quantity);
+        }
+      }
+    }
+
+    const STARTER_SALES_BY_SLUG: Record<string, number> = {
+      "minimalist-slim-leather-wallet": 48,
+      "wireless-anc-earbuds": 35,
+      "foldable-ergonomic-laptop-stand": 22,
+      "matte-black-ceramic-coffee-mug": 16,
+      "heavyweight-pure-cotton-tshirt": 9,
+      "aromatherapy-soy-wax-candle": 5,
+    };
+
     if (dbProducts.status === "fulfilled" && dbProducts.value.length > 0) {
-      products = dbProducts.value;
+      // Enrich products with sales metrics & viral classification
+      const enriched = dbProducts.value.map((p) => {
+        const realSales = salesMap.get(p.id) || 0;
+        const starterSales = STARTER_SALES_BY_SLUG[p.slug] || 0;
+        const salesCount = realSales > 0 ? realSales + starterSales : starterSales;
+        const isViral = salesCount >= 10 || (p.isFeatured && salesCount > 0);
+
+        return {
+          ...p,
+          salesCount,
+          isViral,
+        };
+      });
+
+      // Dynamic sorting priority:
+      // 1. Admin pushed (isFeatured) with sales momentum
+      // 2. Admin pushed (isFeatured)
+      // 3. Highest salesCount (most sold viral products)
+      // 4. Newest products
+      enriched.sort((a, b) => {
+        const scoreA = (a.isFeatured ? 1000 : 0) + (a.salesCount || 0) * 10;
+        const scoreB = (b.isFeatured ? 1000 : 0) + (b.salesCount || 0) * 10;
+        if (scoreB !== scoreA) return scoreB - scoreA;
+        return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+      });
+
+      products = enriched;
     } else if (dbProducts.status === "fulfilled" && dbProducts.value.length === 0) {
       // Database connected but empty: auto-seed starter products into DB
       try {
@@ -163,7 +231,11 @@ export default async function HomePage() {
               isActive: true,
             },
           });
-          seeded.push(created);
+          seeded.push({
+            ...created,
+            salesCount: p.salesCount,
+            isViral: p.isViral,
+          });
         }
         if (seeded.length > 0) {
           products = seeded;

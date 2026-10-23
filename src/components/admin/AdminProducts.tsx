@@ -16,6 +16,7 @@ import {
   Eye,
   EyeOff,
   Flame,
+  Zap,
 } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import { compressAndUploadImage } from "@/lib/image-upload";
@@ -32,6 +33,8 @@ export interface AdminProduct {
   imageUrl: string;
   isFeatured: boolean;
   isActive: boolean;
+  salesCount?: number;
+  isViral?: boolean;
   createdAt?: string;
 }
 
@@ -234,6 +237,20 @@ export function AdminProducts({
     }
   };
 
+  const handleTogglePushToHome = async (p: AdminProduct) => {
+    try {
+      const res = await fetch(`/api/products/${p.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isFeatured: !p.isFeatured }),
+      });
+      if (!res.ok) throw new Error("Failed to update home push status");
+      onProductsUpdated();
+    } catch {
+      alert("Failed to toggle product homepage push");
+    }
+  };
+
   const handleDeleteProduct = async (p: AdminProduct) => {
     if (!confirm(`Are you sure you want to delete "${p.name}"? This cannot be undone.`)) {
       return;
@@ -308,13 +325,15 @@ export function AdminProducts({
       ) : (
         <div className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[580px] text-left text-xs text-slate-600">
+            <table className="w-full min-w-[700px] text-left text-xs text-slate-600">
               <thead className="bg-neutral-50 text-[11px] uppercase tracking-wider text-slate-500 border-b border-gray-200">
                 <tr>
                   <th className="py-3.5 px-4 font-bold">Product</th>
                   <th className="py-3.5 px-4 font-bold">Category</th>
                   <th className="py-3.5 px-4 font-bold">Price</th>
+                  <th className="py-3.5 px-4 font-bold">Sales / Demand</th>
                   <th className="py-3.5 px-4 font-bold">Stock</th>
+                  <th className="py-3.5 px-4 font-bold text-center">Home Push</th>
                   <th className="py-3.5 px-4 font-bold text-center">Status</th>
                   <th className="py-3.5 px-4 font-bold text-right">Actions</th>
                 </tr>
@@ -345,7 +364,7 @@ export function AdminProducts({
                             {p.isFeatured && (
                               <span className="inline-flex items-center gap-1 text-[10px] text-amber-700 font-bold bg-amber-50 px-1.5 py-0.2 rounded-md border border-amber-200 mt-0.5">
                                 <Flame className="h-3 w-3 text-amber-500" />
-                                Featured
+                                Pushed to Home
                               </span>
                             )}
                           </div>
@@ -373,6 +392,22 @@ export function AdminProducts({
                         </div>
                       </td>
 
+                      {/* Sales & Demand */}
+                      <td className="py-3 px-4">
+                        <div className="flex flex-col gap-0.5">
+                          <span className="font-mono text-xs font-bold text-slate-800 flex items-center gap-1">
+                            <Zap className="h-3 w-3 text-amber-500 fill-amber-500" />
+                            <span>{p.salesCount || 0} sold</span>
+                          </span>
+                          {p.isViral ? (
+                            <span className="inline-flex items-center gap-1 text-[10px] text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200 w-fit">
+                              <Flame className="h-2.5 w-2.5 text-emerald-600 fill-emerald-600" />
+                              Viral Hit
+                            </span>
+                          ) : null}
+                        </div>
+                      </td>
+
                       {/* Stock Quantity */}
                       <td className="py-3 px-4">
                         {isOut ? (
@@ -388,6 +423,23 @@ export function AdminProducts({
                             {p.stock} in stock
                           </span>
                         )}
+                      </td>
+
+                      {/* Push to Homepage Action Switch */}
+                      <td className="py-3 px-4 text-center">
+                        <button
+                          type="button"
+                          onClick={() => handleTogglePushToHome(p)}
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all shadow-xs ${
+                            p.isFeatured
+                              ? "bg-[#FF6448] text-white shadow-[#FF6448]/25 hover:bg-[#e8553b]"
+                              : "bg-neutral-100 text-slate-600 hover:bg-neutral-200 border border-gray-200"
+                          }`}
+                          title={p.isFeatured ? "Pushed to Homepage. Click to unpush." : "Click to push this product to the top of homepage"}
+                        >
+                          <Flame className={`h-3 w-3 ${p.isFeatured ? "fill-white" : "text-slate-400"}`} />
+                          <span>{p.isFeatured ? "Pushed" : "Push"}</span>
+                        </button>
                       </td>
 
                       {/* Active/Hidden Switch */}
@@ -630,26 +682,34 @@ export function AdminProducts({
                 />
               </div>
 
-              {/* Toggles: Featured & Active */}
-              <div className="flex items-center gap-6 pt-1">
-                <label className="flex items-center gap-2 cursor-pointer">
+              {/* Toggles: Featured / Push to Homepage & Active Visibility */}
+              <div className="space-y-2.5 pt-1">
+                <label className="flex items-start gap-2.5 cursor-pointer p-3 rounded-2xl bg-amber-50/70 border border-amber-200/80 hover:bg-amber-50 transition-colors">
                   <input
                     type="checkbox"
                     checked={isFeatured}
                     onChange={(e) => setIsFeatured(e.target.checked)}
-                    className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500"
+                    className="w-4 h-4 text-[#FF6448] rounded focus:ring-[#FF6448] mt-0.5"
                   />
-                  <span className="font-semibold text-slate-800">Featured on Homepage</span>
+                  <div>
+                    <span className="font-bold text-slate-900 block flex items-center gap-1.5 text-xs">
+                      <Flame className="h-4 w-4 text-[#FF6448] fill-[#FF6448]" />
+                      Push to Homepage & Viral Highlights (Admin Pushed)
+                    </span>
+                    <span className="text-[11px] text-slate-500 block mt-0.5 leading-relaxed">
+                      Pushes this item to the top of the homepage with the &quot;Staff Pick&quot; badge and prioritizes it in the Trending Spotlight.
+                    </span>
+                  </div>
                 </label>
 
-                <label className="flex items-center gap-2 cursor-pointer">
+                <label className="flex items-center gap-2 cursor-pointer px-1">
                   <input
                     type="checkbox"
                     checked={isActive}
                     onChange={(e) => setIsActive(e.target.checked)}
                     className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500"
                   />
-                  <span className="font-semibold text-slate-800">Active / Visible in Store</span>
+                  <span className="font-semibold text-slate-800 text-xs">Active / Visible in Store</span>
                 </label>
               </div>
 

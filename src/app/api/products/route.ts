@@ -38,12 +38,55 @@ export async function GET(req: NextRequest) {
       ];
     }
 
-    const products = await prisma.product.findMany({
-      where,
-      orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
+    const [products, salesAgg] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
+      }),
+      prisma.orderItem.groupBy({
+        by: ["productId"],
+        _sum: {
+          quantity: true,
+        },
+        where: {
+          productId: { not: null },
+          order: {
+            status: { not: "Cancelled" },
+          },
+        },
+      }).catch(() => []),
+    ]);
+
+    const salesMap = new Map<string, number>();
+    for (const item of salesAgg) {
+      if (item.productId && item._sum?.quantity) {
+        salesMap.set(item.productId, item._sum.quantity);
+      }
+    }
+
+    const STARTER_SALES_BY_SLUG: Record<string, number> = {
+      "minimalist-slim-leather-wallet": 48,
+      "wireless-anc-earbuds": 35,
+      "foldable-ergonomic-laptop-stand": 22,
+      "matte-black-ceramic-coffee-mug": 16,
+      "heavyweight-pure-cotton-tshirt": 9,
+      "aromatherapy-soy-wax-candle": 5,
+    };
+
+    const enrichedProducts = products.map((p) => {
+      const realSales = salesMap.get(p.id) || 0;
+      const starterSales = STARTER_SALES_BY_SLUG[p.slug] || 0;
+      const salesCount = realSales > 0 ? realSales + starterSales : starterSales;
+      const isViral = salesCount >= 10 || (p.isFeatured && salesCount > 0);
+
+      return {
+        ...p,
+        salesCount,
+        isViral,
+      };
     });
 
-    return NextResponse.json(products);
+    return NextResponse.json(enrichedProducts);
   } catch (error) {
     console.error("GET /api/products error:", error);
     return NextResponse.json(

@@ -150,6 +150,11 @@ export function SearchAutocomplete<T extends SearchableProduct>({
                         <span className="text-[10px] text-slate-400 font-medium">
                           {p.category}
                         </span>
+                        {p.salesCount !== undefined && p.salesCount > 0 && (
+                          <span className="text-[9px] font-bold text-[#FF6448] bg-[#FF6448]/10 px-1.5 py-0.2 rounded">
+                            {p.salesCount} sold
+                          </span>
+                        )}
                         {p.stock <= 0 && (
                           <span className="text-[10px] font-bold text-rose-600 bg-rose-50 px-1.5 rounded">
                             Sold Out

@@ -9,6 +9,8 @@ export interface SearchableProduct {
   stock: number;
   imageUrl: string;
   isFeatured?: boolean;
+  salesCount?: number;
+  isViral?: boolean;
 }
 
 export interface SearchOutput<T> {
