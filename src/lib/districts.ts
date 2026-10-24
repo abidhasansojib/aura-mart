@@ -86,6 +86,16 @@ export const BANGLADESH_DISTRICTS: DistrictInfo[] = [
   { name: "Sherpur", bnName: "শেরপুর", division: "Mymensingh" },
 ];
 
+// Common Bangladesh city spelling variations & aliases
+const DISTRICT_ALIASES: Record<string, string[]> = {
+  bogura: ["bogura", "bogra", "বগুড়া"],
+  dhaka: ["dhaka", "ঢাকা", "dacca"],
+  chattogram: ["chattogram", "chittagong", "চট্টগ্রাম"],
+  cumilla: ["cumilla", "comilla", "কুমিল্লা"],
+  barishal: ["barishal", "barisal", "বরিশাল"],
+  jashore: ["jashore", "jessore", "যশোর"],
+};
+
 /**
  * Check whether a chosen district is inside the shop's local city zone
  */
@@ -93,7 +103,21 @@ export function isInsideLocalCity(districtName: string, shopCity: string = "Bogu
   if (!districtName || !shopCity) return false;
   const dNorm = districtName.trim().toLowerCase();
   const cNorm = shopCity.trim().toLowerCase();
-  return dNorm === cNorm || dNorm.includes(cNorm) || cNorm.includes(dNorm);
+
+  if (dNorm === cNorm || dNorm.includes(cNorm) || cNorm.includes(dNorm)) {
+    return true;
+  }
+
+  // Check alias groups (e.g. Bogra <-> Bogura, Chittagong <-> Chattogram)
+  for (const group of Object.values(DISTRICT_ALIASES)) {
+    const dMatches = group.some((alias) => dNorm.includes(alias) || alias.includes(dNorm));
+    const cMatches = group.some((alias) => cNorm.includes(alias) || alias.includes(cNorm));
+    if (dMatches && cMatches) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 /**

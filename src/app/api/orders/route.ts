@@ -140,6 +140,7 @@ export async function POST(req: NextRequest) {
       customerPhone,
       shippingAddress,
       deliveryZone,
+      district,
       paymentMethod,
       paymentSenderNo,
       trxId,
@@ -262,22 +263,29 @@ export async function POST(req: NextRequest) {
 
       // d. Delivery charge calculation with Free Shipping threshold support
       const shopCity = settings.shopCity || "Bogura";
-      let isInside =
-        deliveryZone === "Inside City" ||
-        deliveryZone === "inside" ||
-        (typeof deliveryZone === "string" && deliveryZone.toLowerCase().includes("inside"));
+      let isInside = false;
 
-      // Address verification: if address mentions another district and not local shop city, enforce outside city delivery
-      const cleanAddressLower = (shippingAddress || "").toLowerCase();
-      const isExplicitOutsideDistrict = BANGLADESH_DISTRICTS.some(
-        (d) =>
-          !isInsideLocalCity(d.name, shopCity) &&
-          (cleanAddressLower.includes(d.name.toLowerCase()) ||
-            cleanAddressLower.includes(d.bnName))
-      );
+      if (district && typeof district === "string" && district.trim()) {
+        // Authoritative district check
+        isInside = isInsideLocalCity(district.trim(), shopCity);
+      } else {
+        // Fallback to deliveryZone or address parsing
+        isInside =
+          deliveryZone === "Inside City" ||
+          deliveryZone === "inside" ||
+          (typeof deliveryZone === "string" && deliveryZone.toLowerCase().includes("inside"));
 
-      if (isExplicitOutsideDistrict && !isInsideLocalCity(cleanAddressLower, shopCity)) {
-        isInside = false;
+        const cleanAddressLower = (shippingAddress || "").toLowerCase();
+        const isExplicitOutsideDistrict = BANGLADESH_DISTRICTS.some(
+          (d) =>
+            !isInsideLocalCity(d.name, shopCity) &&
+            (cleanAddressLower.includes(d.name.toLowerCase()) ||
+              cleanAddressLower.includes(d.bnName))
+        );
+
+        if (isExplicitOutsideDistrict && !isInsideLocalCity(cleanAddressLower, shopCity)) {
+          isInside = false;
+        }
       }
 
       let deliveryCharge = isInside ? settings.insideCityDelivery : settings.outsideCityDelivery;

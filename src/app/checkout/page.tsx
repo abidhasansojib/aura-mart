@@ -184,7 +184,15 @@ export default function CheckoutPage() {
         if (data) {
           setSettings((prev) => ({ ...prev, ...data }));
           if (data.shopCity) {
-            setSelectedDistrict(data.shopCity);
+            const matched = BANGLADESH_DISTRICTS.find(
+              (d) =>
+                d.name.toLowerCase() === data.shopCity.toLowerCase() ||
+                isInsideLocalCity(d.name, data.shopCity)
+            );
+            if (matched) {
+              setSelectedDistrict(matched.name);
+              setDeliveryZone("Inside City");
+            }
           }
           if (data.enableCod === false && data.enableBkash) {
             setPaymentMethod("bKash");
@@ -303,15 +311,21 @@ export default function CheckoutPage() {
     setIsSubmitting(true);
 
     try {
-      const formattedAddress = address.trim().toLowerCase().includes(selectedDistrict.toLowerCase())
-        ? address.trim()
-        : `${address.trim()}, ${selectedDistrict}`;
+      const cleanAddress = address.trim();
+      const formattedAddress = cleanAddress.toLowerCase().includes(selectedDistrict.toLowerCase())
+        ? cleanAddress
+        : `${cleanAddress}, ${selectedDistrict}`;
+
+      const computedZone = isInsideLocalCity(selectedDistrict, settings.shopCity)
+        ? "Inside City"
+        : "Outside City";
 
       const payload = {
         customerName: name.trim(),
         customerPhone: phone.trim(),
         shippingAddress: formattedAddress,
-        deliveryZone,
+        deliveryZone: computedZone,
+        district: selectedDistrict,
         paymentMethod,
         paymentSenderNo: paymentMethod !== "COD" ? paymentSenderNo.trim() : null,
         trxId: paymentMethod !== "COD" ? trxId.trim() : null,
@@ -938,7 +952,14 @@ export default function CheckoutPage() {
                             name="deliveryZone"
                             value="Inside City"
                             checked={deliveryZone === "Inside City"}
-                            onChange={() => setDeliveryZone("Inside City")}
+                            onChange={() => {
+                              setDeliveryZone("Inside City");
+                              const localMatch =
+                                BANGLADESH_DISTRICTS.find((d) =>
+                                  isInsideLocalCity(d.name, settings.shopCity)
+                                )?.name || settings.shopCity || "Bogura";
+                              setSelectedDistrict(localMatch);
+                            }}
                             className="w-4 h-4 text-emerald-600 focus:ring-emerald-500"
                           />
                           <div>
@@ -969,7 +990,12 @@ export default function CheckoutPage() {
                             name="deliveryZone"
                             value="Outside City"
                             checked={deliveryZone === "Outside City"}
-                            onChange={() => setDeliveryZone("Outside City")}
+                            onChange={() => {
+                              setDeliveryZone("Outside City");
+                              if (isInsideLocalCity(selectedDistrict, settings.shopCity)) {
+                                setSelectedDistrict("Dhaka");
+                              }
+                            }}
                             className="w-4 h-4 text-emerald-600 focus:ring-emerald-500"
                           />
                           <div>
