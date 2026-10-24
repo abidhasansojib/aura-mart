@@ -145,15 +145,15 @@ export function Navbar({
                   className="group shrink-0 cursor-pointer"
                 >
                   {logoUrl ? (
-                    <div className="h-10 sm:h-12 max-w-[140px] sm:max-w-[180px] flex items-center shrink-0">
+                    <div className="h-9 sm:h-11 max-w-[130px] sm:max-w-[160px] flex items-center shrink-0">
                       <img
                         src={logoUrl}
                         alt={storeName}
-                        className="h-full w-auto max-h-10 sm:max-h-12 object-contain rounded-lg group-hover:opacity-90 transition-opacity"
+                        className="h-full w-auto max-h-9 sm:max-h-11 object-contain rounded-lg group-hover:opacity-90 transition-opacity"
                       />
                     </div>
                   ) : (
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[#181A1D] flex items-center justify-center text-white font-black text-base sm:text-xl shadow-md group-hover:scale-105 transition-transform border border-white/10 relative overflow-hidden shrink-0">
+                    <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-[#181A1D] flex items-center justify-center text-white font-black text-sm sm:text-lg shadow-md group-hover:scale-105 transition-transform border border-white/10 relative overflow-hidden shrink-0">
                       <span className="relative z-10">{storeName.charAt(0) || "A"}</span>
                       <div className="absolute inset-0 bg-gradient-to-tr from-[#FF6448]/30 to-transparent pointer-events-none" />
                     </div>
@@ -173,12 +173,12 @@ export function Navbar({
               </div>
 
               {/* Mobile Actions: Search Trigger, Track Order & Cart (Visible on < sm) */}
-              <div className="flex items-center gap-2 sm:hidden">
+              <div className="flex items-center gap-1.5 sm:hidden">
                 {isScrolledDown && (
                   <button
                     type="button"
                     onClick={toggleMobileSearch}
-                    className={`flex items-center justify-center w-10 h-10 rounded-xl border transition-colors active:scale-95 animate-in fade-in shrink-0 ${
+                    className={`flex items-center justify-center w-9 h-9 rounded-xl border transition-colors active:scale-95 animate-in fade-in shrink-0 ${
                       isMobileSearchOpen
                         ? "bg-[#181A1D] border-[#181A1D] text-white shadow-sm"
                         : "bg-slate-100 hover:bg-slate-200 border-slate-200/80 text-slate-700"
@@ -187,30 +187,30 @@ export function Navbar({
                     aria-label={isMobileSearchOpen ? "Close search" : "Search"}
                   >
                     {isMobileSearchOpen ? (
-                      <X className="h-5 w-5" />
+                      <X className="h-[18px] w-[18px]" />
                     ) : (
-                      <Search className="h-5 w-5" />
+                      <Search className="h-[18px] w-[18px]" />
                     )}
                   </button>
                 )}
 
                 <button
                   onClick={() => setIsTrackModalOpen(true)}
-                  className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200/80 text-slate-700 transition-colors active:scale-95 shadow-sm shrink-0"
+                  className="flex items-center justify-center w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200/80 text-slate-700 transition-colors active:scale-95 shadow-sm shrink-0"
                   title="Track Order Status"
                   aria-label="Track Order"
                 >
-                  <Truck className="h-5 w-5" />
+                  <Truck className="h-[18px] w-[18px]" />
                 </button>
 
                 <button
                   onClick={() => setIsCartOpen(true)}
-                  className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-[#181A1D] hover:bg-black text-white shadow-md active:scale-95 transition-all shrink-0"
+                  className="relative flex items-center justify-center w-9 h-9 rounded-xl bg-[#181A1D] hover:bg-black text-white shadow-md active:scale-95 transition-all shrink-0"
                   aria-label={`Shopping cart containing ${totalItems} items`}
                 >
-                  <ShoppingBag className="h-5 w-5" />
+                  <ShoppingBag className="h-[18px] w-[18px]" />
                   {totalItems > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 bg-[#FF6448] text-white text-[10px] font-black h-5 min-w-[20px] px-1 rounded-full flex items-center justify-center shadow-md border-2 border-white animate-pulse">
+                    <span className="absolute -top-1 -right-1 bg-[#FF6448] text-white text-[9px] font-black h-[18px] min-w-[18px] px-1 rounded-full flex items-center justify-center shadow-md border-2 border-white animate-pulse">
                       {totalItems}
                     </span>
                   )}
