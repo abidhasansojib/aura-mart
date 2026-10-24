@@ -85,12 +85,12 @@ export function Navbar({
 
       {/* 2. Floating Bento Glass Header (Auto-condenses on mobile scroll) */}
       <header className="sticky top-0 z-30 backdrop-blur-xl bg-white/90 border-b border-black/5 shadow-sm transition-all duration-300">
-        <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-2 sm:py-0">
+        <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-2.5 sm:py-0">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between sm:h-20 gap-2 sm:gap-6">
             {/* Top row on mobile / Left Brand on desktop */}
             <div className="flex items-center justify-between gap-3">
               {/* Brand Logo & Name */}
-              <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+              <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
                 {/* Logo redirects to Admin Portal */}
                 <Link
                   href="/admin"
@@ -98,15 +98,15 @@ export function Navbar({
                   className="group shrink-0 cursor-pointer"
                 >
                   {logoUrl ? (
-                    <div className="h-8 sm:h-10 max-w-[120px] sm:max-w-[160px] flex items-center shrink-0">
+                    <div className="h-10 sm:h-12 max-w-[140px] sm:max-w-[180px] flex items-center shrink-0">
                       <img
                         src={logoUrl}
                         alt={storeName}
-                        className="h-full w-auto max-h-8 sm:max-h-10 object-contain rounded-lg group-hover:opacity-90 transition-opacity"
+                        className="h-full w-auto max-h-10 sm:max-h-12 object-contain rounded-lg group-hover:opacity-90 transition-opacity"
                       />
                     </div>
                   ) : (
-                    <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-[#181A1D] flex items-center justify-center text-white font-black text-sm sm:text-lg shadow-md group-hover:scale-105 transition-transform border border-white/10 relative overflow-hidden">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[#181A1D] flex items-center justify-center text-white font-black text-base sm:text-xl shadow-md group-hover:scale-105 transition-transform border border-white/10 relative overflow-hidden shrink-0">
                       <span className="relative z-10">{storeName.charAt(0) || "A"}</span>
                       <div className="absolute inset-0 bg-gradient-to-tr from-[#FF6448]/30 to-transparent pointer-events-none" />
                     </div>
@@ -115,46 +115,46 @@ export function Navbar({
 
                 {/* Brand Name redirects to Homepage */}
                 <Link href="/" className="hover:opacity-90 transition-opacity">
-                  <span className="text-sm sm:text-lg font-black text-slate-900 tracking-tight block leading-none">
+                  <span className="text-base sm:text-xl font-black text-slate-900 tracking-tight block leading-tight">
                     {storeName}
                   </span>
-                  <span className="text-[9px] sm:text-[10px] text-[#FF6448] font-bold uppercase tracking-wider block mt-0.5 sm:mt-1 flex items-center gap-1">
-                    <Sparkles className="h-2.5 w-2.5" />
+                  <span className="text-[10px] sm:text-xs text-[#FF6448] font-bold uppercase tracking-wider block mt-0.5 sm:mt-1 flex items-center gap-1">
+                    <Sparkles className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                     <span>Premium Store</span>
                   </span>
                 </Link>
               </div>
 
               {/* Mobile Actions: Search Trigger, Track Order & Cart (Visible on < sm) */}
-              <div className="flex items-center gap-1.5 sm:hidden">
+              <div className="flex items-center gap-2 sm:hidden">
                 {isScrolledDown && (
                   <button
                     onClick={() => setIsScrolledDown(false)}
-                    className="flex items-center justify-center w-8.5 h-8.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors active:scale-95 animate-in fade-in"
+                    className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200/80 text-slate-700 transition-colors active:scale-95 animate-in fade-in shrink-0"
                     title="Search catalog"
                     aria-label="Search"
                   >
-                    <Search className="h-4 w-4" />
+                    <Search className="h-5 w-5" />
                   </button>
                 )}
 
                 <button
                   onClick={() => setIsTrackModalOpen(true)}
-                  className="flex items-center justify-center w-8.5 h-8.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors active:scale-95"
+                  className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200/80 text-slate-700 transition-colors active:scale-95 shadow-sm shrink-0"
                   title="Track Order Status"
                   aria-label="Track Order"
                 >
-                  <Truck className="h-4 w-4" />
+                  <Truck className="h-5 w-5" />
                 </button>
 
                 <button
                   onClick={() => setIsCartOpen(true)}
-                  className="relative flex items-center justify-center w-8.5 h-8.5 rounded-xl bg-[#181A1D] hover:bg-black text-white shadow-md active:scale-95 transition-all"
+                  className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-[#181A1D] hover:bg-black text-white shadow-md active:scale-95 transition-all shrink-0"
                   aria-label={`Shopping cart containing ${totalItems} items`}
                 >
-                  <ShoppingBag className="h-4 w-4" />
+                  <ShoppingBag className="h-5 w-5" />
                   {totalItems > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-[#FF6448] text-white text-[9px] font-black h-4 min-w-[16px] px-1 rounded-full flex items-center justify-center shadow-md animate-pulse">
+                    <span className="absolute -top-1.5 -right-1.5 bg-[#FF6448] text-white text-[10px] font-black h-5 min-w-[20px] px-1 rounded-full flex items-center justify-center shadow-md border-2 border-white animate-pulse">
                       {totalItems}
                     </span>
                   )}
@@ -188,7 +188,7 @@ export function Navbar({
                     }
                   }}
                   placeholder="Search products, categories, or keywords..."
-                  className="w-full pl-9 sm:pl-11 pr-12 sm:pr-14 py-1.5 sm:py-2.5 rounded-xl sm:rounded-full border border-black/10 bg-white/95 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#FF6448]/30 focus:border-[#FF6448] transition-all min-h-[36px] sm:min-h-[44px] shadow-sm"
+                  className="w-full pl-9 sm:pl-11 pr-12 sm:pr-14 py-2 sm:py-2.5 rounded-xl sm:rounded-full border border-black/10 bg-white/95 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#FF6448]/30 focus:border-[#FF6448] transition-all min-h-[40px] sm:min-h-[44px] shadow-sm"
                 />
                 {searchQuery && (
                   <button
