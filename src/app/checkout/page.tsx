@@ -24,6 +24,7 @@ import {
   X,
   MessageCircle,
   Clock,
+  ChevronDown,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/utils";
@@ -642,17 +643,20 @@ export default function CheckoutPage() {
                     <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
                       Reason for Cancellation
                     </label>
-                    <select
-                      value={cancelReason}
-                      onChange={(e) => setCancelReason(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-xs text-slate-900 bg-white font-medium focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 min-h-[44px]"
-                    >
-                      <option value="Ordered by mistake">Ordered by mistake</option>
-                      <option value="Want to change shipping address or delivery zone">Want to change delivery address</option>
-                      <option value="Want to change ordered products or quantity">Want to change products or quantity</option>
-                      <option value="Found a better price or no longer needed">No longer needed</option>
-                      <option value="Other">Other reason</option>
-                    </select>
+                    <div className="relative">
+                      <select
+                        value={cancelReason}
+                        onChange={(e) => setCancelReason(e.target.value)}
+                        className="w-full appearance-none pl-4 pr-10 py-3 rounded-2xl border border-gray-200 hover:border-gray-300 focus:border-rose-500 text-xs font-semibold text-slate-900 bg-neutral-50/70 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/20 shadow-xs transition-all cursor-pointer min-h-[44px]"
+                      >
+                        <option value="Ordered by mistake">Ordered by mistake</option>
+                        <option value="Want to change shipping address or delivery zone">Want to change delivery address</option>
+                        <option value="Want to change ordered products or quantity">Want to change products or quantity</option>
+                        <option value="Found a better price or no longer needed">No longer needed</option>
+                        <option value="Other">Other reason</option>
+                      </select>
+                      <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                    </div>
 
                     {cancelReason === "Other" && (
                       <textarea
@@ -862,28 +866,32 @@ export default function CheckoutPage() {
 
                   {/* Destination District (Bangladesh) */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                      Destination District (Bangladesh) <span className="text-rose-500">*</span>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                      <span>Destination District (Bangladesh) <span className="text-rose-500">*</span></span>
+                      <span className="text-[10px] text-slate-400 font-normal">All 64 districts</span>
                     </label>
-                    <select
-                      value={selectedDistrict}
-                      onChange={(e) => {
-                        const newDist = e.target.value;
-                        setSelectedDistrict(newDist);
-                        if (isInsideLocalCity(newDist, settings.shopCity)) {
-                          setDeliveryZone("Inside City");
-                        } else {
-                          setDeliveryZone("Outside City");
-                        }
-                      }}
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-base sm:text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 min-h-[44px]"
-                    >
-                      {BANGLADESH_DISTRICTS.map((d) => (
-                        <option key={d.name} value={d.name}>
-                          {d.name} ({d.bnName}) — {d.division} Division
-                        </option>
-                      ))}
-                    </select>
+                    <div className="relative">
+                      <select
+                        value={selectedDistrict}
+                        onChange={(e) => {
+                          const newDist = e.target.value;
+                          setSelectedDistrict(newDist);
+                          if (isInsideLocalCity(newDist, settings.shopCity)) {
+                            setDeliveryZone("Inside City");
+                          } else {
+                            setDeliveryZone("Outside City");
+                          }
+                        }}
+                        className="w-full appearance-none pl-4 pr-10 py-3 rounded-2xl border border-gray-200 hover:border-gray-300 focus:border-emerald-600 text-base sm:text-sm font-semibold text-slate-900 bg-neutral-50/70 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 shadow-xs transition-all cursor-pointer min-h-[46px]"
+                      >
+                        {BANGLADESH_DISTRICTS.map((d) => (
+                          <option key={d.name} value={d.name} className="py-1">
+                            {d.name} ({d.bnName}) — {d.division} Division
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none transition-transform" />
+                    </div>
 
                     {/* Estimated Courier Turnaround Notice */}
                     {(() => {

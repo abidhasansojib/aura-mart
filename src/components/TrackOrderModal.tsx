@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Search, PackageCheck, CheckCircle2, AlertCircle, ShoppingBag, Ban, Truck, Star, Send, Loader2 } from "lucide-react";
+import { X, Search, PackageCheck, CheckCircle2, AlertCircle, ShoppingBag, Ban, Truck, Star, Send, Loader2, ChevronDown } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 
 interface TrackOrderModalProps {
@@ -484,17 +484,20 @@ export function TrackOrderModal({ isOpen, onClose, currencySymbol = "৳" }: Tra
                   <label className="block text-[11px] font-bold text-slate-700 uppercase">
                     Reason for Cancellation
                   </label>
-                  <select
-                    value={cancelReason}
-                    onChange={(e) => setCancelReason(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs text-slate-900 bg-white font-medium focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 min-h-[40px]"
-                  >
-                    <option value="Ordered by mistake">Ordered by mistake</option>
-                    <option value="Want to change delivery address">Want to change delivery address</option>
-                    <option value="Want to change items or quantity">Want to change items/quantity</option>
-                    <option value="No longer needed">No longer needed</option>
-                    <option value="Other">Other</option>
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={cancelReason}
+                      onChange={(e) => setCancelReason(e.target.value)}
+                      className="w-full appearance-none pl-3.5 pr-9 py-2.5 rounded-xl border border-gray-200 hover:border-gray-300 text-xs font-semibold text-slate-900 bg-neutral-50/70 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 shadow-xs transition-all cursor-pointer min-h-[42px]"
+                    >
+                      <option value="Ordered by mistake">Ordered by mistake</option>
+                      <option value="Want to change delivery address">Want to change delivery address</option>
+                      <option value="Want to change items or quantity">Want to change items/quantity</option>
+                      <option value="No longer needed">No longer needed</option>
+                      <option value="Other">Other</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+                  </div>
 
                   {cancelReason === "Other" && (
                     <input

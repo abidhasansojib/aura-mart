@@ -17,10 +17,10 @@ import {
   Star,
   PackageCheck,
   PhoneCall,
-  SlidersHorizontal,
   CheckCircle2,
   MessageCircle,
   AlertCircle,
+  ChevronDown,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { Navbar } from "@/components/Navbar";
@@ -548,12 +548,8 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
               )}
             </div>
 
-            {/* Compact Sort Dropdown */}
-            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-              <span className="text-xs font-bold text-slate-600 hidden md:inline flex items-center gap-1">
-                <SlidersHorizontal className="h-3.5 w-3.5" />
-                <span>Sort by:</span>
-              </span>
+            {/* Modern Styled Sort Dropdown */}
+            <div className="relative flex items-center shrink-0">
               <select
                 value={sortBy}
                 onChange={(e) =>
@@ -562,14 +558,15 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
                   )
                 }
                 aria-label="Sort products by"
-                className="bg-white/95 backdrop-blur-sm border border-black/10 rounded-xl sm:rounded-2xl px-2.5 sm:px-3 py-1.5 sm:py-2 text-[11px] sm:text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/30 min-h-[34px] sm:min-h-[40px] shadow-xs cursor-pointer"
+                className="appearance-none bg-white/95 backdrop-blur-md border border-slate-300/80 hover:border-slate-400 focus:border-[#FF6448] rounded-xl sm:rounded-2xl pl-3 sm:pl-3.5 pr-8 sm:pr-9 py-1.5 sm:py-2 text-[11px] sm:text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/20 min-h-[36px] sm:min-h-[40px] shadow-xs cursor-pointer transition-all"
               >
-                <option value="featured">Featured / Default</option>
+                <option value="featured">✨ Featured / Default</option>
                 <option value="viral">🔥 Mostly Sold / Viral</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-                <option value="discount">Biggest Savings</option>
+                <option value="price-asc">💵 Price: Low to High</option>
+                <option value="price-desc">💎 Price: High to Low</option>
+                <option value="discount">🏷️ Biggest Savings</option>
               </select>
+              <ChevronDown className="absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500 pointer-events-none transition-transform" />
             </div>
           </div>
 

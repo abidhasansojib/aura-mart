@@ -23,6 +23,7 @@ import {
   EyeOff,
   Upload,
   Image as ImageIcon,
+  ChevronDown,
 } from "lucide-react";
 import { compressAndUploadImage } from "@/lib/image-upload";
 
@@ -1114,15 +1115,18 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
                     <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
                       Account Type
                     </label>
-                    <select
-                      value={bkashType}
-                      onChange={(e) => handleBkashChange(bkashPhone, e.target.value as PaymentAccountType)}
-                      className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-slate-900 font-bold text-xs focus:outline-none focus:ring-2 focus:ring-[#E2136E]/20 focus:border-[#E2136E] min-h-[42px] bg-white shadow-xs cursor-pointer"
-                    >
-                      <option value="Personal">Personal (Send Money)</option>
-                      <option value="Agent">Agent (Cash In)</option>
-                      <option value="Merchant">Merchant (Payment)</option>
-                    </select>
+                    <div className="relative">
+                      <select
+                        value={bkashType}
+                        onChange={(e) => handleBkashChange(bkashPhone, e.target.value as PaymentAccountType)}
+                        className="w-full appearance-none pl-3.5 pr-8 py-2.5 rounded-xl border border-gray-200 hover:border-gray-300 text-slate-900 font-bold text-xs focus:outline-none focus:ring-2 focus:ring-[#E2136E]/20 focus:border-[#E2136E] min-h-[42px] bg-white shadow-xs cursor-pointer transition-all"
+                      >
+                        <option value="Personal">Personal (Send Money)</option>
+                        <option value="Agent">Agent (Cash In)</option>
+                        <option value="Merchant">Merchant (Payment)</option>
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#E2136E] pointer-events-none" />
+                    </div>
                   </div>
                 </div>
 
@@ -1177,15 +1181,18 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
                     <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
                       Account Type
                     </label>
-                    <select
-                      value={nagadType}
-                      onChange={(e) => handleNagadChange(nagadPhone, e.target.value as PaymentAccountType)}
-                      className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-slate-900 font-bold text-xs focus:outline-none focus:ring-2 focus:ring-[#F7941D]/20 focus:border-[#F7941D] min-h-[42px] bg-white shadow-xs cursor-pointer"
-                    >
-                      <option value="Personal">Personal (Send Money)</option>
-                      <option value="Agent">Agent (Cash Out)</option>
-                      <option value="Merchant">Merchant (Payment)</option>
-                    </select>
+                    <div className="relative">
+                      <select
+                        value={nagadType}
+                        onChange={(e) => handleNagadChange(nagadPhone, e.target.value as PaymentAccountType)}
+                        className="w-full appearance-none pl-3.5 pr-8 py-2.5 rounded-xl border border-gray-200 hover:border-gray-300 text-slate-900 font-bold text-xs focus:outline-none focus:ring-2 focus:ring-[#F7941D]/20 focus:border-[#F7941D] min-h-[42px] bg-white shadow-xs cursor-pointer transition-all"
+                      >
+                        <option value="Personal">Personal (Send Money)</option>
+                        <option value="Agent">Agent (Cash Out)</option>
+                        <option value="Merchant">Merchant (Payment)</option>
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#F7941D] pointer-events-none" />
+                    </div>
                   </div>
                 </div>
 
@@ -1240,15 +1247,18 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
                     <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
                       Account Type
                     </label>
-                    <select
-                      value={rocketType}
-                      onChange={(e) => handleRocketChange(rocketPhone, e.target.value as PaymentAccountType)}
-                      className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-slate-900 font-bold text-xs focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 min-h-[42px] bg-white shadow-xs cursor-pointer"
-                    >
-                      <option value="Personal">Personal (Send Money)</option>
-                      <option value="Agent">Agent (Cash Out)</option>
-                      <option value="Merchant">Merchant (Payment)</option>
-                    </select>
+                    <div className="relative">
+                      <select
+                        value={rocketType}
+                        onChange={(e) => handleRocketChange(rocketPhone, e.target.value as PaymentAccountType)}
+                        className="w-full appearance-none pl-3.5 pr-8 py-2.5 rounded-xl border border-gray-200 hover:border-gray-300 text-slate-900 font-bold text-xs focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 min-h-[42px] bg-white shadow-xs cursor-pointer transition-all"
+                      >
+                        <option value="Personal">Personal (Send Money)</option>
+                        <option value="Agent">Agent (Cash Out)</option>
+                        <option value="Merchant">Merchant (Payment)</option>
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-purple-600 pointer-events-none" />
+                    </div>
                   </div>
                 </div>
 
@@ -1303,14 +1313,17 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
                   <label className="block font-bold text-[11px] text-slate-700 mb-1">
                     Discount Type
                   </label>
-                  <select
-                    value={couponType}
-                    onChange={(e) => setCouponType(e.target.value as "PERCENTAGE" | "FIXED")}
-                    className="w-full px-3 py-2 rounded-xl border border-gray-200 text-slate-900 text-xs font-bold min-h-[40px] bg-white cursor-pointer"
-                  >
-                    <option value="PERCENTAGE">Percentage (% Off)</option>
-                    <option value="FIXED">Flat Amount (৳ Off)</option>
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={couponType}
+                      onChange={(e) => setCouponType(e.target.value as "PERCENTAGE" | "FIXED")}
+                      className="w-full appearance-none pl-3.5 pr-8 py-2 rounded-xl border border-gray-200 hover:border-gray-300 text-slate-900 text-xs font-bold min-h-[40px] bg-white shadow-xs cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all"
+                    >
+                      <option value="PERCENTAGE">Percentage (% Off)</option>
+                      <option value="FIXED">Flat Amount (৳ Off)</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
+                  </div>
                 </div>
 
                 <div>

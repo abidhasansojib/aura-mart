@@ -55,3 +55,14 @@ body {
 .bento-card:hover {
   transform: translateY(-2px);
 }
+
+/* Polished styling for select options across all OS/browsers */
+select {
+  cursor: pointer;
+}
+select option {
+  background-color: #ffffff;
+  color: #0f172a;
+  font-weight: 500;
+  padding: 8px 12px;
+}

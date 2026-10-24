@@ -566,15 +566,15 @@ export function AdminOrders({
                         disabled={isUpdating}
                         value={order.status}
                         onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                        className="appearance-none pl-3 pr-8 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-xs font-bold text-slate-800 rounded-xl border border-gray-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-50 min-h-[36px]"
+                        className="appearance-none pl-3.5 pr-8 py-1.5 bg-white hover:bg-neutral-50 text-xs font-bold text-slate-800 rounded-xl border border-gray-200 hover:border-gray-300 shadow-xs cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-50 min-h-[36px] transition-all"
                       >
                         {STATUS_OPTIONS.map((status) => (
                           <option key={status} value={status}>
-                            Set: {status}
+                            ● {status}
                           </option>
                         ))}
                       </select>
-                      <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500 pointer-events-none" />
+                      <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
                     </div>
 
                     {/* Print Packing Slip Button */}
@@ -836,18 +836,21 @@ export function AdminOrders({
                 <label className="block font-bold text-slate-700 mb-1">
                   Courier Partner
                 </label>
-                <select
-                  value={courierNameInput}
-                  onChange={(e) => setCourierNameInput(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                >
-                  <option value="Steadfast">Steadfast Courier</option>
-                  <option value="Pathao">Pathao Courier</option>
-                  <option value="RedX">RedX Logistics</option>
-                  <option value="Paperfly">Paperfly</option>
-                  <option value="eCourier">eCourier</option>
-                  <option value="Other">Other / Self-Delivery</option>
-                </select>
+                <div className="relative">
+                  <select
+                    value={courierNameInput}
+                    onChange={(e) => setCourierNameInput(e.target.value)}
+                    className="w-full appearance-none pl-3.5 pr-9 py-2.5 rounded-xl border border-gray-200 hover:border-gray-300 text-slate-900 font-semibold bg-neutral-50/70 hover:bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 shadow-xs cursor-pointer min-h-[42px] transition-all"
+                  >
+                    <option value="Steadfast">Steadfast Courier</option>
+                    <option value="Pathao">Pathao Courier</option>
+                    <option value="RedX">RedX Logistics</option>
+                    <option value="Paperfly">Paperfly</option>
+                    <option value="eCourier">eCourier</option>
+                    <option value="Other">Other / Self-Delivery</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                </div>
               </div>
 
               <div>
