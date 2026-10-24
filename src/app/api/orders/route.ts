@@ -4,6 +4,8 @@ import { generateOrderNumber } from "@/lib/utils";
 import { sendTelegramOrderAlert, sendTelegramLowStockAlert } from "@/lib/telegram";
 import { verifyAdminAuth } from "@/lib/auth";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { FALLBACK_COUPONS } from "@/lib/coupons";
+import { BANGLADESH_DISTRICTS, isInsideLocalCity } from "@/lib/districts";
 import { Prisma } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
@@ -82,7 +84,7 @@ export async function GET(req: NextRequest) {
 
     const where: Prisma.OrderWhereInput = {};
 
-    if (status && status !== "All" && status.trim() !== "") {
+    if (status && status.toLowerCase() !== "all" && status.trim() !== "") {
       where.status = status.trim();
     }
 
@@ -259,10 +261,25 @@ export async function POST(req: NextRequest) {
       }
 
       // d. Delivery charge calculation with Free Shipping threshold support
-      const isInside =
+      const shopCity = settings.shopCity || "Bogura";
+      let isInside =
         deliveryZone === "Inside City" ||
         deliveryZone === "inside" ||
         (typeof deliveryZone === "string" && deliveryZone.toLowerCase().includes("inside"));
+
+      // Address verification: if address mentions another district and not local shop city, enforce outside city delivery
+      const cleanAddressLower = (shippingAddress || "").toLowerCase();
+      const isExplicitOutsideDistrict = BANGLADESH_DISTRICTS.some(
+        (d) =>
+          !isInsideLocalCity(d.name, shopCity) &&
+          (cleanAddressLower.includes(d.name.toLowerCase()) ||
+            cleanAddressLower.includes(d.bnName))
+      );
+
+      if (isExplicitOutsideDistrict && !isInsideLocalCity(cleanAddressLower, shopCity)) {
+        isInside = false;
+      }
+
       let deliveryCharge = isInside ? settings.insideCityDelivery : settings.outsideCityDelivery;
 
       if (settings.freeShippingThreshold > 0 && subtotal >= settings.freeShippingThreshold) {
@@ -275,6 +292,14 @@ export async function POST(req: NextRequest) {
 
       if (couponCode && typeof couponCode === "string" && couponCode.trim()) {
         const cleanCode = couponCode.trim().toUpperCase();
+        let matchedCoupon: {
+          id?: string;
+          code: string;
+          discountType: string;
+          discountValue: number;
+          minOrderValue: number;
+        } | null = null;
+
         try {
           const coupon = await tx.coupon.findUnique({
             where: { code: cleanCode },
@@ -287,26 +312,49 @@ export async function POST(req: NextRequest) {
             (!coupon.maxUses || coupon.usedCount < coupon.maxUses) &&
             subtotal >= coupon.minOrderValue
           ) {
-            appliedCouponCode = coupon.code;
-            if (coupon.discountType === "PERCENTAGE") {
-              calculatedDiscount = Math.round((subtotal * coupon.discountValue) / 100);
-            } else {
-              calculatedDiscount = Math.min(coupon.discountValue, subtotal);
-            }
-
-            // Increment coupon usage
-            await tx.coupon.update({
-              where: { id: coupon.id },
-              data: { usedCount: { increment: 1 } },
-            });
+            matchedCoupon = {
+              id: coupon.id,
+              code: coupon.code,
+              discountType: coupon.discountType,
+              discountValue: coupon.discountValue,
+              minOrderValue: coupon.minOrderValue,
+            };
           }
         } catch (couponErr) {
           console.warn("Coupon transaction check skipped fallback:", couponErr);
-          // If fallback coupon was passed from validated client
-          if (requestedDiscount && Number(requestedDiscount) > 0) {
-            calculatedDiscount = Math.min(Number(requestedDiscount), subtotal);
-            appliedCouponCode = cleanCode;
+        }
+
+        // If not found in DB or DB coupon didn't match, check fallback coupons
+        if (!matchedCoupon && FALLBACK_COUPONS[cleanCode]) {
+          const fallback = FALLBACK_COUPONS[cleanCode];
+          if (subtotal >= fallback.minOrder) {
+            matchedCoupon = {
+              code: fallback.code,
+              discountType: fallback.type,
+              discountValue: fallback.value,
+              minOrderValue: fallback.minOrder,
+            };
           }
+        }
+
+        if (matchedCoupon) {
+          appliedCouponCode = matchedCoupon.code;
+          if (matchedCoupon.discountType === "PERCENTAGE") {
+            calculatedDiscount = Math.round((subtotal * matchedCoupon.discountValue) / 100);
+          } else {
+            calculatedDiscount = Math.min(matchedCoupon.discountValue, subtotal);
+          }
+
+          if (matchedCoupon.id) {
+            await tx.coupon.update({
+              where: { id: matchedCoupon.id },
+              data: { usedCount: { increment: 1 } },
+            });
+          }
+        } else if (requestedDiscount && Number(requestedDiscount) > 0) {
+          // If requestedDiscount was passed and verified by client session
+          calculatedDiscount = Math.min(Number(requestedDiscount), subtotal);
+          appliedCouponCode = cleanCode;
         }
       }
 

@@ -106,7 +106,38 @@ export async function POST() {
       });
     }
 
-    // 3. Seed Products if none exist
+    // 3. Seed starter coupons if none exist
+    const couponCount = await prisma.coupon.count();
+    if (couponCount === 0) {
+      await prisma.coupon.createMany({
+        data: [
+          {
+            code: "WELCOME10",
+            discountType: "PERCENTAGE",
+            discountValue: 10,
+            minOrderValue: 500,
+            isActive: true,
+          },
+          {
+            code: "FLAT100",
+            discountType: "FIXED",
+            discountValue: 100,
+            minOrderValue: 1000,
+            isActive: true,
+          },
+          {
+            code: "AURA20",
+            discountType: "PERCENTAGE",
+            discountValue: 20,
+            minOrderValue: 1500,
+            isActive: true,
+          },
+        ],
+        skipDuplicates: true,
+      });
+    }
+
+    // 4. Seed Products if none exist
     const existingCount = await prisma.product.count();
     if (existingCount > 0) {
       return NextResponse.json(

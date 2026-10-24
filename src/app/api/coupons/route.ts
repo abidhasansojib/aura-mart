@@ -11,9 +11,44 @@ export async function GET() {
   }
 
   try {
-    const coupons = await prisma.coupon.findMany({
+    let coupons = await prisma.coupon.findMany({
       orderBy: { createdAt: "desc" },
     });
+
+    if (coupons.length === 0) {
+      // Auto-initialize standard starter coupons so admin can manage them immediately
+      await prisma.coupon.createMany({
+        data: [
+          {
+            code: "WELCOME10",
+            discountType: "PERCENTAGE",
+            discountValue: 10,
+            minOrderValue: 500,
+            isActive: true,
+          },
+          {
+            code: "FLAT100",
+            discountType: "FIXED",
+            discountValue: 100,
+            minOrderValue: 1000,
+            isActive: true,
+          },
+          {
+            code: "AURA20",
+            discountType: "PERCENTAGE",
+            discountValue: 20,
+            minOrderValue: 1500,
+            isActive: true,
+          },
+        ],
+        skipDuplicates: true,
+      });
+
+      coupons = await prisma.coupon.findMany({
+        orderBy: { createdAt: "desc" },
+      });
+    }
+
     return NextResponse.json(coupons);
   } catch (error) {
     console.error("GET /api/coupons error:", error);

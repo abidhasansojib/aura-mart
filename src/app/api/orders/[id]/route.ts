@@ -102,7 +102,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
       if (status === "Cancelled" && previousStatus !== "Cancelled") {
         for (const item of existingOrder.items) {
           if (item.productId) {
-            await tx.product.update({
+            await tx.product.updateMany({
               where: { id: item.productId },
               data: {
                 stock: {
@@ -112,13 +112,19 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
             });
           }
         }
+        if (existingOrder.couponCode) {
+          await tx.coupon.updateMany({
+            where: { code: existingOrder.couponCode },
+            data: { usedCount: { decrement: 1 } },
+          });
+        }
       }
 
       // If moving from Cancelled back to an active state, re-decrement stock if items exist
       if (previousStatus === "Cancelled" && status && status !== "Cancelled") {
         for (const item of existingOrder.items) {
           if (item.productId) {
-            await tx.product.update({
+            await tx.product.updateMany({
               where: { id: item.productId },
               data: {
                 stock: {
@@ -127,6 +133,12 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
               },
             });
           }
+        }
+        if (existingOrder.couponCode) {
+          await tx.coupon.updateMany({
+            where: { code: existingOrder.couponCode },
+            data: { usedCount: { increment: 1 } },
+          });
         }
       }
 
@@ -162,15 +174,59 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
 
   try {
     const { id } = params;
-    await prisma.order.delete({
-      where: { id },
+
+    await prisma.$transaction(async (tx) => {
+      const existingOrder = await tx.order.findUnique({
+        where: { id },
+        include: {
+          items: true,
+        },
+      });
+
+      if (!existingOrder) {
+        throw new Error("Order not found");
+      }
+
+      // If order was not Cancelled or Delivered, restore reserved stock to inventory
+      if (existingOrder.status !== "Cancelled" && existingOrder.status !== "Delivered") {
+        for (const item of existingOrder.items) {
+          if (item.productId) {
+            await tx.product.updateMany({
+              where: { id: item.productId },
+              data: {
+                stock: {
+                  increment: item.quantity,
+                },
+              },
+            });
+          }
+        }
+
+        // Rollback coupon count if one was applied
+        if (existingOrder.couponCode) {
+          await tx.coupon.updateMany({
+            where: { code: existingOrder.couponCode },
+            data: {
+              usedCount: {
+                decrement: 1,
+              },
+            },
+          });
+        }
+      }
+
+      // Delete order (cascades to orderItems)
+      await tx.order.delete({
+        where: { id },
+      });
     });
 
-    return NextResponse.json({ success: true, message: "Order deleted successfully" });
+    return NextResponse.json({ success: true, message: "Order deleted and inventory synchronized" });
   } catch (error) {
     console.error(`DELETE /api/orders/${params.id} error:`, error);
+    const message = error instanceof Error ? error.message : "Failed to delete order";
     return NextResponse.json(
-      { error: "Failed to delete order" },
+      { error: message },
       { status: 500 }
     );
   }

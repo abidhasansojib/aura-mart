@@ -1,14 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { FALLBACK_COUPONS } from "@/lib/coupons";
 
 export const dynamic = "force-dynamic";
-
-// Hardcoded fallback coupons in case database is offline / demo mode
-const FALLBACK_COUPONS: Record<string, { type: "PERCENTAGE" | "FIXED"; value: number; minOrder: number }> = {
-  WELCOME10: { type: "PERCENTAGE", value: 10, minOrder: 500 },
-  FLAT100: { type: "FIXED", value: 100, minOrder: 1000 },
-  AURA20: { type: "PERCENTAGE", value: 20, minOrder: 1500 },
-};
 
 // POST /api/coupons/validate - Validate coupon for checkout
 export async function POST(req: NextRequest) {

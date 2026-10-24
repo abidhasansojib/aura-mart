@@ -46,8 +46,8 @@ export async function GET(req: NextRequest) {
     const status = searchParams.get("status");
 
     const where: { status?: string } = {};
-    if (status && status !== "ALL") {
-      where.status = status;
+    if (status && status.toUpperCase() !== "ALL" && status.trim() !== "") {
+      where.status = status.trim();
     }
 
     let orders: ExportOrder[] = [];
