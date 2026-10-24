@@ -57,11 +57,6 @@ export function verifySessionToken(token: string): { id: string; username: strin
   }
 }
 
-// Fallback legacy secret token
-export function getExpectedAdminToken(): string {
-  return crypto.createHash("sha256").update(SECRET_SALT).digest("hex");
-}
-
 export function verifyAdminAuth(): boolean {
   try {
     const cookieStore = cookies();
@@ -70,15 +65,9 @@ export function verifyAdminAuth(): boolean {
       return false;
     }
 
-    // 1. Check if it's a signed user session token
+    // Strictly enforce cryptographically signed, unexpired user session tokens
     const user = verifySessionToken(sessionCookie.value);
-    if (user) {
-      return true;
-    }
-
-    // 2. Check legacy passcode hash
-    const expectedToken = getExpectedAdminToken();
-    return sessionCookie.value === expectedToken;
+    return Boolean(user && user.id);
   } catch {
     return false;
   }
@@ -97,9 +86,9 @@ export function getAdminSessionUser(): { id: string; username: string; email: st
   }
 }
 
-export function setAdminSessionCookie(payload?: { id: string; username: string; email: string }): void {
+export function setAdminSessionCookie(payload: { id: string; username: string; email: string }): void {
   const cookieStore = cookies();
-  const token = payload ? createSessionToken(payload) : getExpectedAdminToken();
+  const token = createSessionToken(payload);
   cookieStore.set(COOKIE_NAME_ADMIN, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",

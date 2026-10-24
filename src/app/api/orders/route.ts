@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { generateOrderNumber } from "@/lib/utils";
 import { sendTelegramOrderAlert, sendTelegramLowStockAlert } from "@/lib/telegram";
 import { verifyAdminAuth } from "@/lib/auth";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { Prisma } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
@@ -23,6 +24,20 @@ export async function GET(req: NextRequest) {
 
     // 1. Customer order tracking via phone number (strict exact/normalized lookup)
     if (phone && phone.trim() !== "") {
+      const ip = getClientIp(req);
+      // Rate limit: max 15 phone tracking lookups per 5 minutes to prevent customer enumeration
+      const trackLimit = checkRateLimit(`order-track:${ip}`, 15, 300);
+      if (!trackLimit.success) {
+        return NextResponse.json(
+          {
+            error: `Too many order tracking attempts. Please wait ${Math.ceil(
+              trackLimit.resetInSeconds / 60
+            )} minute(s) before trying again.`,
+          },
+          { status: 429 }
+        );
+      }
+
       const rawDigits = phone.replace(/[^0-9]/g, "");
       if (rawDigits.length < 11) {
         return NextResponse.json(
@@ -103,6 +118,20 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req);
+    // Anti-Spam / Anti-Inventory-Draining: max 10 orders per 10 minutes per IP
+    const orderLimit = checkRateLimit(`order-create:${ip}`, 10, 600);
+    if (!orderLimit.success) {
+      return NextResponse.json(
+        {
+          error: `Too many orders placed from your network. Please wait ${Math.ceil(
+            orderLimit.resetInSeconds / 60
+          )} minute(s) before submitting another order.`,
+        },
+        { status: 429 }
+      );
+    }
+
     const body = await req.json();
     const {
       customerName,

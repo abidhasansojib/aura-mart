@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendTelegramOrderCancellationAlert } from "@/lib/telegram";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -12,18 +13,38 @@ interface RouteParams {
 
 export async function POST(req: NextRequest, { params }: RouteParams) {
   try {
+    const ip = getClientIp(req);
+    // Rate limit: max 5 cancellation attempts per 15 minutes per IP
+    const cancelLimit = checkRateLimit(`order-cancel:${ip}`, 5, 900);
+    if (!cancelLimit.success) {
+      return NextResponse.json(
+        {
+          error: `Too many order cancellation requests. Please wait ${Math.ceil(
+            cancelLimit.resetInSeconds / 60
+          )} minute(s) before trying again.`,
+        },
+        { status: 429 }
+      );
+    }
+
     const { id } = params;
     const body = await req.json().catch(() => ({}));
     const { customerPhone, reason } = body;
 
-    if (!customerPhone || typeof customerPhone !== "string" || customerPhone.trim().length < 5) {
+    if (!customerPhone || typeof customerPhone !== "string" || customerPhone.trim().length < 11) {
       return NextResponse.json(
-        { error: "Please provide the phone number used when placing the order for verification." },
+        { error: "Please provide your full 11-digit phone number (e.g. 017XXXXXXXX) for verification." },
         { status: 400 }
       );
     }
 
     const cleanInputPhone = customerPhone.replace(/[^0-9]/g, "");
+    if (cleanInputPhone.length < 11) {
+      return NextResponse.json(
+        { error: "Please enter a valid 11-digit phone number." },
+        { status: 400 }
+      );
+    }
 
     // 1. Fetch current order
     const existingOrder = await prisma.order.findUnique({
@@ -35,16 +56,15 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    // 2. Security Check: Phone Number Verification
+    // 2. Strict Security Check: Exact 11-digit Phone Number Verification
     const cleanOrderPhone = existingOrder.customerPhone.replace(/[^0-9]/g, "");
     const isPhoneMatch =
       cleanOrderPhone === cleanInputPhone ||
-      cleanOrderPhone.endsWith(cleanInputPhone) ||
-      cleanInputPhone.endsWith(cleanOrderPhone);
+      cleanOrderPhone.slice(-11) === cleanInputPhone.slice(-11);
 
     if (!isPhoneMatch) {
       return NextResponse.json(
-        { error: "Phone number does not match the order records." },
+        { error: "Phone number does not match the customer record for this order." },
         { status: 403 }
       );
     }

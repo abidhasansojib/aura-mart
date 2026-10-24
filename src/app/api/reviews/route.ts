@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 // GET /api/reviews?productId={id}
 // Fetches only APPROVED reviews for public display
@@ -56,8 +57,22 @@ export async function GET(req: Request) {
 
 // POST /api/reviews
 // Abuse-proof review submission for genuine buyers
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req);
+    // Rate limit: max 5 review submissions per 15 minutes per IP
+    const reviewLimit = checkRateLimit(`review-submit:${ip}`, 5, 900);
+    if (!reviewLimit.success) {
+      return NextResponse.json(
+        {
+          error: `Too many reviews submitted. Please wait ${Math.ceil(
+            reviewLimit.resetInSeconds / 60
+          )} minute(s) before submitting another review.`,
+        },
+        { status: 429 }
+      );
+    }
+
     const body = await req.json();
     const {
       productId,

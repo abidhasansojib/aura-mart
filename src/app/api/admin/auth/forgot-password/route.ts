@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
       success: true,
       message: telegramDelivered
         ? "A 6-digit verification code has been dispatched to your Telegram bot."
-        : "Verification code generated. (Note: Telegram bot could not be reached, you can also use your Master Recovery Key).",
+        : "Verification code generated. However, Telegram alert delivery failed. Please check your bot token configuration.",
       telegramDelivered,
       username: user.username,
     });
