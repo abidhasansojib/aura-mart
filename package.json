@@ -9,6 +9,12 @@
     "lint": "next lint",
     "postinstall": "prisma generate"
   },
+  "allowScripts": {
+    "@prisma/client": true,
+    "@prisma/engines": true,
+    "prisma": true,
+    "unrs-resolver": true
+  },
   "dependencies": {
     "@prisma/client": "^6.19.3",
     "browser-image-compression": "^2.0.2",
