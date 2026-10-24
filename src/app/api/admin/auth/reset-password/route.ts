@@ -98,9 +98,11 @@ export async function POST(req: NextRequest) {
     });
 
     // Send Telegram Security Notice
-    sendTelegramPasswordChangedAlert(user.username || user.email).catch((err) =>
-      console.warn("Telegram password changed alert failed:", err)
-    );
+    try {
+      await sendTelegramPasswordChangedAlert(user.username || user.email);
+    } catch (err) {
+      console.warn("Telegram password changed alert failed:", err);
+    }
 
     // Automatically sign in the admin
     setAdminSessionCookie({

@@ -89,6 +89,7 @@ export async function sendTelegramOrderAlert(
         text: messageHtml,
         parse_mode: "HTML",
       }),
+      signal: AbortSignal.timeout(3500),
     });
 
     if (!res.ok) {
@@ -151,6 +152,7 @@ export async function sendTelegramOrderCancellationAlert(
         text: messageHtml,
         parse_mode: "HTML",
       }),
+      signal: AbortSignal.timeout(3500),
     });
 
     return res.ok;
@@ -199,6 +201,7 @@ export async function sendTelegramLowStockAlert(
         text: messageHtml,
         parse_mode: "HTML",
       }),
+      signal: AbortSignal.timeout(3500),
     });
 
     return res.ok;
@@ -243,6 +246,7 @@ export async function sendTelegramPasswordResetOtp(
         text: messageHtml,
         parse_mode: "HTML",
       }),
+      signal: AbortSignal.timeout(3500),
     });
 
     return res.ok;
@@ -270,7 +274,7 @@ export async function sendTelegramPasswordChangedAlert(
       `👤 <b>Admin Username:</b> <code>${escapeTelegramHtml(username)}</code>`,
       `🕒 <b>Timestamp:</b> ${timeString} (BST)`,
       `━━━━━━━━━━━━━━━━━━`,
-      `✅ <i>Your store admin password was successfully updated. If this was not you, reset your password or use your Master Key immediately.</i>`,
+      `✅ <i>Your store admin password was successfully updated. If this was not you, reset your password via Telegram OTP immediately.</i>`,
     ].join("\n");
 
     const endpoint = `https://api.telegram.org/bot${botToken}/sendMessage`;
@@ -282,6 +286,7 @@ export async function sendTelegramPasswordChangedAlert(
         text: messageHtml,
         parse_mode: "HTML",
       }),
+      signal: AbortSignal.timeout(3500),
     });
 
     return res.ok;

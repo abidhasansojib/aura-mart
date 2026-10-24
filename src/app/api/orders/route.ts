@@ -402,18 +402,21 @@ export async function POST(req: NextRequest) {
       };
     });
 
-    // Asynchronously dispatch Telegram order alert (non-blocking)
-    sendTelegramOrderAlert(transactionResult.order, transactionResult.currencySymbol).catch(
-      (err) => console.error("Async Telegram alert error:", err)
-    );
+    // Dispatch Telegram alerts and ensure delivery before serverless container freeze
+    try {
+      const alertPromises: Promise<unknown>[] = [
+        sendTelegramOrderAlert(transactionResult.order, transactionResult.currencySymbol),
+      ];
 
-    // Asynchronously dispatch Telegram low stock alerts if threshold breached
-    if (transactionResult.lowStockAlerts && transactionResult.lowStockAlerts.length > 0) {
-      transactionResult.lowStockAlerts.forEach((item) => {
-        sendTelegramLowStockAlert(item, transactionResult.lowStockThreshold).catch((err) =>
-          console.error("Async Telegram low-stock alert error:", err)
-        );
-      });
+      if (transactionResult.lowStockAlerts && transactionResult.lowStockAlerts.length > 0) {
+        transactionResult.lowStockAlerts.forEach((item) => {
+          alertPromises.push(sendTelegramLowStockAlert(item, transactionResult.lowStockThreshold));
+        });
+      }
+
+      await Promise.allSettled(alertPromises);
+    } catch (alertErr) {
+      console.warn("Non-fatal Telegram alert dispatch warning:", alertErr);
     }
 
     return NextResponse.json(transactionResult.order, { status: 201 });

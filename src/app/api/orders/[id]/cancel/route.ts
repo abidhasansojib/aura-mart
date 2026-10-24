@@ -131,20 +131,24 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       });
     });
 
-    // 5. Fire Telegram Cancellation Notification (non-blocking)
-    sendTelegramOrderCancellationAlert(
-      {
-        orderNumber: cancelledOrder.orderNumber,
-        customerName: cancelledOrder.customerName,
-        customerPhone: cancelledOrder.customerPhone,
-        totalAmount: cancelledOrder.totalAmount,
-        items: cancelledOrder.items.map((i) => ({
-          productName: i.productName,
-          quantity: i.quantity,
-        })),
-      },
-      reason
-    ).catch((tErr) => console.warn("Telegram cancel alert failed:", tErr));
+    // 5. Fire Telegram Cancellation Notification before container freeze
+    try {
+      await sendTelegramOrderCancellationAlert(
+        {
+          orderNumber: cancelledOrder.orderNumber,
+          customerName: cancelledOrder.customerName,
+          customerPhone: cancelledOrder.customerPhone,
+          totalAmount: cancelledOrder.totalAmount,
+          items: cancelledOrder.items.map((i) => ({
+            productName: i.productName,
+            quantity: i.quantity,
+          })),
+        },
+        reason
+      );
+    } catch (tErr) {
+      console.warn("Non-fatal Telegram cancel alert dispatch warning:", tErr);
+    }
 
     return NextResponse.json({
       success: true,
