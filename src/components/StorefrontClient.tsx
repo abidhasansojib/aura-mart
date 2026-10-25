@@ -439,7 +439,7 @@ export function StorefrontClient({
         {/* =====================================================================
             2. MODERN BENTO HERO SHOWCASE (Matching Dribbble Bento Aesthetic)
             ===================================================================== */}
-        <section className="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4">
+        <section className="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 overflow-hidden no-scrollbar [&::-webkit-scrollbar]:hidden">
           {/* Main Hero Card: Swipable Animated Hero Banner Slider */}
           <HeroBannerSlider banners={banners} defaultSettings={settings} />
 
@@ -550,7 +550,7 @@ export function StorefrontClient({
                 aria-label="Sort products by"
                 className="appearance-none bg-white/95 backdrop-blur-md border border-slate-300/80 hover:border-slate-400 focus:border-[#FF6448] rounded-xl sm:rounded-2xl pl-3 sm:pl-3.5 pr-8 sm:pr-9 py-1.5 sm:py-2 text-[11px] sm:text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/20 min-h-[36px] sm:min-h-[40px] shadow-xs cursor-pointer transition-all"
               >
-                <option value="featured">✨ Featured / Default</option>
+                <option value="featured">✨ Featured</option>
                 <option value="viral">🔥 Mostly Sold / Viral</option>
                 <option value="price-asc">💵 Price: Low to High</option>
                 <option value="price-desc">💎 Price: High to Low</option>
@@ -580,7 +580,7 @@ export function StorefrontClient({
                   {cat === "Featured" && <Sparkles className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-amber-500" />}
                   <span>
                     {cat === "Discover"
-                      ? "Discover (8)"
+                      ? `Discover (${Math.min(8, initialProducts.length)})`
                       : cat === "All"
                       ? `All Products (${initialProducts.length})`
                       : cat === "Viral"
@@ -851,14 +851,14 @@ export function StorefrontClient({
               </div>
 
               {/* Browse All Products Prompt when in Discover Mode */}
-              {selectedCategory === "Discover" && initialProducts.length > 8 && (
+              {selectedCategory === "Discover" && initialProducts.length > Math.min(8, initialProducts.length) && (
                 <div className="bg-white/90 backdrop-blur-md rounded-2xl sm:rounded-3xl border border-black/5 p-6 sm:p-8 text-center shadow-sm space-y-3.5 mt-2 sm:mt-4">
                   <div>
                     <h4 className="text-sm sm:text-base font-black text-slate-900">
-                      Showing 8 Random Picks from our {initialProducts.length} Products
+                      Showing {Math.min(8, initialProducts.length)} Random Picks from our {initialProducts.length} Products
                     </h4>
                     <p className="text-[11px] sm:text-xs text-slate-500 max-w-md mx-auto mt-0.5">
-                      Want to explore our entire collection or get another fresh set of 8 items?
+                      Want to explore our entire collection or get another fresh set of {Math.min(8, initialProducts.length)} items?
                     </p>
                   </div>
                   <div className="flex items-center justify-center gap-2.5 flex-wrap pt-1">
@@ -879,7 +879,7 @@ export function StorefrontClient({
                       className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl sm:rounded-2xl bg-white hover:bg-slate-50 text-slate-800 text-xs font-bold transition-all border border-slate-200 shadow-xs active:scale-95 min-h-[42px]"
                     >
                       <Shuffle className="h-3.5 w-3.5 text-[#FF6448]" />
-                      <span>Shuffle 8 More</span>
+                      <span>Shuffle {Math.min(8, initialProducts.length)} More</span>
                     </button>
                   </div>
                 </div>
@@ -943,10 +943,13 @@ export function StorefrontClient({
           )}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="fixed bottom-20 sm:bottom-6 right-5 z-40 flex items-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white px-4 py-3 rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all text-xs font-bold border-2 border-white/20"
+          className={`fixed ${
+            totalItems > 0 ? "bottom-[76px]" : "bottom-4"
+          } sm:bottom-6 right-3 sm:right-6 z-40 flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white w-10 h-10 sm:w-auto sm:h-auto sm:px-4 sm:py-2.5 rounded-full shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 text-xs font-bold border-2 border-white/80`}
           title="Chat or Order via WhatsApp"
+          aria-label="Order via WhatsApp"
         >
-          <MessageCircle className="h-5 w-5 fill-white" />
+          <MessageCircle className="h-5 w-5 fill-white shrink-0" />
           <span className="hidden sm:inline">WhatsApp Order</span>
         </a>
       )}

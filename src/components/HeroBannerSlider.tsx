@@ -109,7 +109,11 @@ export function HeroBannerSlider({ banners = [], defaultSettings }: HeroBannerSl
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      className={`col-span-12 md:col-span-7 bg-gradient-to-br ${bgGradient} text-white rounded-[24px] sm:rounded-[32px] p-4 xs:p-6 sm:p-10 shadow-xl flex flex-col justify-between bento-card relative overflow-hidden group select-none min-h-[300px] xs:min-h-[340px] sm:min-h-[380px] transition-all duration-500`}
+      className={`col-span-12 md:col-span-7 bg-gradient-to-br ${bgGradient} text-white rounded-[24px] sm:rounded-[32px] p-4 xs:p-6 sm:p-10 shadow-xl flex flex-col justify-between bento-card relative overflow-hidden group select-none min-h-[300px] xs:min-h-[340px] sm:min-h-[380px] transition-all duration-500 no-scrollbar [&::-webkit-scrollbar]:hidden [scrollbar-width:none] [-ms-overflow-style:none] isolate`}
+      style={{
+        WebkitMaskImage: "-webkit-radial-gradient(white, black)",
+        transform: "translateZ(0)",
+      }}
     >
       {/* Background Photo Layer (Full-bleed card background when image is provided) */}
       {currentBanner.imageUrl && (
@@ -237,10 +241,10 @@ export function HeroBannerSlider({ banners = [], defaultSettings }: HeroBannerSl
 
       {/* 3. Subtle Animated Progress Bar for Autoplay */}
       {totalSlides > 1 && !isPaused && (
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/20 overflow-hidden">
+        <div className="absolute bottom-1 sm:bottom-1.5 left-6 right-6 h-0.5 bg-black/25 overflow-hidden rounded-full pointer-events-none">
           <div
             key={`progress-${currentIndex}`}
-            className="h-full bg-white/60 animate-[progress_5s_linear]"
+            className="h-full bg-white/60 rounded-full animate-[progress_5s_linear]"
             style={{
               animation: "progress 5s linear forwards",
             }}
