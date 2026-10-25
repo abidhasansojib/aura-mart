@@ -27,7 +27,7 @@ You are an elite Full-Stack Next.js E-Commerce Architect building a production-r
 ## 3. UI/UX DESIGN THEME ("DRIBBLE BENTO-BOX")
 - **Mobile-First Priority**: Over 85% of customers will visit from smartphones via Facebook, Instagram, or WhatsApp links. Every button must have a minimum touch target height of 44px.
 - **Color Palette & Bento Aesthetics**:
-  - Soft Celadon Sage Framing Canvas: `#CBD5CE` (`bg-[#CBD5CE]`)
+  - Crisp High-End Neutral Canvas: `#F8FAFC` (`bg-[#F8FAFC]`)
   - Deep Obsidian Matte Panel: `#181A1D` (`bg-[#181A1D]`)
   - Coral Bento Accent: `#FF6448` (`bg-[#FF6448]`) with striped patterned revenue bar charts and highlights
   - Royal Indigo Bento Accent: `#5256FF` (`bg-[#5256FF]`) with order status indicators and fulfillment sparklines

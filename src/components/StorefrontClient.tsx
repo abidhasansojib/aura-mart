@@ -399,7 +399,7 @@ export function StorefrontClient({
   };
 
   return (
-    <div className="min-h-screen bg-[#CBD5CE] text-slate-900 flex flex-col font-sans selection:bg-[#FF6448] selection:text-white">
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col font-sans selection:bg-[#FF6448] selection:text-white">
       {/* 1. Header & Navigation */}
       <Navbar
         storeName={settings.storeName}

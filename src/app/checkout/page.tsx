@@ -370,7 +370,7 @@ export default function CheckoutPage() {
   // ---------------------------------------------------------------------------
   if (completedOrder) {
     return (
-      <div className="min-h-screen bg-[#CBD5CE] py-6 sm:py-12 px-3 sm:px-6 lg:px-8 selection:bg-[#FF6448] selection:text-white">
+      <div className="min-h-screen bg-[#F8FAFC] py-6 sm:py-12 px-3 sm:px-6 lg:px-8 selection:bg-[#FF6448] selection:text-white">
         <div className="max-w-2xl mx-auto space-y-6">
           {/* Action Bar (hidden when printing) */}
           <div className="print:hidden flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
@@ -727,7 +727,7 @@ export default function CheckoutPage() {
   // ---------------------------------------------------------------------------
   if (cart.length === 0) {
     return (
-      <div className="min-h-screen bg-[#CBD5CE] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white rounded-3xl border border-gray-200 p-8 sm:p-10 text-center space-y-4 shadow-xl">
           <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
             <ShoppingBag className="h-8 w-8" />
@@ -754,7 +754,7 @@ export default function CheckoutPage() {
   // 3. 1-PAGE FRICTIONLESS CHECKOUT FORM
   // ---------------------------------------------------------------------------
   return (
-    <div className="min-h-screen bg-[#CBD5CE] text-slate-900 selection:bg-[#FF6448] selection:text-white">
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 selection:bg-[#FF6448] selection:text-white">
       {/* Top Simple Header */}
       <header className="bg-white/95 border-b border-black/5 py-3.5 sm:py-4 px-4 sm:px-6 sticky top-0 z-20 backdrop-blur-md shadow-xs">
         <div className="max-w-7xl mx-auto flex items-center justify-between">

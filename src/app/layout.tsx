@@ -36,7 +36,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#CBD5CE] text-slate-900 min-h-screen selection:bg-[#FF6448] selection:text-white overflow-x-hidden`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#F8FAFC] text-slate-900 min-h-screen selection:bg-[#FF6448] selection:text-white overflow-x-hidden`}>
         <CartProvider>
           {children}
         </CartProvider>

@@ -213,7 +213,7 @@ export function AdminLogin({
   };
 
   return (
-    <div className="min-h-screen bg-[#CBD5CE] text-slate-900 selection:bg-[#FF6448] selection:text-white flex flex-col justify-center items-center p-4 sm:p-6 relative overflow-hidden font-sans">
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 selection:bg-[#FF6448] selection:text-white flex flex-col justify-center items-center p-4 sm:p-6 relative overflow-hidden font-sans">
       {/* Decorative Bento Ambient Glows */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-[#FF6448]/15 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#5256FF]/10 rounded-full blur-3xl pointer-events-none" />

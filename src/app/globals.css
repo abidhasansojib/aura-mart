@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  --canvas-bg: #CBD5CE;
+  --canvas-bg: #F8FAFC;
   --panel-dark: #1A1D20;
   --card-dark: #22252A;
   --card-coral: #FF6448;
@@ -13,7 +13,7 @@
 }
 
 body {
-  background-color: #CBD5CE;
+  background-color: #F8FAFC;
   color: #1A1D20;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   -webkit-tap-highlight-color: transparent;

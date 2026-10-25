@@ -126,7 +126,7 @@ export default function AdminPage() {
 
   if (isAuthenticated === null) {
     return (
-      <div className="min-h-screen bg-[#CBD5CE] flex items-center justify-center">
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 border-3 border-slate-900 border-t-transparent rounded-full animate-spin" />
           <span className="text-xs font-semibold text-slate-700">Loading Dashboard...</span>
@@ -162,7 +162,7 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#CBD5CE] p-2 xs:p-3 sm:p-6 lg:p-8 pb-24 sm:pb-6 flex items-center justify-center font-sans selection:bg-[#FF6448] selection:text-white">
+    <div className="min-h-screen bg-[#F8FAFC] p-2 xs:p-3 sm:p-6 lg:p-8 pb-24 sm:pb-6 flex items-center justify-center font-sans selection:bg-[#FF6448] selection:text-white">
       {/* =======================================================================
           OUTER MATTE CONTAINER (Replicating Dribbble Reference)
           ======================================================================= */}
