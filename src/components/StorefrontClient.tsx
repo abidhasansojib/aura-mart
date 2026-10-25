@@ -15,8 +15,6 @@ import {
   Search,
   RotateCcw,
   Star,
-  PackageCheck,
-  PhoneCall,
   MessageCircle,
   AlertCircle,
   ChevronDown,
@@ -810,65 +808,6 @@ export function StorefrontClient({
               ))}
             </div>
           )}
-        </section>
-
-        {/* =====================================================================
-            5. MODERN BENTO TRUST & ASSURANCE SECTION
-            ===================================================================== */}
-        <section className="bg-[#181A1D] text-white rounded-[32px] p-6 sm:p-10 shadow-2xl space-y-6">
-          <div className="max-w-2xl space-y-1">
-            <span className="text-[11px] font-black uppercase tracking-wider text-[#FF6448]">
-              WHY BUY FROM {settings.storeName ? settings.storeName.toUpperCase() : "OUR STORE"}
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-black tracking-tight">
-              A Hassle-Free Shopping Experience
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-400">
-              Enjoy verified quality, nationwide cash on delivery, and open-box verification on every purchase.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
-            <div className="bg-[#24272C] rounded-2xl p-5 space-y-2 border border-white/5">
-              <div className="w-10 h-10 rounded-xl bg-[#5256FF]/20 text-[#5256FF] flex items-center justify-center">
-                <Truck className="h-5 w-5" />
-              </div>
-              <h4 className="text-sm font-bold text-white">Nationwide Shipping</h4>
-              <p className="text-xs text-slate-400">
-                Doorstep delivery across all 64 districts with real-time SMS & hotline tracking.
-              </p>
-            </div>
-
-            <div className="bg-[#24272C] rounded-2xl p-5 space-y-2 border border-white/5">
-              <div className="w-10 h-10 rounded-xl bg-[#C4E9E5]/20 text-[#C4E9E5] flex items-center justify-center">
-                <PackageCheck className="h-5 w-5" />
-              </div>
-              <h4 className="text-sm font-bold text-white">Cash on Delivery</h4>
-              <p className="text-xs text-slate-400">
-                Zero advance payment required. Inspect parcel before paying the delivery agent.
-              </p>
-            </div>
-
-            <div className="bg-[#24272C] rounded-2xl p-5 space-y-2 border border-white/5">
-              <div className="w-10 h-10 rounded-xl bg-[#FF6448]/20 text-[#FF6448] flex items-center justify-center">
-                <RotateCcw className="h-5 w-5" />
-              </div>
-              <h4 className="text-sm font-bold text-white">7-Day Replacement</h4>
-              <p className="text-xs text-slate-400">
-                Received a damaged or defective item? We replace it swiftly with zero hassle.
-              </p>
-            </div>
-
-            <div className="bg-[#24272C] rounded-2xl p-5 space-y-2 border border-white/5">
-              <div className="w-10 h-10 rounded-xl bg-amber-400/20 text-amber-400 flex items-center justify-center">
-                <PhoneCall className="h-5 w-5" />
-              </div>
-              <h4 className="text-sm font-bold text-white">Direct Phone Support</h4>
-              <p className="text-xs text-slate-400">
-                Have questions or need help placing an order? Call our hotline: {settings.supportPhone || "01700000000"}.
-              </p>
-            </div>
-          </div>
         </section>
       </main>
 
