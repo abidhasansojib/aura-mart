@@ -211,8 +211,8 @@ export function HeroBannerSlider({ banners = [], defaultSettings }: HeroBannerSl
               </button>
             </div>
 
-            {/* Pagination Indicators */}
-            <div className="flex items-center gap-1.5 bg-black/25 backdrop-blur-md px-2.5 py-1.5 rounded-full border border-white/10 shadow-xs">
+            {/* Pagination Indicators (Story-Style Animated Active Progress Pill) */}
+            <div className="flex items-center gap-1.5 bg-black/30 backdrop-blur-md px-2.5 py-1.5 rounded-full border border-white/10 shadow-xs">
               {slideList.map((slide, idx) => {
                 const isActive = idx === currentIndex;
                 return (
@@ -221,12 +221,28 @@ export function HeroBannerSlider({ banners = [], defaultSettings }: HeroBannerSl
                     type="button"
                     onClick={() => handleGoTo(idx)}
                     aria-label={`Go to slide ${idx + 1}`}
-                    className={`h-2 rounded-full transition-all duration-300 ${
+                    className={`h-2 rounded-full transition-all duration-300 relative overflow-hidden ${
                       isActive
-                        ? "w-6 bg-white shadow-xs"
+                        ? "w-8 bg-white/30 shadow-xs"
                         : "w-2 bg-white/40 hover:bg-white/70"
                     }`}
-                  />
+                  >
+                    {isActive && (
+                      <span
+                        key={`pill-fill-${currentIndex}`}
+                        className={`absolute inset-0 bg-white rounded-full ${
+                          isPaused ? "w-full" : "animate-[progress_5s_linear]"
+                        }`}
+                        style={
+                          !isPaused
+                            ? {
+                                animation: "progress 5s linear forwards",
+                              }
+                            : { width: "100%" }
+                        }
+                      />
+                    )}
+                  </button>
                 );
               })}
             </div>
@@ -238,19 +254,6 @@ export function HeroBannerSlider({ banners = [], defaultSettings }: HeroBannerSl
           </div>
         )}
       </div>
-
-      {/* 3. Subtle Animated Progress Bar for Autoplay */}
-      {totalSlides > 1 && !isPaused && (
-        <div className="absolute bottom-1 sm:bottom-1.5 left-6 right-6 h-0.5 bg-black/25 overflow-hidden rounded-full pointer-events-none">
-          <div
-            key={`progress-${currentIndex}`}
-            className="h-full bg-white/60 rounded-full animate-[progress_5s_linear]"
-            style={{
-              animation: "progress 5s linear forwards",
-            }}
-          />
-        </div>
-      )}
 
       {/* Visual Watermark & Lighting */}
       <div className="absolute -right-8 -bottom-8 w-72 h-44 striped-bar-pattern opacity-25 pointer-events-none rounded-tl-full" />
