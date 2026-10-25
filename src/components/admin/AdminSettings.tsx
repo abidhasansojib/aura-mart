@@ -160,10 +160,10 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
     expressCardTitle: initialSettings.expressCardTitle || "Fast Doorstep Delivery",
     expressCardSubtitle:
       initialSettings.expressCardSubtitle || "All 64 Districts Dispatched in 24-48 Hours",
-    guaranteeCardTitle: initialSettings.guaranteeCardTitle || "Open-Box Inspection",
+    guaranteeCardTitle: initialSettings.guaranteeCardTitle || "100% Quality Assured",
     guaranteeCardSubtitle:
       initialSettings.guaranteeCardSubtitle ||
-      "Check your parcel in front of the delivery agent before paying cash.",
+      "Every item is hand-inspected for flawless quality and packaged securely before dispatch.",
     whatsappNumber: initialSettings.whatsappNumber || initialSettings.supportPhone || "01700000000",
     facebookUrl: initialSettings.facebookUrl || "",
     instagramUrl: initialSettings.instagramUrl || "",
@@ -1325,26 +1325,26 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
               {/* Bento Card 3: Quality Guarantee */}
               <div className="p-4 rounded-2xl bg-[#C4E9E5]/30 border border-[#C4E9E5] space-y-4">
                 <span className="text-xs font-black uppercase text-teal-900 tracking-wider block">
-                  3. Quality Assurance Bento Card (Ice Mint)
+                  3. Quality & Packaging Bento Card (Ice Mint)
                 </span>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block font-bold text-[11px] text-slate-700 mb-1">
-                      Guarantee Title
+                      Card Title
                     </label>
                     <input
                       type="text"
                       value={settings.guaranteeCardTitle || ""}
                       onChange={(e) => setSettings({ ...settings, guaranteeCardTitle: e.target.value })}
-                      placeholder="Open-Box Inspection"
+                      placeholder="100% Quality Assured"
                       className="w-full px-3.5 py-2 rounded-xl border border-gray-200 text-slate-900 min-h-[40px]"
                     />
                   </div>
 
                   <div>
                     <label className="block font-bold text-[11px] text-slate-700 mb-1">
-                      Guarantee Description
+                      Card Description
                     </label>
                     <input
                       type="text"
@@ -1352,7 +1352,7 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
                       onChange={(e) =>
                         setSettings({ ...settings, guaranteeCardSubtitle: e.target.value })
                       }
-                      placeholder="Check your parcel in front of the delivery agent before paying cash."
+                      placeholder="Every item is hand-inspected for flawless quality and packaged securely before dispatch."
                       className="w-full px-3.5 py-2 rounded-xl border border-gray-200 text-slate-900 min-h-[40px]"
                     />
                   </div>

@@ -13,7 +13,6 @@ import {
   Sparkles,
   Flame,
   Search,
-  RotateCcw,
   Star,
   MessageCircle,
   AlertCircle,
@@ -444,11 +443,11 @@ export function StorefrontClient({
               </div>
             </div>
 
-            {/* Ice Mint Card: 100% Authentic & Inspection */}
+            {/* Ice Mint Card: Quality Assurance & Bubble-Wrap Packaging */}
             <div className="bg-[#C4E9E5] text-slate-950 rounded-[28px] p-6 shadow-xl flex flex-col justify-between bento-card">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-black uppercase tracking-wider text-slate-700 truncate">
-                  INSPECTION & TRUST
+                  QUALITY & AUTHENTICITY
                 </span>
                 <div className="w-9 h-9 rounded-2xl bg-[#181A1D] text-white flex items-center justify-center shadow-md shrink-0">
                   <ShieldCheck className="h-4 w-4 text-emerald-400" />
@@ -456,16 +455,16 @@ export function StorefrontClient({
               </div>
               <div className="my-2">
                 <div className="text-lg font-black tracking-tight leading-snug">
-                  {settings.guaranteeCardTitle || "Open-Box Inspection"}
+                  {settings.guaranteeCardTitle || "100% Quality Assured"}
                 </div>
                 <p className="text-xs text-slate-700 mt-1 font-medium leading-tight">
                   {settings.guaranteeCardSubtitle ||
-                    "Check your parcel in front of the delivery agent before paying cash."}
+                    "Every item is hand-inspected for flawless quality and packaged securely before dispatch."}
                 </p>
               </div>
               <div className="text-[11px] font-bold text-slate-900 flex items-center gap-1.5 pt-1 truncate">
-                <RotateCcw className="h-3.5 w-3.5 text-emerald-700 shrink-0" />
-                <span className="truncate">7-Day Replacement Guarantee</span>
+                <ShieldCheck className="h-3.5 w-3.5 text-emerald-700 shrink-0" />
+                <span className="truncate">Damage-Free Protective Packaging</span>
               </div>
             </div>
           </div>

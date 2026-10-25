@@ -51,8 +51,8 @@ export function Footer({
                 <PackageCheck className="h-4 sm:h-5 w-4 sm:w-5" />
               </div>
               <div>
-                <h4 className="text-xs sm:text-sm font-black text-white">Doorstep Check</h4>
-                <p className="text-[10px] sm:text-[11px] text-slate-400">Inspect before payment</p>
+                <h4 className="text-xs sm:text-sm font-black text-white">Safe Packaging</h4>
+                <p className="text-[10px] sm:text-[11px] text-slate-400">Bubble-wrapped & sealed</p>
               </div>
             </div>
 

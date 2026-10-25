@@ -584,7 +584,7 @@ export default function CheckoutPage() {
             {/* Footer Trust Note on Slip */}
             <div className="text-center pt-4 border-t border-dashed border-gray-200 text-[11px] text-slate-400">
               <p>For questions regarding your delivery, contact our customer hotline at {settings.supportPhone}.</p>
-              <p className="mt-1">Please inspect parcel upon delivery. Thank you for shopping with {settings.storeName}!</p>
+              <p className="mt-1">Thank you for shopping with {settings.storeName}! Your parcel is being carefully prepared.</p>
             </div>
           </div>
 
