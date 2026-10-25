@@ -33,7 +33,7 @@ export default function AdminPage() {
   const [orders, setOrders] = useState<AdminOrder[]>([]);
   const [products, setProducts] = useState<AdminProduct[]>([]);
   const [settings, setSettings] = useState<StoreSettingsData>({
-    storeName: "Aura Mart",
+    storeName: "Official Store",
     tagline: "Quality Products Delivered to Your Doorstep",
     announcementText: "🚚 Cash on Delivery Available Nationwide! Fast Express Shipping.",
     supportPhone: "01700000000",

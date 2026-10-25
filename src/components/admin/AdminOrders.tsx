@@ -65,7 +65,7 @@ const STATUS_OPTIONS = ["Pending", "Confirmed", "Shipped", "Delivered", "Cancell
 export function AdminOrders({
   orders,
   currencySymbol = "৳",
-  storeName = "Aura Mart",
+  storeName = "Official Store",
   supportPhone = "01700000000",
   onOrderUpdated,
 }: AdminOrdersProps) {

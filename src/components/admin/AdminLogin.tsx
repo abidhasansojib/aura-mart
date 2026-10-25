@@ -47,7 +47,7 @@ function getPasswordStrength(pass: string): {
 
 export function AdminLogin({
   onSuccess,
-  storeName = "Aura Mart",
+  storeName = "Official Store",
   logoUrl = "",
 }: AdminLoginProps) {
   const [mode, setMode] = useState<AuthMode>("login");
@@ -292,7 +292,7 @@ export function AdminLogin({
                   required
                   value={usernameOrEmail}
                   onChange={(e) => setUsernameOrEmail(e.target.value)}
-                  placeholder="admin or admin@auramart.com"
+                  placeholder="admin or your email"
                   className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-black/10 bg-white text-base sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/30 focus:border-[#FF6448] transition-all min-h-[46px]"
                 />
               </div>
@@ -387,7 +387,7 @@ export function AdminLogin({
                   required
                   value={usernameOrEmail}
                   onChange={(e) => setUsernameOrEmail(e.target.value)}
-                  placeholder="admin or admin@auramart.com"
+                  placeholder="admin or your email"
                   className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-black/10 bg-white text-base sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/30 focus:border-[#FF6448] transition-all min-h-[46px]"
                 />
               </div>

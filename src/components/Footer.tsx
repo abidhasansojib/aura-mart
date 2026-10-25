@@ -13,7 +13,7 @@ interface FooterProps {
 }
 
 export function Footer({
-  storeName = "Aura Mart",
+  storeName = "Official Store",
   logoUrl,
   tagline = "Quality Products Delivered to Your Doorstep",
   supportPhone = "01700000000",

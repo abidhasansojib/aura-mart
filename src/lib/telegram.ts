@@ -1,3 +1,5 @@
+import { prisma } from "@/lib/prisma";
+
 export function escapeTelegramHtml(text: string | number | null | undefined): string {
   if (text === null || text === undefined) return "";
   return String(text)
@@ -211,6 +213,19 @@ export async function sendTelegramLowStockAlert(
   }
 }
 
+async function getStoreName(): Promise<string> {
+  try {
+    const s = await prisma.storeSettings.findUnique({
+      where: { id: "default" },
+      select: { storeName: true },
+    });
+    if (s?.storeName?.trim()) return s.storeName.trim().toUpperCase();
+  } catch {
+    // fallback
+  }
+  return "STORE";
+}
+
 export async function sendTelegramPasswordResetOtp(
   otp: string,
   usernameOrEmail: string,
@@ -225,9 +240,10 @@ export async function sendTelegramPasswordResetOtp(
   }
 
   try {
+    const storeHeader = await getStoreName();
     const timeString = new Date().toLocaleString("en-US", { timeZone: "Asia/Dhaka" });
     const messageHtml = [
-      `🔐 <b>AURA MART SECURITY: Password Reset Code</b>`,
+      `🔐 <b>${escapeTelegramHtml(storeHeader)} SECURITY: Password Reset Code</b>`,
       `━━━━━━━━━━━━━━━━━━`,
       `👤 <b>Account:</b> <code>${escapeTelegramHtml(usernameOrEmail)}</code>`,
       `🔑 <b>Verification OTP:</b> <code>${escapeTelegramHtml(otp)}</code>`,
@@ -267,9 +283,10 @@ export async function sendTelegramPasswordChangedAlert(
   }
 
   try {
+    const storeHeader = await getStoreName();
     const timeString = new Date().toLocaleString("en-US", { timeZone: "Asia/Dhaka" });
     const messageHtml = [
-      `🛡️ <b>AURA MART SECURITY NOTICE: Password Changed</b>`,
+      `🛡️ <b>${escapeTelegramHtml(storeHeader)} SECURITY NOTICE: Password Changed</b>`,
       `━━━━━━━━━━━━━━━━━━`,
       `👤 <b>Admin Username:</b> <code>${escapeTelegramHtml(username)}</code>`,
       `🕒 <b>Timestamp:</b> ${timeString} (BST)`,

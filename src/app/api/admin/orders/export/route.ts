@@ -109,11 +109,24 @@ export async function GET(req: NextRequest) {
     const csvContent = [headers.join(","), ...rows].join("\r\n");
     const dateStr = new Date().toISOString().split("T")[0];
 
+    let filenamePrefix = "orders";
+    try {
+      const s = await prisma.storeSettings.findUnique({
+        where: { id: "default" },
+        select: { storeName: true },
+      });
+      if (s?.storeName?.trim()) {
+        filenamePrefix = `${s.storeName.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-")}-orders`;
+      }
+    } catch {
+      // fallback
+    }
+
     return new NextResponse(csvContent, {
       status: 200,
       headers: {
         "Content-Type": "text/csv; charset=utf-8",
-        "Content-Disposition": `attachment; filename="aura-mart-orders-${dateStr}.csv"`,
+        "Content-Disposition": `attachment; filename="${filenamePrefix}-${dateStr}.csv"`,
       },
     });
   } catch (error) {

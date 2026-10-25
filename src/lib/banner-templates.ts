@@ -142,7 +142,7 @@ export function getFallbackBannerFromSettings(settings?: {
     title:
       settings?.heroTitle && settings.heroTitle !== "Aura Mart"
         ? settings.heroTitle
-        : settings?.storeName || "Aura Mart",
+        : settings?.storeName || "Featured Collection",
     subtitle:
       settings?.heroTagline ||
       settings?.tagline ||

@@ -17,7 +17,7 @@ export async function GET() {
   const user = getAdminSessionUser();
   return NextResponse.json({
     authenticated: isAuthenticated,
-    user: user || (isAuthenticated ? { username: "admin", email: "admin@auramart.com" } : null),
+    user: user || (isAuthenticated ? { username: "admin", email: "admin@admin.local" } : null),
   });
 }
 
@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
         const newAdmin = await prisma.adminUser.create({
           data: {
             username: identifier || "admin",
-            email: identifier.includes("@") ? identifier : `${identifier}@auramart.com`,
+            email: identifier.includes("@") ? identifier : `${identifier}@admin.local`,
             password: hashPassword(inputPass),
             name: "Super Admin",
             role: "superadmin",

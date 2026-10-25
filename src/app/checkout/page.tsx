@@ -90,7 +90,7 @@ export default function CheckoutPage() {
 
   // Settings
   const [settings, setSettings] = useState<StoreSettings>({
-    storeName: "Aura Mart",
+    storeName: "Official Store",
     tagline: "Quality Products Delivered to Your Doorstep",
     announcementText: "🚚 Cash on Delivery Available Nationwide! Fast Express Shipping.",
     supportPhone: "01700000000",

@@ -147,7 +147,10 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
     ...initialSettings,
     logoUrl: initialSettings.logoUrl || "",
     heroBadgeText: initialSettings.heroBadgeText || "Featured Collection 2026",
-    heroTitle: initialSettings.heroTitle || initialSettings.storeName || "Aura Mart",
+    heroTitle:
+      initialSettings.heroTitle && initialSettings.heroTitle !== "Aura Mart"
+        ? initialSettings.heroTitle
+        : initialSettings.storeName || "Official Store",
     heroTagline:
       initialSettings.heroTagline ||
       initialSettings.tagline ||
@@ -1259,7 +1262,7 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
                           type="text"
                           value={settings.heroTitle || ""}
                           onChange={(e) => setSettings({ ...settings, heroTitle: e.target.value })}
-                          placeholder="Aura Mart"
+                          placeholder={settings.storeName || "Store Name"}
                           className="w-full px-3 py-1.5 text-xs rounded-xl border border-gray-200 text-slate-900"
                         />
                       </div>

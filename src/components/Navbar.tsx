@@ -23,7 +23,7 @@ interface NavbarProps {
 }
 
 export function Navbar({
-  storeName = "Aura Mart",
+  storeName = "Official Store",
   logoUrl,
   announcementText = "🚚 Cash on Delivery Available Nationwide! Fast Express Shipping.",
   supportPhone = "01700000000",

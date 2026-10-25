@@ -96,7 +96,7 @@ const FALLBACK_PRODUCTS: ModalProduct[] = [
 ];
 
 const DEFAULT_SETTINGS = {
-  storeName: "Aura Mart",
+  storeName: "Official Store",
   logoUrl: "",
   tagline: "Quality Products Delivered to Your Doorstep",
   announcementText: "🚚 Cash on Delivery Available Nationwide! Fast Express Shipping.",

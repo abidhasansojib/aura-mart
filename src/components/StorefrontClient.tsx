@@ -818,7 +818,7 @@ export function StorefrontClient({
         <section className="bg-[#181A1D] text-white rounded-[32px] p-6 sm:p-10 shadow-2xl space-y-6">
           <div className="max-w-2xl space-y-1">
             <span className="text-[11px] font-black uppercase tracking-wider text-[#FF6448]">
-              WHY BUY FROM AURA MART
+              WHY BUY FROM {settings.storeName ? settings.storeName.toUpperCase() : "OUR STORE"}
             </span>
             <h2 className="text-2xl sm:text-3xl font-black tracking-tight">
               A Hassle-Free Shopping Experience
@@ -921,7 +921,7 @@ export function StorefrontClient({
               ? settings.whatsappNumber.replace(/[^0-9]/g, "")
               : `88${settings.whatsappNumber.replace(/[^0-9]/g, "")}`
           }?text=${encodeURIComponent(
-            `Hello ${settings.storeName || "Aura Mart"}, I want to place an order!`
+            `Hello ${settings.storeName || "there"}, I want to place an order!`
           )}`}
           target="_blank"
           rel="noopener noreferrer"

@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 const DEFAULT_STORE_SETTINGS = {
   id: "default",
-  storeName: "Aura Mart",
+  storeName: "Official Store",
   logoUrl: "",
   tagline: "Quality Products Delivered to Your Doorstep",
   announcementText: "🚚 Cash on Delivery Available Nationwide! Fast Express Shipping.",
@@ -20,7 +20,7 @@ const DEFAULT_STORE_SETTINGS = {
   shopCity: "Bogura",
   shopAddress: "Bogura, Rajshahi, Bangladesh",
   heroBadgeText: "Featured Collection 2026",
-  heroTitle: "Aura Mart",
+  heroTitle: "Curated Essentials",
   heroTagline: "Quality Products Delivered to Your Doorstep. Zero advance payment required.",
   heroCtaText: "Shop Catalog",
   heroBadgeSecondary: "Cash on Delivery Available",
@@ -117,7 +117,12 @@ export async function PUT(req: NextRequest) {
         ...(shopCity !== undefined && { shopCity: String(shopCity).trim() }),
         ...(shopAddress !== undefined && { shopAddress: String(shopAddress).trim() }),
         ...(heroBadgeText !== undefined && { heroBadgeText: String(heroBadgeText) }),
-        ...(heroTitle !== undefined && { heroTitle: String(heroTitle) }),
+        ...(heroTitle !== undefined && {
+          heroTitle:
+            String(heroTitle).trim() === "Aura Mart" && storeName
+              ? String(storeName).trim()
+              : String(heroTitle).trim(),
+        }),
         ...(heroTagline !== undefined && { heroTagline: String(heroTagline) }),
         ...(heroCtaText !== undefined && { heroCtaText: String(heroCtaText) }),
         ...(heroBadgeSecondary !== undefined && { heroBadgeSecondary: String(heroBadgeSecondary) }),
