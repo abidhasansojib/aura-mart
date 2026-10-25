@@ -2,7 +2,6 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   X,
@@ -213,46 +212,47 @@ export function ProductDetailModal({
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 z-20 p-2 sm:p-2.5 rounded-full bg-white/90 backdrop-blur-md text-slate-700 hover:text-black shadow-md border border-black/5 transition-colors"
+            className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 z-30 p-2 sm:p-2.5 rounded-full bg-white/90 backdrop-blur-md text-slate-700 hover:text-black shadow-md border border-black/5 transition-colors"
             aria-label="Close modal"
           >
             <X className="h-4 w-4 sm:h-5 sm:w-5" />
           </button>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 overflow-y-auto">
-            {/* Image Section */}
-            <div className="relative w-full bg-slate-50/80 md:bg-neutral-100 aspect-square sm:aspect-[4/3] md:aspect-auto md:h-full min-h-[280px] xs:min-h-[340px] sm:min-h-[400px] flex items-center justify-center overflow-hidden">
-              {/* Ambient Blurred Backdrop for studio-grade depth (eliminates empty side voids) */}
-              {product.imageUrl && (
-                <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20 filter blur-2xl scale-125">
+          {/* Scrollable Body: Image + Details */}
+          <div className="flex-1 overflow-y-auto min-h-0">
+            <div className="grid grid-cols-1 md:grid-cols-2">
+              {/* Image Section */}
+              <div className="relative w-full aspect-[4/3] xs:aspect-square md:aspect-auto md:h-full min-h-[260px] xs:min-h-[320px] bg-neutral-900 overflow-hidden flex items-center justify-center">
+                {/* Ambient Blurred Backdrop for studio-grade depth (fills 100% width with product color palette) */}
+                {product.imageUrl && (
+                  <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    <img
+                      src={product.imageUrl}
+                      alt=""
+                      className="w-full h-full object-cover object-center filter blur-2xl scale-125 opacity-40"
+                    />
+                    <div className="absolute inset-0 bg-black/15 backdrop-blur-xs" />
+                  </div>
+                )}
+
+                {/* Centered High-Res Product Image */}
+                <div className="relative w-full h-full flex items-center justify-center p-3 xs:p-4 sm:p-6 z-10">
                   <img
-                    src={product.imageUrl}
-                    alt=""
-                    className="w-full h-full object-cover object-center"
+                    src={product.imageUrl || "/placeholder-product.png"}
+                    alt={product.name}
+                    className="max-w-full max-h-full object-contain rounded-xl sm:rounded-2xl drop-shadow-2xl transition-transform duration-300 hover:scale-105"
                   />
                 </div>
-              )}
 
-              <div className="relative w-full h-full flex items-center justify-center p-3 xs:p-4 sm:p-6 z-1">
-                <Image
-                  src={product.imageUrl || "/placeholder-product.png"}
-                  alt={product.name}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  className="object-contain drop-shadow-sm transition-transform duration-300 hover:scale-105"
-                  priority
-                />
+                {discountPercent && (
+                  <div className="absolute top-3 left-3 sm:top-4 sm:left-4 bg-[#FF6448] text-white text-[10px] sm:text-xs font-black px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full shadow-md z-20">
+                    {discountPercent}% OFF
+                  </div>
+                )}
               </div>
 
-              {discountPercent && (
-                <div className="absolute top-3 left-3 sm:top-4 sm:left-4 bg-[#FF6448] text-white text-[10px] sm:text-xs font-black px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full shadow-md z-10">
-                  {discountPercent}% OFF
-                </div>
-              )}
-            </div>
-
-            {/* Content Section */}
-            <div className="p-5 xs:p-6 sm:p-8 flex flex-col justify-between space-y-4 sm:space-y-5">
+              {/* Content Section */}
+              <div className="p-4 xs:p-5 sm:p-7 space-y-4 sm:space-y-5">
               <div className="space-y-3 sm:space-y-3.5">
                 {/* Category & Dynamic Stock Tag */}
                 <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
@@ -645,62 +645,62 @@ export function ProductDetailModal({
                 )}
               </div>
 
-              {/* Actions Section */}
-              <div className="space-y-4 pt-3 border-t border-gray-100">
-                {!isOutOfStock && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-700">Quantity:</span>
-                    <div className="flex items-center border border-gray-200 rounded-2xl bg-slate-50 p-1">
-                      <button
-                        onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                        className="p-1.5 text-slate-600 hover:text-black transition-colors rounded-xl hover:bg-white"
-                        aria-label="Decrease quantity"
-                      >
-                        <Minus className="h-4 w-4" />
-                      </button>
-                      <span className="w-10 text-center font-bold text-sm text-slate-900 font-mono">
-                        {quantity}
-                      </span>
-                      <button
-                        onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
-                        className="p-1.5 text-slate-600 hover:text-black transition-colors rounded-xl hover:bg-white"
-                        aria-label="Increase quantity"
-                      >
-                        <Plus className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Primary & Secondary Action Buttons */}
-                {isOutOfStock ? (
-                  <button
-                    disabled
-                    className="w-full py-3.5 rounded-2xl bg-gray-100 text-slate-400 font-bold text-sm cursor-not-allowed min-h-[48px]"
-                  >
-                    Sold Out
-                  </button>
-                ) : (
-                  <div className="flex flex-col xs:grid xs:grid-cols-2 gap-2.5 sm:gap-3">
-                    <button
-                      onClick={handleAddToCart}
-                      className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl border-2 border-[#181A1D] text-[#181A1D] font-bold text-xs hover:bg-[#181A1D] hover:text-white transition-all active:scale-95 min-h-[48px]"
-                    >
-                      <ShoppingBag className="h-4 w-4" />
-                      <span>Add to Cart</span>
-                    </button>
-
-                    <button
-                      onClick={handleBuyNow}
-                      className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-[#FF6448] hover:bg-[#e8553b] text-white font-bold text-xs shadow-lg shadow-[#FF6448]/25 transition-all active:scale-95 min-h-[48px]"
-                    >
-                      <Zap className="h-4 w-4 fill-white" />
-                      <span>Buy Now (COD)</span>
-                    </button>
-                  </div>
-                )}
               </div>
             </div>
+          </div>
+
+          {/* Sticky Bottom Action Footer (Always 100% visible, never cut off!) */}
+          <div className="shrink-0 bg-white/95 backdrop-blur-md border-t border-slate-100 p-3 xs:p-3.5 sm:p-4 px-4 sm:px-6 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] z-20">
+            {isOutOfStock ? (
+              <button
+                disabled
+                className="w-full py-3 sm:py-3.5 rounded-xl sm:rounded-2xl bg-gray-100 text-slate-400 font-bold text-xs sm:text-sm cursor-not-allowed min-h-[46px]"
+              >
+                Sold Out
+              </button>
+            ) : (
+              <div className="flex items-center gap-2.5 sm:gap-4">
+                {/* Quantity Selector */}
+                <div className="flex items-center border border-slate-200 rounded-xl sm:rounded-2xl bg-slate-50/80 p-0.5 sm:p-1 shrink-0">
+                  <button
+                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                    className="p-1 sm:p-1.5 text-slate-600 hover:text-black transition-colors rounded-lg hover:bg-white"
+                    aria-label="Decrease quantity"
+                  >
+                    <Minus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  </button>
+                  <span className="w-7 xs:w-9 sm:w-10 text-center font-bold text-xs sm:text-sm text-slate-900 font-mono">
+                    {quantity}
+                  </span>
+                  <button
+                    onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
+                    className="p-1 sm:p-1.5 text-slate-600 hover:text-black transition-colors rounded-lg hover:bg-white"
+                    aria-label="Increase quantity"
+                  >
+                    <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  </button>
+                </div>
+
+                {/* Primary Action Buttons */}
+                <div className="flex-1 grid grid-cols-2 gap-2 sm:gap-3">
+                  <button
+                    onClick={handleAddToCart}
+                    className="flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl sm:rounded-2xl border-2 border-[#181A1D] text-[#181A1D] font-bold text-xs hover:bg-[#181A1D] hover:text-white transition-all active:scale-95 min-h-[44px] sm:min-h-[48px]"
+                  >
+                    <ShoppingBag className="h-3.5 sm:h-4 w-3.5 sm:w-4 shrink-0" />
+                    <span className="truncate">Add to Cart</span>
+                  </button>
+
+                  <button
+                    onClick={handleBuyNow}
+                    className="flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl sm:rounded-2xl bg-[#FF6448] hover:bg-[#e8553b] text-white font-bold text-xs shadow-lg shadow-[#FF6448]/25 transition-all active:scale-95 min-h-[44px] sm:min-h-[48px]"
+                  >
+                    <Zap className="h-3.5 sm:h-4 w-3.5 sm:w-4 fill-white shrink-0" />
+                    <span className="truncate">Buy Now (COD)</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
