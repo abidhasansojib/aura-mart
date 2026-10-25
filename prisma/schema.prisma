@@ -106,6 +106,7 @@ model Product {
   reviews        Review[]
 
   @@index([category, isActive])
+  @@index([isActive, isFeatured])
 }
 
 model Order {
@@ -147,6 +148,9 @@ model OrderItem {
 
   order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([productId])
+  @@index([orderId])
 }
 
 model Review {

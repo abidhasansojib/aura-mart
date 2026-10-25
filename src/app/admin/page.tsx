@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import {
   BarChart3,
   Package,
@@ -18,10 +19,22 @@ import {
 } from "lucide-react";
 import { AdminLogin } from "@/components/admin/AdminLogin";
 import { AdminOverview } from "@/components/admin/AdminOverview";
-import { AdminOrders, AdminOrder } from "@/components/admin/AdminOrders";
-import { AdminProducts, AdminProduct } from "@/components/admin/AdminProducts";
-import { AdminSettings, StoreSettingsData } from "@/components/admin/AdminSettings";
-import { AdminReviews } from "@/components/admin/AdminReviews";
+import type { AdminOrder } from "@/components/admin/AdminOrders";
+import type { AdminProduct } from "@/components/admin/AdminProducts";
+import type { StoreSettingsData } from "@/components/admin/AdminSettings";
+
+const AdminOrders = dynamic(() => import("@/components/admin/AdminOrders").then((m) => m.AdminOrders), {
+  loading: () => <div className="p-8 text-center text-slate-400 text-xs">Loading Orders Pipeline...</div>,
+});
+const AdminProducts = dynamic(() => import("@/components/admin/AdminProducts").then((m) => m.AdminProducts), {
+  loading: () => <div className="p-8 text-center text-slate-400 text-xs">Loading Products & Inventory...</div>,
+});
+const AdminReviews = dynamic(() => import("@/components/admin/AdminReviews").then((m) => m.AdminReviews), {
+  loading: () => <div className="p-8 text-center text-slate-400 text-xs">Loading Reviews Moderation...</div>,
+});
+const AdminSettings = dynamic(() => import("@/components/admin/AdminSettings").then((m) => m.AdminSettings), {
+  loading: () => <div className="p-8 text-center text-slate-400 text-xs">Loading Store Settings...</div>,
+});
 
 type ActiveTab = "overview" | "orders" | "products" | "reviews" | "settings";
 

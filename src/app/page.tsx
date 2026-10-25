@@ -4,8 +4,7 @@ import { StorefrontClient } from "@/components/StorefrontClient";
 import { ModalProduct } from "@/components/ProductDetailModal";
 import { BannerItem } from "@/lib/banner-templates";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60;
 
 // Fallback demo products if database is not yet connected during local review
 const FALLBACK_PRODUCTS: ModalProduct[] = [

@@ -44,7 +44,11 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    return NextResponse.json(banners);
+    return NextResponse.json(banners, {
+      headers: showAll
+        ? { "Cache-Control": "no-store" }
+        : { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" },
+    });
   } catch (error) {
     console.error("GET /api/banners error:", error);
     return NextResponse.json([], { status: 200 });

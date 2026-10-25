@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import {
   ShoppingBag,
@@ -25,11 +26,16 @@ import { useCart } from "@/context/CartContext";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { CartDrawer } from "@/components/CartDrawer";
-import { ProductDetailModal, ModalProduct } from "@/components/ProductDetailModal";
+import type { ModalProduct } from "@/components/ProductDetailModal";
 import { HeroBannerSlider } from "@/components/HeroBannerSlider";
 import { BannerItem } from "@/lib/banner-templates";
 import { formatPrice } from "@/lib/utils";
 import { searchProducts } from "@/lib/search";
+
+const ProductDetailModal = dynamic(
+  () => import("@/components/ProductDetailModal").then((mod) => mod.ProductDetailModal),
+  { ssr: false }
+);
 
 // Helper for highlighting matching terms
 function HighlightText({ text, query }: { text: string; query?: string }) {
@@ -61,6 +67,7 @@ interface ProductCardProps {
   onQuickBuy: (product: ModalProduct) => void;
   searchHighlight?: string;
   isSimilar?: boolean;
+  priority?: boolean;
 }
 
 function ProductCard({
@@ -71,6 +78,7 @@ function ProductCard({
   onQuickBuy,
   searchHighlight,
   isSimilar,
+  priority = false,
 }: ProductCardProps) {
   const isOutOfStock = product.stock <= 0;
   const isLowStock = product.stock > 0 && product.stock <= 5;
@@ -90,9 +98,10 @@ function ProductCard({
           src={product.imageUrl || "/placeholder-product.png"}
           alt={product.name}
           fill
+          priority={priority}
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           className="object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
-          loading="lazy"
+          {...(!priority ? { loading: "lazy" as const } : {})}
         />
 
         {/* Top Badges */}
@@ -838,7 +847,7 @@ export function StorefrontClient({
           ) : (
             <>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-6">
-                {standardFilteredProducts.map((product) => (
+                {standardFilteredProducts.map((product, idx) => (
                   <ProductCard
                     key={product.id}
                     product={product}
@@ -846,6 +855,7 @@ export function StorefrontClient({
                     onOpenModal={setActiveModalProduct}
                     onAddToCart={(p) => addItem(p, 1)}
                     onQuickBuy={handleQuickBuy}
+                    priority={idx < 4}
                   />
                 ))}
               </div>

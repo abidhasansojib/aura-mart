@@ -1,7 +1,7 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import Image from "next/image";
 import {
   Sparkles,
   Star,
@@ -118,10 +118,13 @@ export function HeroBannerSlider({ banners = [], defaultSettings }: HeroBannerSl
       {/* Background Photo Layer (Full-bleed card background when image is provided) */}
       {currentBanner.imageUrl && (
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-          <img
+          <Image
             src={currentBanner.imageUrl}
             alt={currentBanner.title}
-            className="w-full h-full object-cover object-center scale-100 transition-transform duration-700 group-hover:scale-105"
+            fill
+            priority={currentIndex === 0}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 70vw, 800px"
+            className="object-cover object-center scale-100 transition-transform duration-700 group-hover:scale-105"
           />
           {/* Theme Tint & Vignette Overlays for 100% Text & Badge Legibility */}
           <div

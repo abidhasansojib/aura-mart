@@ -112,7 +112,11 @@ export async function GET(req: NextRequest) {
       };
     });
 
-    return NextResponse.json(enrichedProducts);
+    return NextResponse.json(enrichedProducts, {
+      headers: showAll
+        ? { "Cache-Control": "no-store" }
+        : { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=120" },
+    });
   } catch (error) {
     console.error("GET /api/products error:", error);
     return NextResponse.json(

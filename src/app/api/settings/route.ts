@@ -45,17 +45,29 @@ const DEFAULT_STORE_SETTINGS = {
 
 export async function GET() {
   try {
-    const settings = await prisma.storeSettings.upsert({
+    let settings = await prisma.storeSettings.findUnique({
       where: { id: "default" },
-      update: {},
-      create: DEFAULT_STORE_SETTINGS,
     });
 
-    return NextResponse.json(settings);
+    if (!settings) {
+      settings = await prisma.storeSettings.create({
+        data: DEFAULT_STORE_SETTINGS,
+      });
+    }
+
+    return NextResponse.json(settings, {
+      headers: {
+        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+      },
+    });
   } catch (error) {
     console.error("GET /api/settings error:", error);
     // Return resilient fallback settings if database is not reachable
-    return NextResponse.json(DEFAULT_STORE_SETTINGS);
+    return NextResponse.json(DEFAULT_STORE_SETTINGS, {
+      headers: {
+        "Cache-Control": "public, s-maxage=30, stale-while-revalidate=120",
+      },
+    });
   }
 }
 
