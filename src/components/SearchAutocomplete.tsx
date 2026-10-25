@@ -246,15 +246,20 @@ export function SearchAutocomplete<T extends SearchableProduct>({
 
       {/* 3. Footer Bar */}
       <div className="p-2.5 bg-neutral-50 flex items-center justify-between text-[11px] font-semibold text-slate-500">
-        <span className="truncate pr-2">
-          <span className="hidden xs:inline">Press </span><kbd className="px-1.5 py-0.5 bg-white border border-gray-200 rounded text-[10px] font-mono shadow-xs">Enter</kbd> to view all
-        </span>
+        <button
+          type="button"
+          onClick={onClose}
+          className="truncate pr-2 hover:text-slate-900 transition-colors flex items-center gap-1 font-bold"
+        >
+          <span>View All</span>
+          <ArrowRight className="h-3 w-3 text-slate-400" />
+        </button>
         <button
           type="button"
           onClick={onClose}
           className="text-[#FF6448] hover:underline font-bold shrink-0"
         >
-          Close [Esc]
+          Close
         </button>
       </div>
     </div>
