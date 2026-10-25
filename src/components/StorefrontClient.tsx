@@ -18,6 +18,8 @@ import {
   AlertCircle,
   ChevronDown,
   Boxes,
+  Compass,
+  Shuffle,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { Navbar } from "@/components/Navbar";
@@ -507,7 +509,7 @@ export function StorefrontClient({
                   {isSearching
                     ? "Search Results"
                     : selectedCategory === "Discover"
-                    ? "✨ Handpicked For You"
+                    ? "Discover Picks"
                     : selectedCategory === "All"
                     ? "Explore Full Catalog"
                     : selectedCategory === "Viral"
@@ -570,13 +572,13 @@ export function StorefrontClient({
                       : "bg-white/85 backdrop-blur-sm text-slate-700 hover:bg-white hover:text-slate-950 border border-black/5"
                   }`}
                 >
-                  {cat === "Discover" && <Sparkles className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-[#FF6448]" />}
+                  {cat === "Discover" && <Compass className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-[#FF6448]" />}
                   {cat === "All" && <Boxes className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-slate-600" />}
                   {cat === "Viral" && <Flame className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-[#FF6448] fill-[#FF6448]" />}
                   {cat === "Featured" && <Sparkles className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-amber-500" />}
                   <span>
                     {cat === "Discover"
-                      ? "🎲 Discover (8)"
+                      ? "Discover (8)"
                       : cat === "All"
                       ? `All Products (${initialProducts.length})`
                       : cat === "Viral"
@@ -874,8 +876,8 @@ export function StorefrontClient({
                       onClick={reshuffleRandom}
                       className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl sm:rounded-2xl bg-white hover:bg-slate-50 text-slate-800 text-xs font-bold transition-all border border-slate-200 shadow-xs active:scale-95 min-h-[42px]"
                     >
-                      <Sparkles className="h-3.5 w-3.5 text-[#FF6448]" />
-                      <span>Roll / Shuffle 8 More</span>
+                      <Shuffle className="h-3.5 w-3.5 text-[#FF6448]" />
+                      <span>Shuffle 8 More</span>
                     </button>
                   </div>
                 </div>
