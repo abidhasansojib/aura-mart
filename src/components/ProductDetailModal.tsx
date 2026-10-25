@@ -19,6 +19,7 @@ import {
   AlertCircle,
   Loader2,
   Send,
+  MessageCircle,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/utils";
@@ -53,6 +54,8 @@ interface ProductDetailModalProps {
   product: ModalProduct | null;
   onClose: () => void;
   currencySymbol?: string;
+  whatsappNumber?: string;
+  storeName?: string;
   initialOrderNumber?: string;
   initialCustomerPhone?: string;
 }
@@ -61,6 +64,8 @@ export function ProductDetailModal({
   product,
   onClose,
   currencySymbol = "৳",
+  whatsappNumber = "",
+  storeName = "Official Store",
   initialOrderNumber = "",
   initialCustomerPhone = "",
 }: ProductDetailModalProps) {
@@ -134,6 +139,21 @@ export function ProductDetailModal({
     addItem(product, quantity);
     onClose();
     router.push("/checkout");
+  };
+
+  const getWhatsAppOrderUrl = () => {
+    if (!product || !whatsappNumber) return "#";
+    const cleanNumber = whatsappNumber.replace(/[^0-9]/g, "");
+    const formatted = cleanNumber.startsWith("88") ? cleanNumber : `88${cleanNumber}`;
+    const totalPrice = formatPrice(product.price * quantity, currencySymbol);
+    const text = encodeURIComponent(
+      `Hello ${storeName || "there"}! I want to order this item with Cash on Delivery:\n\n` +
+      `📦 Product: ${product.name}\n` +
+      `🔢 Quantity: ${quantity}\n` +
+      `💰 Total: ${totalPrice}\n\n` +
+      `Please confirm my delivery order!`
+    );
+    return `https://wa.me/${formatted}?text=${text}`;
   };
 
   const handleSubmitReview = async (e: React.FormEvent) => {
@@ -659,46 +679,61 @@ export function ProductDetailModal({
                 Sold Out
               </button>
             ) : (
-              <div className="flex items-center gap-2.5 sm:gap-4">
-                {/* Quantity Selector */}
-                <div className="flex items-center border border-slate-200 rounded-xl sm:rounded-2xl bg-slate-50/80 p-0.5 sm:p-1 shrink-0">
-                  <button
-                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                    className="p-1 sm:p-1.5 text-slate-600 hover:text-black transition-colors rounded-lg hover:bg-white"
-                    aria-label="Decrease quantity"
-                  >
-                    <Minus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  </button>
-                  <span className="w-7 xs:w-9 sm:w-10 text-center font-bold text-xs sm:text-sm text-slate-900 font-mono">
-                    {quantity}
-                  </span>
-                  <button
-                    onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
-                    className="p-1 sm:p-1.5 text-slate-600 hover:text-black transition-colors rounded-lg hover:bg-white"
-                    aria-label="Increase quantity"
-                  >
-                    <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  </button>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2.5 sm:gap-4">
+                  {/* Quantity Selector */}
+                  <div className="flex items-center border border-slate-200 rounded-xl sm:rounded-2xl bg-slate-50/80 p-0.5 sm:p-1 shrink-0">
+                    <button
+                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                      className="p-1 sm:p-1.5 text-slate-600 hover:text-black transition-colors rounded-lg hover:bg-white"
+                      aria-label="Decrease quantity"
+                    >
+                      <Minus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    </button>
+                    <span className="w-7 xs:w-9 sm:w-10 text-center font-bold text-xs sm:text-sm text-slate-900 font-mono">
+                      {quantity}
+                    </span>
+                    <button
+                      onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
+                      className="p-1 sm:p-1.5 text-slate-600 hover:text-black transition-colors rounded-lg hover:bg-white"
+                      aria-label="Increase quantity"
+                    >
+                      <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    </button>
+                  </div>
+
+                  {/* Primary Action Buttons */}
+                  <div className="flex-1 grid grid-cols-2 gap-2 sm:gap-3">
+                    <button
+                      onClick={handleAddToCart}
+                      className="flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl sm:rounded-2xl border-2 border-[#181A1D] text-[#181A1D] font-bold text-xs hover:bg-[#181A1D] hover:text-white transition-all active:scale-95 min-h-[44px] sm:min-h-[48px]"
+                    >
+                      <ShoppingBag className="h-3.5 sm:h-4 w-3.5 sm:w-4 shrink-0" />
+                      <span className="truncate">Add to Cart</span>
+                    </button>
+
+                    <button
+                      onClick={handleBuyNow}
+                      className="flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl sm:rounded-2xl bg-[#FF6448] hover:bg-[#e8553b] text-white font-bold text-xs shadow-lg shadow-[#FF6448]/25 transition-all active:scale-95 min-h-[44px] sm:min-h-[48px]"
+                    >
+                      <Zap className="h-3.5 sm:h-4 w-3.5 sm:w-4 fill-white shrink-0" />
+                      <span className="truncate">Buy Now (COD)</span>
+                    </button>
+                  </div>
                 </div>
 
-                {/* Primary Action Buttons */}
-                <div className="flex-1 grid grid-cols-2 gap-2 sm:gap-3">
-                  <button
-                    onClick={handleAddToCart}
-                    className="flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl sm:rounded-2xl border-2 border-[#181A1D] text-[#181A1D] font-bold text-xs hover:bg-[#181A1D] hover:text-white transition-all active:scale-95 min-h-[44px] sm:min-h-[48px]"
+                {/* 1-Tap Direct Order via WhatsApp */}
+                {whatsappNumber && (
+                  <a
+                    href={getWhatsAppOrderUrl()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full flex items-center justify-center gap-2 py-2 sm:py-2.5 px-3 rounded-xl sm:rounded-2xl bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#0c7042] hover:text-[#06502e] border border-[#25D366]/30 font-bold text-xs transition-all active:scale-98 min-h-[38px] shadow-2xs"
                   >
-                    <ShoppingBag className="h-3.5 sm:h-4 w-3.5 sm:w-4 shrink-0" />
-                    <span className="truncate">Add to Cart</span>
-                  </button>
-
-                  <button
-                    onClick={handleBuyNow}
-                    className="flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl sm:rounded-2xl bg-[#FF6448] hover:bg-[#e8553b] text-white font-bold text-xs shadow-lg shadow-[#FF6448]/25 transition-all active:scale-95 min-h-[44px] sm:min-h-[48px]"
-                  >
-                    <Zap className="h-3.5 sm:h-4 w-3.5 sm:w-4 fill-white shrink-0" />
-                    <span className="truncate">Buy Now (COD)</span>
-                  </button>
-                </div>
+                    <MessageCircle className="h-4 w-4 fill-[#25D366] text-[#25D366] shrink-0" />
+                    <span>Order via WhatsApp (Instant COD)</span>
+                  </a>
+                )}
               </div>
             )}
           </div>

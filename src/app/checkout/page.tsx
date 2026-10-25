@@ -122,6 +122,32 @@ export default function CheckoutPage() {
   const [paymentSenderNo, setPaymentSenderNo] = useState("");
   const [trxId, setTrxId] = useState("");
 
+  const handlePhoneChange = (inputVal: string) => {
+    let digits = inputVal.replace(/[^0-9]/g, "");
+    if (digits.startsWith("8801")) {
+      digits = digits.slice(2);
+    } else if (digits.length > 0 && digits.startsWith("1")) {
+      digits = "0" + digits;
+    }
+    if (digits.length > 11) {
+      digits = digits.slice(0, 11);
+    }
+    setPhone(digits);
+  };
+
+  const handlePaymentSenderChange = (inputVal: string) => {
+    let digits = inputVal.replace(/[^0-9]/g, "");
+    if (digits.startsWith("8801")) {
+      digits = digits.slice(2);
+    } else if (digits.length > 0 && digits.startsWith("1")) {
+      digits = "0" + digits;
+    }
+    if (digits.length > 12) {
+      digits = digits.slice(0, 12);
+    }
+    setPaymentSenderNo(digits);
+  };
+
   // Coupon state
   const [couponInput, setCouponInput] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discountAmount: number } | null>(null);
@@ -860,21 +886,38 @@ export default function CheckoutPage() {
 
                   {/* Phone Number */}
                   <div>
-                    <label
-                      htmlFor="customerPhone"
-                      className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5"
-                    >
-                      Phone Number <span className="text-rose-500">*</span>
-                    </label>
-                    <input
-                      id="customerPhone"
-                      type="tel"
-                      required
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="e.g. 01712345678"
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-base sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 min-h-[44px]"
-                    />
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label
+                        htmlFor="customerPhone"
+                        className="block text-xs font-bold text-slate-700 uppercase tracking-wider"
+                      >
+                        Phone Number <span className="text-rose-500">*</span>
+                      </label>
+                      {phone.length > 0 && (
+                        <span className={`text-[10px] font-mono font-medium ${phone.length === 11 ? "text-emerald-600" : "text-amber-600"}`}>
+                          {phone.length}/11 digits
+                        </span>
+                      )}
+                    </div>
+                    <div className="relative flex items-center">
+                      <div className="absolute left-3 flex items-center gap-1.5 text-slate-500 font-bold text-xs pointer-events-none select-none border-r border-gray-200 pr-2.5">
+                        <span className="text-base leading-none">🇧🇩</span>
+                        <span className="text-slate-700 font-mono">+88</span>
+                      </div>
+                      <input
+                        id="customerPhone"
+                        type="tel"
+                        inputMode="tel"
+                        autoComplete="tel"
+                        pattern="[0-9]*"
+                        maxLength={11}
+                        required
+                        value={phone}
+                        onChange={(e) => handlePhoneChange(e.target.value)}
+                        placeholder="01XXXXXXXXX"
+                        className="w-full pl-[82px] pr-4 py-2.5 rounded-xl border border-gray-200 text-base sm:text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 min-h-[46px] transition-colors"
+                      />
+                    </div>
                     <p className="text-[11px] text-slate-400 mt-1">
                       Our delivery courier will call this number before arrival.
                     </p>
@@ -1196,9 +1239,13 @@ export default function CheckoutPage() {
                           </label>
                           <input
                             type="tel"
+                            inputMode="tel"
+                            autoComplete="tel"
+                            pattern="[0-9]*"
+                            maxLength={11}
                             required
                             value={paymentSenderNo}
-                            onChange={(e) => setPaymentSenderNo(e.target.value)}
+                            onChange={(e) => handlePaymentSenderChange(e.target.value)}
                             placeholder="01XXXXXXXXX"
                             className="w-full px-3 py-2 rounded-xl border border-gray-200 text-base sm:text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#E2136E]/20 focus:border-[#E2136E] min-h-[42px]"
                           />
@@ -1313,9 +1360,13 @@ export default function CheckoutPage() {
                               </label>
                               <input
                                 type="tel"
+                                inputMode="tel"
+                                autoComplete="tel"
+                                pattern="[0-9]*"
+                                maxLength={11}
                                 required
                                 value={paymentSenderNo}
-                                onChange={(e) => setPaymentSenderNo(e.target.value)}
+                                onChange={(e) => handlePaymentSenderChange(e.target.value)}
                                 placeholder="01XXXXXXXXX"
                                 className="w-full px-3 py-2 rounded-xl border border-gray-200 text-base sm:text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#F7941D]/20 focus:border-[#F7941D] min-h-[42px]"
                               />
@@ -1432,9 +1483,13 @@ export default function CheckoutPage() {
                           </label>
                           <input
                             type="tel"
+                            inputMode="tel"
+                            autoComplete="tel"
+                            pattern="[0-9]*"
+                            maxLength={12}
                             required
                             value={paymentSenderNo}
-                            onChange={(e) => setPaymentSenderNo(e.target.value)}
+                            onChange={(e) => handlePaymentSenderChange(e.target.value)}
                             placeholder="01XXXXXXXXXX"
                             className="w-full px-3 py-2 rounded-xl border border-gray-200 text-base sm:text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 min-h-[42px]"
                           />

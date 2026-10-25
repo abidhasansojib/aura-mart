@@ -929,6 +929,8 @@ export function StorefrontClient({
         product={activeModalProduct}
         onClose={() => setActiveModalProduct(null)}
         currencySymbol={currencySymbol}
+        whatsappNumber={settings.whatsappNumber}
+        storeName={settings.storeName}
       />
 
       {/* 9. Floating WhatsApp Direct Order Bubble */}
