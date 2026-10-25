@@ -36,6 +36,7 @@ import {
 
 interface StoreSettings {
   storeName: string;
+  storeBadge?: string;
   logoUrl?: string;
   tagline: string;
   announcementText: string;
@@ -91,6 +92,7 @@ export default function CheckoutPage() {
   // Settings
   const [settings, setSettings] = useState<StoreSettings>({
     storeName: "Official Store",
+    storeBadge: "Verified Online Store",
     tagline: "Quality Products Delivered to Your Doorstep",
     announcementText: "🚚 Cash on Delivery Available Nationwide! Fast Express Shipping.",
     supportPhone: "01700000000",

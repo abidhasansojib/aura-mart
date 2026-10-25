@@ -231,6 +231,7 @@ function ProductCard({
 interface StoreSettingsData {
   id?: string;
   storeName?: string;
+  storeBadge?: string;
   logoUrl?: string;
   tagline?: string;
   announcementText?: string;
@@ -402,6 +403,7 @@ export function StorefrontClient({
       {/* 1. Header & Navigation */}
       <Navbar
         storeName={settings.storeName}
+        storeBadge={settings.storeBadge}
         logoUrl={settings.logoUrl}
         announcementText={settings.announcementText}
         supportPhone={settings.supportPhone}
@@ -890,6 +892,7 @@ export function StorefrontClient({
       {/* 6. Footer */}
       <Footer
         storeName={settings.storeName}
+        storeBadge={settings.storeBadge}
         logoUrl={settings.logoUrl}
         tagline={settings.tagline}
         supportPhone={settings.supportPhone}

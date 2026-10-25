@@ -24,6 +24,7 @@ model AdminUser {
 model StoreSettings {
   id                  String   @id @default("default")
   storeName           String   @default("Aura Mart")
+  storeBadge          String?  @default("Verified Online Store")
   logoUrl             String?  @default("")
   tagline             String   @default("Quality Products Delivered to Your Doorstep")
   announcementText    String   @default("🚚 Cash on Delivery Available Nationwide! Fast Express Shipping.")

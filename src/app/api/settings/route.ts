@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 const DEFAULT_STORE_SETTINGS = {
   id: "default",
   storeName: "Official Store",
+  storeBadge: "Verified Online Store",
   logoUrl: "",
   tagline: "Quality Products Delivered to Your Doorstep",
   announcementText: "🚚 Cash on Delivery Available Nationwide! Fast Express Shipping.",
@@ -67,6 +68,7 @@ export async function PUT(req: NextRequest) {
     const body = await req.json();
     const {
       storeName,
+      storeBadge,
       logoUrl,
       tagline,
       announcementText,
@@ -105,6 +107,7 @@ export async function PUT(req: NextRequest) {
       where: { id: "default" },
       update: {
         ...(storeName !== undefined && { storeName: String(storeName).trim() }),
+        ...(storeBadge !== undefined && { storeBadge: String(storeBadge).trim() }),
         ...(logoUrl !== undefined && { logoUrl: String(logoUrl).trim() }),
         ...(tagline !== undefined && { tagline: String(tagline) }),
         ...(announcementText !== undefined && { announcementText: String(announcementText) }),
@@ -146,6 +149,7 @@ export async function PUT(req: NextRequest) {
       create: {
         id: "default",
         storeName: storeName ? String(storeName).trim() : DEFAULT_STORE_SETTINGS.storeName,
+        storeBadge: storeBadge ? String(storeBadge).trim() : DEFAULT_STORE_SETTINGS.storeBadge,
         logoUrl: logoUrl ? String(logoUrl).trim() : "",
         tagline: tagline ?? DEFAULT_STORE_SETTINGS.tagline,
         announcementText: announcementText ?? DEFAULT_STORE_SETTINGS.announcementText,

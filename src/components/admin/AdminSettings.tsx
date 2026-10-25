@@ -83,6 +83,7 @@ export function formatPaymentField(
 export interface StoreSettingsData {
   id?: string;
   storeName: string;
+  storeBadge?: string;
   logoUrl?: string;
   tagline: string;
   announcementText: string;
@@ -145,6 +146,7 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
 
   const [settings, setSettings] = useState<StoreSettingsData>({
     ...initialSettings,
+    storeBadge: initialSettings.storeBadge ?? "Verified Online Store",
     logoUrl: initialSettings.logoUrl || "",
     heroBadgeText: initialSettings.heroBadgeText || "Featured Collection 2026",
     heroTitle:
@@ -874,6 +876,26 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
                   onChange={(e) => setSettings({ ...settings, storeName: e.target.value })}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/20 focus:border-[#FF6448] min-h-[42px]"
                 />
+              </div>
+
+              <div>
+                <label className="block font-bold uppercase tracking-wider text-[11px] text-slate-700 mb-1 flex items-center justify-between">
+                  <span>Store Badge / Subtitle</span>
+                  <span className="text-[10px] text-slate-400 font-normal">Header & Footer</span>
+                </label>
+                <div className="relative">
+                  <Sparkles className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#FF6448]" />
+                  <input
+                    type="text"
+                    value={settings.storeBadge ?? ""}
+                    onChange={(e) => setSettings({ ...settings, storeBadge: e.target.value })}
+                    placeholder="Verified Online Store"
+                    className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-gray-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/20 focus:border-[#FF6448] min-h-[42px]"
+                  />
+                </div>
+                <p className="text-[10px] text-slate-400 mt-1">
+                  Replaces &apos;Premium Store&apos; in Header and &apos;Official Direct Store&apos; in Footer with this single badge.
+                </p>
               </div>
 
               <div>

@@ -5,6 +5,7 @@ import { ShieldCheck, Truck, PackageCheck, Headphones, Phone } from "lucide-reac
 
 interface FooterProps {
   storeName?: string;
+  storeBadge?: string;
   logoUrl?: string;
   tagline?: string;
   supportPhone?: string;
@@ -14,6 +15,7 @@ interface FooterProps {
 
 export function Footer({
   storeName = "Official Store",
+  storeBadge = "Verified Online Store",
   logoUrl,
   tagline = "Quality Products Delivered to Your Doorstep",
   supportPhone = "01700000000",
@@ -91,7 +93,7 @@ export function Footer({
               <div>
                 <h3 className="text-lg font-black tracking-tight text-white">{storeName}</h3>
                 <span className="text-[10px] text-[#FF6448] font-bold uppercase tracking-wider block">
-                  Official Direct Store
+                  {storeBadge || "Verified Online Store"}
                 </span>
               </div>
             </div>

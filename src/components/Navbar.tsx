@@ -11,6 +11,7 @@ import { ModalProduct } from "@/components/ProductDetailModal";
 
 interface NavbarProps {
   storeName?: string;
+  storeBadge?: string;
   logoUrl?: string;
   announcementText?: string;
   supportPhone?: string;
@@ -24,6 +25,7 @@ interface NavbarProps {
 
 export function Navbar({
   storeName = "Official Store",
+  storeBadge = "Verified Online Store",
   logoUrl,
   announcementText = "🚚 Cash on Delivery Available Nationwide! Fast Express Shipping.",
   supportPhone = "01700000000",
@@ -103,7 +105,7 @@ export function Navbar({
                   </span>
                   <span className="text-[10px] sm:text-xs text-[#FF6448] font-bold uppercase tracking-wider block mt-0.5 sm:mt-1 flex items-center gap-1">
                     <Sparkles className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-                    <span>Premium Store</span>
+                    <span>{storeBadge || "Verified Online Store"}</span>
                   </span>
                 </Link>
               </div>

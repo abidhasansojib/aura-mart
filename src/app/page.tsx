@@ -97,6 +97,7 @@ const FALLBACK_PRODUCTS: ModalProduct[] = [
 
 const DEFAULT_SETTINGS = {
   storeName: "Official Store",
+  storeBadge: "Verified Online Store",
   logoUrl: "",
   tagline: "Quality Products Delivered to Your Doorstep",
   announcementText: "🚚 Cash on Delivery Available Nationwide! Fast Express Shipping.",
@@ -284,6 +285,7 @@ export default async function HomePage() {
       settings = {
         ...DEFAULT_SETTINGS,
         ...dbSettings.value,
+        storeBadge: dbSettings.value.storeBadge || DEFAULT_SETTINGS.storeBadge,
         logoUrl: dbSettings.value.logoUrl || "",
       };
     }
