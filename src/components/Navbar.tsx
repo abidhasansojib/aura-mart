@@ -68,8 +68,8 @@ export function Navbar({
         </div>
       </div>
 
-      {/* 2. Floating Bento Glass Header (Auto-condenses on mobile scroll) */}
-      <header className="sticky top-0 z-30 backdrop-blur-xl bg-[#CBD5CE]/95 border-b border-black/5 shadow-xs transition-all duration-300">
+      {/* 2. Floating Bento Glass Header with Semi-Round Corners */}
+      <header className="sticky top-0 z-30 backdrop-blur-xl bg-white/95 border-b border-black/5 shadow-md shadow-black/[0.03] rounded-b-[22px] sm:rounded-b-[28px] transition-all duration-300">
         <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-2.5 sm:py-0">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between sm:h-20 gap-2 sm:gap-6">
             {/* Top row on mobile / Left Brand on desktop */}
@@ -114,7 +114,7 @@ export function Navbar({
               <div className="flex items-center gap-1.5 sm:hidden">
                 <button
                   onClick={() => setIsTrackModalOpen(true)}
-                  className="flex items-center justify-center w-9 h-9 rounded-xl bg-white/85 hover:bg-white border border-black/5 text-slate-800 transition-colors active:scale-95 shadow-2xs shrink-0"
+                  className="flex items-center justify-center w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200/80 text-slate-700 transition-colors active:scale-95 shadow-2xs shrink-0"
                   title="Track Order Status"
                   aria-label="Track Order"
                 >
@@ -155,7 +155,7 @@ export function Navbar({
                     }
                   }}
                   placeholder="Search products, categories, or keywords..."
-                  className="w-full pl-9 sm:pl-11 pr-12 sm:pr-14 py-2 sm:py-2.5 rounded-xl sm:rounded-full border border-black/10 bg-white/95 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#FF6448]/30 focus:border-[#FF6448] transition-all min-h-[40px] sm:min-h-[44px] shadow-sm"
+                  className="w-full pl-9 sm:pl-11 pr-12 sm:pr-14 py-2 sm:py-2.5 rounded-xl sm:rounded-full border border-black/10 bg-slate-50/90 hover:bg-slate-100/80 focus:bg-white text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#FF6448]/30 focus:border-[#FF6448] transition-all min-h-[40px] sm:min-h-[44px] shadow-2xs"
                 />
                 {searchQuery && (
                   <button
@@ -195,7 +195,7 @@ export function Navbar({
               {/* Track Order Pill */}
               <button
                 onClick={() => setIsTrackModalOpen(true)}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-white/85 hover:bg-white border border-black/5 text-slate-800 text-xs font-bold transition-colors min-h-[44px] shadow-2xs"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-slate-100 hover:bg-slate-200 border border-slate-200/80 text-slate-700 text-xs font-bold transition-colors min-h-[44px] shadow-2xs"
                 title="Track your order status"
               >
                 <Truck className="h-4 w-4 text-slate-600" />
