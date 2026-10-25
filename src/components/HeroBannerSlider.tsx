@@ -109,7 +109,7 @@ export function HeroBannerSlider({ banners = [], defaultSettings }: HeroBannerSl
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      className={`col-span-12 md:col-span-7 bg-gradient-to-br ${bgGradient} text-white rounded-[24px] sm:rounded-[32px] p-4 xs:p-6 sm:p-10 shadow-xl flex flex-col justify-between bento-card relative overflow-hidden group select-none min-h-[300px] xs:min-h-[340px] sm:min-h-[380px] transition-all duration-500 no-scrollbar [&::-webkit-scrollbar]:hidden [scrollbar-width:none] [-ms-overflow-style:none] isolate`}
+      className={`col-span-12 md:col-span-7 bg-gradient-to-br ${bgGradient} text-white rounded-[20px] sm:rounded-[32px] p-3.5 xs:p-5 sm:p-8 md:p-10 shadow-xl flex flex-col justify-between bento-card relative overflow-hidden group select-none min-h-[200px] xs:min-h-[240px] sm:min-h-[340px] md:min-h-[380px] transition-all duration-500 no-scrollbar [&::-webkit-scrollbar]:hidden [scrollbar-width:none] [-ms-overflow-style:none] isolate`}
       style={{
         WebkitMaskImage: "-webkit-radial-gradient(white, black)",
         transform: "translateZ(0)",
@@ -133,28 +133,28 @@ export function HeroBannerSlider({ banners = [], defaultSettings }: HeroBannerSl
       )}
 
       {/* 1. Header Badges */}
-      <div className="space-y-2.5 sm:space-y-4 relative z-10">
-        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+      <div className="space-y-1.5 sm:space-y-4 relative z-10">
+        <div className="flex flex-wrap items-center gap-1 sm:gap-2">
           {currentBanner.badgeText && (
-            <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-[10px] sm:text-xs font-bold border border-white/20 shadow-xs animate-in fade-in duration-300">
-              <Sparkles className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-amber-200" />
+            <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-[9px] sm:text-xs font-bold border border-white/20 shadow-xs animate-in fade-in duration-300">
+              <Sparkles className="h-2.5 sm:h-3.5 w-2.5 sm:w-3.5 text-amber-200" />
               <span>{currentBanner.badgeText}</span>
             </span>
           )}
 
           {currentBanner.badgeSecondary && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 sm:py-1 rounded-full bg-slate-950/30 backdrop-blur-md text-white text-[10px] sm:text-[11px] font-bold border border-white/10 shadow-xs animate-in fade-in duration-300">
-              <Star className="h-3 w-3 fill-amber-300 text-amber-300" />
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:py-1 rounded-full bg-slate-950/30 backdrop-blur-md text-white text-[9px] sm:text-[11px] font-bold border border-white/10 shadow-xs animate-in fade-in duration-300">
+              <Star className="h-2.5 w-2.5 fill-amber-300 text-amber-300" />
               <span>{currentBanner.badgeSecondary}</span>
             </span>
           )}
         </div>
 
         {/* Content Headline & Subtitle */}
-        <div className="space-y-2 max-w-xl">
+        <div className="space-y-1 sm:space-y-2 max-w-xl">
           <h1
             key={`title-${currentIndex}`}
-            className="text-xl xs:text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white leading-tight animate-in fade-in slide-in-from-bottom-2 duration-300"
+            className="text-base xs:text-xl sm:text-3xl md:text-5xl font-black tracking-tight text-white leading-tight animate-in fade-in slide-in-from-bottom-2 duration-300"
           >
             {currentBanner.title}
           </h1>
@@ -162,7 +162,7 @@ export function HeroBannerSlider({ banners = [], defaultSettings }: HeroBannerSl
           {currentBanner.subtitle && (
             <p
               key={`subtitle-${currentIndex}`}
-              className="text-[11px] xs:text-xs sm:text-sm text-white/95 leading-relaxed font-medium line-clamp-3 sm:line-clamp-none animate-in fade-in slide-in-from-bottom-3 duration-300"
+              className="text-[10px] xs:text-xs sm:text-sm text-white/90 leading-relaxed font-medium line-clamp-2 sm:line-clamp-none animate-in fade-in slide-in-from-bottom-3 duration-300"
             >
               {currentBanner.subtitle}
             </p>
@@ -170,27 +170,27 @@ export function HeroBannerSlider({ banners = [], defaultSettings }: HeroBannerSl
         </div>
       </div>
 
-      {/* 2. Bottom Row: CTA Button + Navigation Dots */}
-      <div className="pt-4 sm:pt-6 relative z-10 flex flex-col xs:flex-row items-stretch xs:items-center justify-between gap-3">
+      {/* 2. Bottom Row: CTA Button + Navigation Dots (Side-by-side on mobile) */}
+      <div className="pt-2 sm:pt-6 relative z-10 flex items-center justify-between gap-2">
         {/* Call to Action Button */}
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2">
           <a
             href={currentBanner.ctaLink || "#catalog"}
-            className="inline-flex items-center justify-center gap-1.5 bg-[#181A1D] hover:bg-black text-white text-xs sm:text-sm font-bold px-4 xs:px-6 sm:px-7 py-2.5 sm:py-3.5 rounded-xl sm:rounded-2xl shadow-xl transition-all hover:scale-[1.02] active:scale-95 min-h-[38px] sm:min-h-[44px]"
+            className="inline-flex items-center justify-center gap-1.5 bg-[#181A1D] hover:bg-black text-white text-[11px] sm:text-sm font-bold px-3 sm:px-7 py-1.5 sm:py-3.5 rounded-xl sm:rounded-2xl shadow-xl transition-all hover:scale-[1.02] active:scale-95 min-h-[32px] sm:min-h-[44px]"
           >
             <span>{currentBanner.ctaText || "Shop Catalog"}</span>
-            <ArrowRight className="h-3.5 sm:h-4 w-3.5 sm:w-4" />
+            <ArrowRight className="h-3 sm:h-4 w-3 sm:w-4" />
           </a>
 
-          <span className="hidden sm:inline-flex items-center justify-center gap-1 sm:gap-1.5 text-[10px] xs:text-[11px] sm:text-xs font-semibold bg-white/20 backdrop-blur-md px-2.5 sm:px-3 py-2 rounded-xl sm:rounded-2xl border border-white/25 text-white shadow-xs">
-            <CheckCircle2 className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-white" />
+          <span className="hidden sm:inline-flex items-center justify-center gap-1 sm:gap-1.5 text-xs font-semibold bg-white/20 backdrop-blur-md px-3 py-2 rounded-2xl border border-white/25 text-white shadow-xs">
+            <CheckCircle2 className="h-3.5 w-3.5 text-white" />
             <span>Fast Shipping</span>
           </span>
         </div>
 
         {/* Carousel Navigation Dots & Counter */}
         {totalSlides > 1 && (
-          <div className="flex items-center gap-2 self-center xs:self-auto pt-1 xs:pt-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {/* Desktop Navigation Chevrons */}
             <div className="hidden sm:flex items-center gap-1 mr-1">
               <button
