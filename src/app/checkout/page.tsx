@@ -765,15 +765,15 @@ export default function CheckoutPage() {
 
           <div className="flex items-center gap-2">
             {settings.logoUrl ? (
-              <div className="h-7 max-w-[100px] flex items-center shrink-0">
+              <div className="h-9 sm:h-10 max-w-[130px] min-w-[36px] flex items-center justify-center shrink-0 rounded-xl bg-white p-1 shadow-xs border border-slate-200 overflow-hidden">
                 <img
                   src={settings.logoUrl}
                   alt={settings.storeName}
-                  className="h-full w-auto max-h-7 object-contain rounded-lg"
+                  className="h-full w-auto max-w-full object-contain rounded-lg"
                 />
               </div>
             ) : (
-              <div className="w-7 h-7 rounded-xl bg-[#181A1D] text-white flex items-center justify-center font-black text-xs shadow-sm">
+              <div className="w-8 h-8 rounded-xl bg-[#181A1D] text-white flex items-center justify-center font-black text-xs shadow-sm">
                 {settings.storeName.charAt(0)}
               </div>
             )}

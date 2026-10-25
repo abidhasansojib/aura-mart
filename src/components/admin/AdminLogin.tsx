@@ -224,17 +224,17 @@ export function AdminLogin({
         {/* Brand Header */}
         <div className="text-center space-y-2">
           <Link href="/" className="inline-block group">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[#181A1D] text-white flex items-center justify-center mx-auto shadow-md group-hover:scale-105 transition-transform border border-white/10 relative overflow-hidden p-1.5">
+            <div className="h-14 sm:h-16 max-w-[160px] min-w-[56px] rounded-2xl bg-white text-slate-900 flex items-center justify-center mx-auto shadow-md group-hover:scale-105 transition-transform border border-slate-200 p-1.5 overflow-hidden">
               {logoUrl ? (
                 <img
                   src={logoUrl}
                   alt={storeName}
-                  className="max-h-full max-w-full object-contain"
+                  className="h-full w-auto max-w-full object-contain rounded-xl"
                 />
               ) : (
                 <>
-                  <span className="relative z-10 font-black text-xl">{storeName.charAt(0) || "A"}</span>
-                  <div className="absolute inset-0 bg-gradient-to-tr from-[#FF6448]/40 to-transparent pointer-events-none" />
+                  <span className="relative z-10 font-black text-xl text-slate-900">{storeName.charAt(0) || "A"}</span>
+                  <div className="absolute inset-0 bg-gradient-to-tr from-[#FF6448]/20 to-transparent pointer-events-none" />
                 </>
               )}
             </div>

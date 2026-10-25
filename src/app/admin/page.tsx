@@ -174,14 +174,14 @@ export default function AdminPage() {
           <div className="space-y-4 flex flex-col items-center w-full">
             <Link
               href="/"
-              className="w-10 h-10 rounded-2xl bg-white text-slate-950 font-black text-xs flex items-center justify-center shadow-md hover:scale-105 transition-transform overflow-hidden p-1"
+              className="h-11 max-w-[100px] min-w-[44px] rounded-2xl bg-white text-slate-950 font-black text-xs flex items-center justify-center shadow-md hover:scale-105 transition-transform overflow-hidden p-1 border border-slate-200/80"
               title={`Visit ${settings.storeName || "Storefront"}`}
             >
               {settings.logoUrl ? (
                 <img
                   src={settings.logoUrl}
                   alt={settings.storeName}
-                  className="max-h-full max-w-full object-contain"
+                  className="h-full w-auto max-w-full object-contain rounded-xl"
                 />
               ) : (
                 <span>{settings.storeName?.slice(0, 2).toUpperCase() || "AM"}</span>
@@ -312,14 +312,14 @@ export default function AdminPage() {
               <div className="flex items-center gap-2.5">
                 <Link
                   href="/"
-                  className="sm:hidden w-7 h-7 rounded-xl bg-white text-slate-950 font-black text-[10px] flex items-center justify-center shadow-md shrink-0 overflow-hidden p-0.5"
+                  className="sm:hidden h-8 max-w-[80px] min-w-[32px] rounded-xl bg-white text-slate-950 font-black text-[10px] flex items-center justify-center shadow-md shrink-0 overflow-hidden p-0.5 border border-slate-200"
                   title="Visit Store"
                 >
                   {settings.logoUrl ? (
                     <img
                       src={settings.logoUrl}
                       alt={settings.storeName}
-                      className="max-h-full max-w-full object-contain"
+                      className="h-full w-auto max-w-full object-contain rounded-lg"
                     />
                   ) : (
                     <span>{settings.storeName?.charAt(0) || "A"}</span>

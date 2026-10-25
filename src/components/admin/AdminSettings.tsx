@@ -800,15 +800,15 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
 
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 {/* Logo Live Preview */}
-                <div className="flex items-center justify-center w-24 h-16 sm:w-28 sm:h-20 rounded-2xl bg-white border border-slate-200 shadow-xs p-2 overflow-hidden shrink-0">
+                <div className="flex items-center justify-center w-28 h-20 sm:w-32 sm:h-24 rounded-2xl bg-white border border-slate-200 shadow-xs p-2 overflow-hidden shrink-0">
                   {settings.logoUrl ? (
                     <img
                       src={settings.logoUrl}
                       alt={settings.storeName}
-                      className="max-h-full max-w-full object-contain"
+                      className="h-full w-auto max-w-full object-contain rounded-xl"
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-xl bg-[#181A1D] flex items-center justify-center text-white font-black text-lg shadow-sm">
+                    <div className="w-12 h-12 rounded-xl bg-[#181A1D] flex items-center justify-center text-white font-black text-xl shadow-sm">
                       <span>{settings.storeName?.charAt(0) || "A"}</span>
                     </div>
                   )}

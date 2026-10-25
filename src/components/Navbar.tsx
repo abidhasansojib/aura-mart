@@ -145,15 +145,15 @@ export function Navbar({
                   className="group shrink-0 cursor-pointer"
                 >
                   {logoUrl ? (
-                    <div className="h-9 sm:h-11 max-w-[130px] sm:max-w-[160px] flex items-center shrink-0">
+                    <div className="h-10 sm:h-12 max-w-[140px] sm:max-w-[180px] min-w-[40px] sm:min-w-[48px] rounded-2xl bg-white shadow-xs border border-black/10 p-1 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform overflow-hidden">
                       <img
                         src={logoUrl}
                         alt={storeName}
-                        className="h-full w-auto max-h-9 sm:max-h-11 object-contain rounded-lg group-hover:opacity-90 transition-opacity"
+                        className="h-full w-auto max-w-full object-contain rounded-xl"
                       />
                     </div>
                   ) : (
-                    <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-[#181A1D] flex items-center justify-center text-white font-black text-sm sm:text-lg shadow-md group-hover:scale-105 transition-transform border border-white/10 relative overflow-hidden shrink-0">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[#181A1D] flex items-center justify-center text-white font-black text-sm sm:text-lg shadow-md group-hover:scale-105 transition-transform border border-white/10 relative overflow-hidden shrink-0">
                       <span className="relative z-10">{storeName.charAt(0) || "A"}</span>
                       <div className="absolute inset-0 bg-gradient-to-tr from-[#FF6448]/30 to-transparent pointer-events-none" />
                     </div>

@@ -76,15 +76,15 @@ export function Footer({
           <div className="md:col-span-5 space-y-4">
             <div className="flex items-center gap-3">
               {logoUrl ? (
-                <div className="h-10 max-w-[140px] flex items-center shrink-0 bg-white/5 px-2.5 py-1 rounded-2xl border border-white/10">
+                <div className="h-11 sm:h-12 max-w-[140px] sm:max-w-[180px] min-w-[44px] sm:min-w-[48px] rounded-2xl bg-white shadow-md border border-white/20 p-1 flex items-center justify-center shrink-0 overflow-hidden">
                   <img
                     src={logoUrl}
                     alt={storeName}
-                    className="h-full w-auto max-h-8 object-contain"
+                    className="h-full w-auto max-w-full object-contain rounded-xl"
                   />
                 </div>
               ) : (
-                <div className="w-10 h-10 rounded-2xl bg-[#24272C] border border-white/10 flex items-center justify-center text-white font-black text-lg">
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-[#24272C] border border-white/10 flex items-center justify-center text-white font-black text-lg shadow-md">
                   <span>{storeName.charAt(0) || "A"}</span>
                 </div>
               )}
