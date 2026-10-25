@@ -213,7 +213,7 @@ export function ProductDetailModal({
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 z-10 p-2 sm:p-2.5 rounded-full bg-white/90 backdrop-blur-md text-slate-700 hover:text-black shadow-md border border-black/5 transition-colors"
+            className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 z-20 p-2 sm:p-2.5 rounded-full bg-white/90 backdrop-blur-md text-slate-700 hover:text-black shadow-md border border-black/5 transition-colors"
             aria-label="Close modal"
           >
             <X className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -221,17 +221,29 @@ export function ProductDetailModal({
 
           <div className="grid grid-cols-1 md:grid-cols-2 overflow-y-auto">
             {/* Image Section */}
-            <div className="relative bg-neutral-100 aspect-square md:aspect-auto h-56 xs:h-64 sm:h-72 md:h-full flex items-center justify-center p-4 sm:p-6 overflow-hidden">
-              <div className="relative w-full h-full min-h-[220px]">
+            <div className="relative w-full bg-slate-50/80 md:bg-neutral-100 aspect-square sm:aspect-[4/3] md:aspect-auto md:h-full min-h-[280px] xs:min-h-[340px] sm:min-h-[400px] flex items-center justify-center overflow-hidden">
+              {/* Ambient Blurred Backdrop for studio-grade depth (eliminates empty side voids) */}
+              {product.imageUrl && (
+                <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20 filter blur-2xl scale-125">
+                  <img
+                    src={product.imageUrl}
+                    alt=""
+                    className="w-full h-full object-cover object-center"
+                  />
+                </div>
+              )}
+
+              <div className="relative w-full h-full flex items-center justify-center p-3 xs:p-4 sm:p-6 z-1">
                 <Image
                   src={product.imageUrl || "/placeholder-product.png"}
                   alt={product.name}
                   fill
                   sizes="(max-width: 768px) 100vw, 50vw"
-                  className="object-contain rounded-2xl"
+                  className="object-contain drop-shadow-sm transition-transform duration-300 hover:scale-105"
                   priority
                 />
               </div>
+
               {discountPercent && (
                 <div className="absolute top-3 left-3 sm:top-4 sm:left-4 bg-[#FF6448] text-white text-[10px] sm:text-xs font-black px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full shadow-md z-10">
                   {discountPercent}% OFF

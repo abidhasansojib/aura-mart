@@ -2,7 +2,6 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import Image from "next/image";
 import {
   Sparkles,
   Star,
@@ -112,6 +111,23 @@ export function HeroBannerSlider({ banners = [], defaultSettings }: HeroBannerSl
       onTouchEnd={handleTouchEnd}
       className={`col-span-12 md:col-span-7 bg-gradient-to-br ${bgGradient} text-white rounded-[24px] sm:rounded-[32px] p-4 xs:p-6 sm:p-10 shadow-xl flex flex-col justify-between bento-card relative overflow-hidden group select-none min-h-[300px] xs:min-h-[340px] sm:min-h-[380px] transition-all duration-500`}
     >
+      {/* Background Photo Layer (Full-bleed card background when image is provided) */}
+      {currentBanner.imageUrl && (
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+          <img
+            src={currentBanner.imageUrl}
+            alt={currentBanner.title}
+            className="w-full h-full object-cover object-center scale-100 transition-transform duration-700 group-hover:scale-105"
+          />
+          {/* Theme Tint & Vignette Overlays for 100% Text & Badge Legibility */}
+          <div
+            className={`absolute inset-0 bg-gradient-to-r ${bgGradient} opacity-75 mix-blend-multiply`}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/20" />
+          <div className="absolute inset-0 bg-black/25" />
+        </div>
+      )}
+
       {/* 1. Header Badges */}
       <div className="space-y-2.5 sm:space-y-4 relative z-10">
         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
@@ -130,37 +146,22 @@ export function HeroBannerSlider({ banners = [], defaultSettings }: HeroBannerSl
           )}
         </div>
 
-        {/* Content & Optional Hero Image Grid */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="space-y-2 max-w-lg">
-            <h1
-              key={`title-${currentIndex}`}
-              className="text-xl xs:text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white leading-tight animate-in fade-in slide-in-from-bottom-2 duration-300"
+        {/* Content Headline & Subtitle */}
+        <div className="space-y-2 max-w-xl">
+          <h1
+            key={`title-${currentIndex}`}
+            className="text-xl xs:text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white leading-tight animate-in fade-in slide-in-from-bottom-2 duration-300"
+          >
+            {currentBanner.title}
+          </h1>
+
+          {currentBanner.subtitle && (
+            <p
+              key={`subtitle-${currentIndex}`}
+              className="text-[11px] xs:text-xs sm:text-sm text-white/95 leading-relaxed font-medium line-clamp-3 sm:line-clamp-none animate-in fade-in slide-in-from-bottom-3 duration-300"
             >
-              {currentBanner.title}
-            </h1>
-
-            {currentBanner.subtitle && (
-              <p
-                key={`subtitle-${currentIndex}`}
-                className="text-[11px] xs:text-xs sm:text-sm text-white/95 leading-relaxed font-medium line-clamp-3 sm:line-clamp-none animate-in fade-in slide-in-from-bottom-3 duration-300"
-              >
-                {currentBanner.subtitle}
-              </p>
-            )}
-          </div>
-
-          {/* Optional Banner Image / Showcase Product */}
-          {currentBanner.imageUrl && (
-            <div className="hidden sm:block shrink-0 relative w-36 h-36 lg:w-44 lg:h-44 rounded-2xl overflow-hidden shadow-2xl border-2 border-white/30 bg-white/10 backdrop-blur-sm self-center animate-in zoom-in-95 duration-300">
-              <Image
-                src={currentBanner.imageUrl}
-                alt={currentBanner.title}
-                fill
-                sizes="(max-width: 640px) 120px, 180px"
-                className="object-cover"
-              />
-            </div>
+              {currentBanner.subtitle}
+            </p>
           )}
         </div>
       </div>

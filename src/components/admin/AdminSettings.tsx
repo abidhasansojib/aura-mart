@@ -2150,6 +2150,24 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
                     bannerForm.bgGradient || "from-[#FF6448] via-[#FF755B] to-[#FF8A73]"
                   } text-white shadow-md relative overflow-hidden flex flex-col justify-between min-h-[160px] sm:min-h-[180px]`}
                 >
+                  {/* Card Background Photo Layer (when image is uploaded) */}
+                  {bannerForm.imageUrl && (
+                    <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                      <img
+                        src={bannerForm.imageUrl}
+                        alt="Banner Background Preview"
+                        className="w-full h-full object-cover object-center"
+                      />
+                      <div
+                        className={`absolute inset-0 bg-gradient-to-r ${
+                          bannerForm.bgGradient || "from-[#FF6448] via-[#FF755B] to-[#FF8A73]"
+                        } opacity-75 mix-blend-multiply`}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/20" />
+                      <div className="absolute inset-0 bg-black/25" />
+                    </div>
+                  )}
+
                   <div className="space-y-2 relative z-10">
                     <div className="flex flex-wrap items-center gap-1.5">
                       {bannerForm.badgeText && (
@@ -2166,25 +2184,13 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
                       )}
                     </div>
 
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="space-y-1 max-w-sm">
-                        <h4 className="text-base sm:text-xl font-black tracking-tight leading-tight">
-                          {bannerForm.title || "Your Banner Headline Here"}
-                        </h4>
-                        <p className="text-[11px] text-white/90 line-clamp-2">
-                          {bannerForm.subtitle || "Your promotional subtitle and value proposition description."}
-                        </p>
-                      </div>
-
-                      {bannerForm.imageUrl && (
-                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden shadow-lg border border-white/30 shrink-0 bg-white/10">
-                          <img
-                            src={bannerForm.imageUrl}
-                            alt="Preview"
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      )}
+                    <div className="space-y-1 max-w-sm">
+                      <h4 className="text-base sm:text-xl font-black tracking-tight leading-tight">
+                        {bannerForm.title || "Your Banner Headline Here"}
+                      </h4>
+                      <p className="text-[11px] text-white/90 line-clamp-2">
+                        {bannerForm.subtitle || "Your promotional subtitle and value proposition description."}
+                      </p>
                     </div>
                   </div>
 
@@ -2329,15 +2335,15 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
                 </div>
               </div>
 
-              {/* 4. Banner Showcase Image */}
+              {/* 4. Banner Background Image */}
               <div className="space-y-2">
                 <label className="block font-bold text-[11px] text-slate-700">
-                  Showcase Image (Optional Product or Illustration)
+                  Banner Background Photo (Full Card Background)
                 </label>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                   <label className="cursor-pointer inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl border border-gray-200 hover:bg-slate-50 text-slate-700 text-xs font-bold transition-colors">
                     <Upload className="h-3.5 w-3.5 text-slate-500" />
-                    <span>{isUploadingBannerImg ? "Uploading..." : "Upload Image File"}</span>
+                    <span>{isUploadingBannerImg ? "Uploading..." : "Upload Background Photo"}</span>
                     <input
                       type="file"
                       accept="image/*"
@@ -2365,9 +2371,9 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
                     </button>
                   )}
                 </div>
-                {bannerImgFeedback && (
-                  <p className="text-[10px] text-slate-500 font-medium">{bannerImgFeedback}</p>
-                )}
+                <p className="text-[10px] text-slate-500">
+                  {bannerImgFeedback || "This photo serves as the full-bleed background for your banner card. Theme gradient and readability overlays are automatically applied so text and buttons pop."}
+                </p>
               </div>
 
               {/* 5. Active Toggle */}
