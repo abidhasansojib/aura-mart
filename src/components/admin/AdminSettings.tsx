@@ -698,7 +698,7 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
           }`}
         >
           <Sparkles className="h-3.5 w-3.5 text-[#FF6448]" />
-          <span>Hero & Bento Content</span>
+          <span>Banner Content</span>
         </button>
 
         <button
@@ -1001,7 +1001,7 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
                 <Sparkles className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-slate-900">Hero & Bento Card Copywriting</h3>
+                <h3 className="text-sm font-bold text-slate-900">Banner Copywriting & Cards</h3>
                 <p className="text-[11px] text-slate-400">
                   Instantly edit the promotional headlines and guarantee badges on your homepage
                 </p>
@@ -1009,13 +1009,13 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
             </div>
 
             <div className="space-y-5">
-              {/* 1. SWIPABLE HERO BANNERS CAROUSEL MANAGER */}
+              {/* 1. SWIPABLE BANNERS CAROUSEL MANAGER */}
               <div className="p-4 sm:p-6 rounded-2xl bg-gradient-to-br from-slate-50 to-orange-50/30 border border-orange-200/60 space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-orange-100">
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-black uppercase text-[#FF6448] tracking-wider block">
-                        1. Swipable Hero Carousel & Templates
+                        1. Swipable Banner Carousel & Templates
                       </span>
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FF6448]/10 text-[#FF6448] border border-[#FF6448]/20">
                         ⚡ 5s Autoplay + Swipe
@@ -1285,10 +1285,10 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
                 </div>
               </div>
 
-              {/* Bento Card 2: Express Shipping */}
+              {/* Banner Card 2: Express Shipping */}
               <div className="p-4 rounded-2xl bg-[#5256FF]/5 border border-[#5256FF]/20 space-y-4">
                 <span className="text-xs font-black uppercase text-[#5256FF] tracking-wider block">
-                  2. Express Shipping Bento Card (Royal Indigo)
+                  2. Express Shipping Banner Card (Royal Indigo)
                 </span>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1322,10 +1322,10 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
                 </div>
               </div>
 
-              {/* Bento Card 3: Quality Guarantee */}
+              {/* Banner Card 3: Quality Guarantee */}
               <div className="p-4 rounded-2xl bg-[#C4E9E5]/30 border border-[#C4E9E5] space-y-4">
                 <span className="text-xs font-black uppercase text-teal-900 tracking-wider block">
-                  3. Quality & Packaging Bento Card (Ice Mint)
+                  3. Quality & Packaging Banner Card (Ice Mint)
                 </span>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -2122,7 +2122,7 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-slate-900">
-                    {editingBanner ? "Edit Hero Banner Slide" : "Create New Hero Banner Slide"}
+                    {editingBanner ? "Edit Banner Slide" : "Create New Banner Slide"}
                   </h3>
                   <p className="text-[10px] text-slate-500">
                     Customize headlines, visuals, CTAs, and background gradients

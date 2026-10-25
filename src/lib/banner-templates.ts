@@ -33,8 +33,8 @@ export interface BannerTemplate {
 export const BANNER_TEMPLATES: BannerTemplate[] = [
   {
     id: "coral-sunset",
-    name: "Signature Coral (Bento Default)",
-    description: "Vibrant coral aesthetic matching your store's modern bento design.",
+    name: "Signature Coral (Banner Default)",
+    description: "Vibrant coral aesthetic matching your store's modern banner design.",
     tag: "Most Popular",
     badgeText: "✨ Featured Collection 2026",
     badgeSecondary: "Cash on Delivery Available",

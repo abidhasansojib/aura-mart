@@ -128,7 +128,7 @@ export default function AdminPage() {
       <div className="min-h-screen bg-[#CBD5CE] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 border-3 border-slate-900 border-t-transparent rounded-full animate-spin" />
-          <span className="text-xs font-semibold text-slate-700">Loading Bento Canvas...</span>
+          <span className="text-xs font-semibold text-slate-700">Loading Dashboard...</span>
         </div>
       </div>
     );
