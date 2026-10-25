@@ -1,9 +1,9 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import Link from "next/link";
-import { Phone, Search, ShoppingBag, Truck, Sparkles, X } from "lucide-react";
+import { Phone, Search, ShoppingBag, Truck, Sparkles } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { TrackOrderModal } from "@/components/TrackOrderModal";
 import { SearchAutocomplete } from "@/components/SearchAutocomplete";
@@ -37,72 +37,8 @@ export function Navbar({
   const { totalItems, setIsCartOpen } = useCart();
   const [isTrackModalOpen, setIsTrackModalOpen] = useState(false);
   const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
-  const [isScrolledDown, setIsScrolledDown] = useState(false);
-  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
 
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const lastScrollY = useRef(0);
-  const isTransitioningRef = useRef(false);
-  const isMobileSearchOpenRef = useRef(false);
-  const searchQueryRef = useRef(searchQuery);
-
-  useEffect(() => {
-    isMobileSearchOpenRef.current = isMobileSearchOpen;
-  }, [isMobileSearchOpen]);
-
-  useEffect(() => {
-    searchQueryRef.current = searchQuery;
-  }, [searchQuery]);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      // Never auto-condense if transitioning, user manually opened mobile search, user is typing/has active query, or input is focused
-      if (isTransitioningRef.current) return;
-      if (isMobileSearchOpenRef.current) return;
-      if (searchQueryRef.current.trim().length > 0) return;
-      if (document.activeElement === searchInputRef.current) return;
-
-      const currentScrollY = window.scrollY;
-      if (currentScrollY > 70 && currentScrollY > lastScrollY.current + 8) {
-        // Scrolling down past 70px -> condense mobile search to give screen estate to products
-        setIsScrolledDown(true);
-      } else if (currentScrollY < lastScrollY.current - 8 || currentScrollY <= 40) {
-        // Scrolling up or at top -> smoothly reveal search bar
-        setIsScrolledDown(false);
-        setIsMobileSearchOpen(false);
-      }
-      lastScrollY.current = currentScrollY;
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const toggleMobileSearch = () => {
-    if (isMobileSearchOpen) {
-      setIsMobileSearchOpen(false);
-      setIsSearchDropdownOpen(false);
-      searchInputRef.current?.blur();
-      isTransitioningRef.current = true;
-      lastScrollY.current = window.scrollY;
-      setTimeout(() => {
-        isTransitioningRef.current = false;
-        lastScrollY.current = window.scrollY;
-      }, 400);
-    } else {
-      setIsMobileSearchOpen(true);
-      isTransitioningRef.current = true;
-      lastScrollY.current = window.scrollY;
-      setTimeout(() => {
-        searchInputRef.current?.focus();
-        isTransitioningRef.current = false;
-        lastScrollY.current = window.scrollY;
-      }, 100);
-      setTimeout(() => {
-        lastScrollY.current = window.scrollY;
-      }, 400);
-    }
-  };
 
   return (
     <>
@@ -172,28 +108,8 @@ export function Navbar({
                 </Link>
               </div>
 
-              {/* Mobile Actions: Search Trigger, Track Order & Cart (Visible on < sm) */}
+              {/* Mobile Actions: Track Order & Cart (Visible on < sm) */}
               <div className="flex items-center gap-1.5 sm:hidden">
-                {isScrolledDown && (
-                  <button
-                    type="button"
-                    onClick={toggleMobileSearch}
-                    className={`flex items-center justify-center w-9 h-9 rounded-xl border transition-colors active:scale-95 animate-in fade-in shrink-0 ${
-                      isMobileSearchOpen
-                        ? "bg-[#181A1D] border-[#181A1D] text-white shadow-sm"
-                        : "bg-slate-100 hover:bg-slate-200 border-slate-200/80 text-slate-700"
-                    }`}
-                    title={isMobileSearchOpen ? "Close search" : "Search catalog"}
-                    aria-label={isMobileSearchOpen ? "Close search" : "Search"}
-                  >
-                    {isMobileSearchOpen ? (
-                      <X className="h-[18px] w-[18px]" />
-                    ) : (
-                      <Search className="h-[18px] w-[18px]" />
-                    )}
-                  </button>
-                )}
-
                 <button
                   onClick={() => setIsTrackModalOpen(true)}
                   className="flex items-center justify-center w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200/80 text-slate-700 transition-colors active:scale-95 shadow-sm shrink-0"
@@ -218,14 +134,8 @@ export function Navbar({
               </div>
             </div>
 
-            {/* Instant Search Bar with Live Autocomplete Popover (Auto-condensed on mobile downward scroll) */}
-            <div
-              className={`flex-1 w-full sm:max-w-md md:max-w-lg relative transition-all duration-300 ease-in-out ${
-                isScrolledDown && !isMobileSearchOpen
-                  ? "max-h-0 opacity-0 -translate-y-2 pointer-events-none overflow-hidden sm:max-h-none sm:opacity-100 sm:translate-y-0 sm:pointer-events-auto sm:overflow-visible"
-                  : "max-h-20 opacity-100 translate-y-0 overflow-visible"
-              }`}
-            >
+            {/* Instant Search Bar with Live Autocomplete Popover (Always persistent on mobile & desktop) */}
+            <div className="flex-1 w-full sm:max-w-md md:max-w-lg relative">
               <div className="relative">
                 <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 h-3.5 sm:h-4 w-3.5 sm:w-4 text-slate-400 pointer-events-none" />
                 <input
@@ -238,12 +148,7 @@ export function Navbar({
                     if (!isSearchDropdownOpen) setIsSearchDropdownOpen(true);
                   }}
                   onKeyDown={(e) => {
-                    if (e.key === "Escape") {
-                      setIsSearchDropdownOpen(false);
-                      if (isMobileSearchOpen) {
-                        toggleMobileSearch();
-                      }
-                    } else if (e.key === "Enter") {
+                    if (e.key === "Escape" || e.key === "Enter") {
                       setIsSearchDropdownOpen(false);
                     }
                   }}
@@ -274,12 +179,10 @@ export function Navbar({
                 onSelectProduct={(p) => {
                   if (onSelectProduct) onSelectProduct(p);
                   setIsSearchDropdownOpen(false);
-                  setIsMobileSearchOpen(false);
                 }}
                 onSelectCategory={(cat) => {
                   if (onSelectCategory) onSelectCategory(cat);
                   setIsSearchDropdownOpen(false);
-                  setIsMobileSearchOpen(false);
                 }}
                 onClose={() => setIsSearchDropdownOpen(false)}
               />
