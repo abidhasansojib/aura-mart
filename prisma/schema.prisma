@@ -168,3 +168,22 @@ model Review {
   @@index([customerPhone])
   @@index([orderId, productId])
 }
+
+model Banner {
+  id             String   @id @default(uuid())
+  title          String
+  subtitle       String?
+  badgeText      String?  @default("Featured Collection 2026")
+  badgeSecondary String?  @default("Cash on Delivery Available")
+  imageUrl       String?  @default("")
+  ctaText        String?  @default("Shop Catalog")
+  ctaLink        String?  @default("#catalog")
+  bgGradient     String?  @default("from-[#FF6448] via-[#FF755B] to-[#FF8A73]")
+  textColor      String?  @default("#FFFFFF")
+  order          Int      @default(0)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([isActive, order])
+}

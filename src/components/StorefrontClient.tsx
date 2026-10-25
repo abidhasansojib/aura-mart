@@ -17,7 +17,6 @@ import {
   Star,
   PackageCheck,
   PhoneCall,
-  CheckCircle2,
   MessageCircle,
   AlertCircle,
   ChevronDown,
@@ -27,6 +26,8 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { CartDrawer } from "@/components/CartDrawer";
 import { ProductDetailModal, ModalProduct } from "@/components/ProductDetailModal";
+import { HeroBannerSlider } from "@/components/HeroBannerSlider";
+import { BannerItem } from "@/lib/banner-templates";
 import { formatPrice } from "@/lib/utils";
 import { searchProducts } from "@/lib/search";
 
@@ -267,9 +268,14 @@ interface StoreSettingsData {
 interface StorefrontClientProps {
   initialProducts: ModalProduct[];
   settings: StoreSettingsData;
+  banners?: BannerItem[];
 }
 
-export function StorefrontClient({ initialProducts, settings }: StorefrontClientProps) {
+export function StorefrontClient({
+  initialProducts,
+  settings,
+  banners = [],
+}: StorefrontClientProps) {
   const router = useRouter();
   const { addItem, totalItems, subtotal, setIsCartOpen } = useCart();
   const currencySymbol = settings.currencySymbol || "৳";
@@ -408,52 +414,8 @@ export function StorefrontClient({ initialProducts, settings }: StorefrontClient
             2. MODERN BENTO HERO SHOWCASE (Matching Dribbble Bento Aesthetic)
             ===================================================================== */}
         <section className="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4">
-          {/* Main Hero Card: Coral `#FF6448` (Full width on mobile, 7 cols on desktop) */}
-          <div className="col-span-12 md:col-span-7 bg-[#FF6448] text-white rounded-[24px] sm:rounded-[32px] p-4 xs:p-6 sm:p-10 shadow-xl flex flex-col justify-between bento-card relative overflow-hidden group">
-            <div className="space-y-2.5 sm:space-y-4 relative z-10">
-              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                <span className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-[10px] sm:text-xs font-bold border border-white/20 shadow-xs">
-                  <Sparkles className="h-3 sm:h-3.5 w-3 sm:w-3.5" />
-                  <span>{settings.heroBadgeText || "Featured Collection 2026"}</span>
-                </span>
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 sm:py-1 rounded-full bg-slate-950/30 backdrop-blur-md text-white text-[10px] sm:text-[11px] font-bold">
-                  <Star className="h-3 w-3 fill-amber-300 text-amber-300" />
-                  <span>4.9/5 (2,400+ Orders)</span>
-                </span>
-              </div>
-
-              <h1 className="text-xl xs:text-2xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight">
-                {settings.heroTitle && settings.heroTitle !== "Aura Mart"
-                  ? settings.heroTitle
-                  : settings.storeName || "Aura Mart"}
-              </h1>
-
-              <p className="text-[11px] xs:text-xs sm:text-base text-white/95 max-w-lg leading-relaxed font-medium line-clamp-2 sm:line-clamp-none">
-                {settings.heroTagline ||
-                  settings.tagline ||
-                  "Quality Products Delivered to Your Doorstep. Zero advance payment required."}
-              </p>
-            </div>
-
-            <div className="pt-4 sm:pt-8 relative z-10 flex flex-row items-center gap-2 sm:gap-3 flex-wrap">
-              <a
-                href="#catalog"
-                className="inline-flex items-center justify-center gap-1.5 bg-[#181A1D] hover:bg-black text-white text-xs sm:text-sm font-bold px-4 xs:px-6 sm:px-7 py-2.5 sm:py-3.5 rounded-xl sm:rounded-2xl shadow-xl transition-all hover:scale-[1.02] active:scale-95 min-h-[38px] sm:min-h-[44px]"
-              >
-                <span>{settings.heroCtaText || "Shop Catalog"}</span>
-                <ArrowRight className="h-3.5 sm:h-4 w-3.5 sm:w-4" />
-              </a>
-
-              <span className="inline-flex items-center justify-center gap-1 sm:gap-1.5 text-[10px] xs:text-[11px] sm:text-xs font-semibold bg-white/20 backdrop-blur-md px-2.5 sm:px-4 py-2 sm:py-3 rounded-xl sm:rounded-2xl border border-white/25 text-white shadow-xs">
-                <CheckCircle2 className="h-3 sm:h-4 w-3 sm:w-4 text-white" />
-                <span>{settings.heroBadgeSecondary || "Cash on Delivery Available"}</span>
-              </span>
-            </div>
-
-            {/* Subtle striped pattern watermark */}
-            <div className="absolute -right-8 -bottom-8 w-72 h-44 striped-bar-pattern opacity-25 pointer-events-none rounded-tl-full" />
-            <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-3xl pointer-events-none" />
-          </div>
+          {/* Main Hero Card: Swipable Animated Hero Banner Slider */}
+          <HeroBannerSlider banners={banners} defaultSettings={settings} />
 
           {/* Right Bento Column: Desktop only (>= md), hidden on mobile per user instruction */}
           <div className="hidden md:grid md:col-span-5 grid-cols-1 gap-4">

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { StorefrontClient } from "@/components/StorefrontClient";
 import { ModalProduct } from "@/components/ProductDetailModal";
+import { BannerItem } from "@/lib/banner-templates";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -144,9 +145,10 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function HomePage() {
   let products: ModalProduct[] = FALLBACK_PRODUCTS;
   let settings = DEFAULT_SETTINGS;
+  let banners: BannerItem[] = [];
 
   try {
-    const [dbProducts, dbSettings, dbSales, dbReviews] = await Promise.allSettled([
+    const [dbProducts, dbSettings, dbSales, dbReviews, dbBanners] = await Promise.allSettled([
       prisma.product.findMany({
         where: { isActive: true },
         orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
@@ -177,6 +179,10 @@ export default async function HomePage() {
         where: {
           status: "APPROVED",
         },
+      }),
+      prisma.banner.findMany({
+        where: { isActive: true },
+        orderBy: { order: "asc" },
       }),
     ]);
 
@@ -281,6 +287,23 @@ export default async function HomePage() {
         logoUrl: dbSettings.value.logoUrl || "",
       };
     }
+
+    if (dbBanners.status === "fulfilled" && Array.isArray(dbBanners.value)) {
+      banners = dbBanners.value.map((b) => ({
+        id: b.id,
+        title: b.title,
+        subtitle: b.subtitle,
+        badgeText: b.badgeText,
+        badgeSecondary: b.badgeSecondary,
+        imageUrl: b.imageUrl,
+        ctaText: b.ctaText,
+        ctaLink: b.ctaLink,
+        bgGradient: b.bgGradient,
+        textColor: b.textColor,
+        order: b.order,
+        isActive: b.isActive,
+      }));
+    }
   } catch (error) {
     console.warn("Could not query database for storefront, using safe fallbacks:", error);
   }
@@ -350,7 +373,7 @@ export default async function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <StorefrontClient initialProducts={products} settings={settings} />
+      <StorefrontClient initialProducts={products} settings={settings} banners={banners} />
     </>
   );
 }
