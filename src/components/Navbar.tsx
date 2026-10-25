@@ -3,7 +3,7 @@
 
 import React, { useState, useRef } from "react";
 import Link from "next/link";
-import { Phone, Search, ShoppingBag, Truck, Sparkles } from "lucide-react";
+import { Phone, Search, ShoppingBag, Truck, Sparkles, X } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { TrackOrderModal } from "@/components/TrackOrderModal";
 import { SearchAutocomplete } from "@/components/SearchAutocomplete";
@@ -39,6 +39,7 @@ export function Navbar({
   const { totalItems, setIsCartOpen } = useCart();
   const [isTrackModalOpen, setIsTrackModalOpen] = useState(false);
   const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
 
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -110,8 +111,35 @@ export function Navbar({
                 </Link>
               </div>
 
-              {/* Mobile Actions: Track Order & Cart (Visible on < sm) */}
+              {/* Mobile Actions: Search Toggle, Track Order & Cart (Visible on < sm) */}
               <div className="flex items-center gap-1.5 sm:hidden">
+                {/* Search Toggle Button beside Track Order */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileSearchOpen((prev) => {
+                      const next = !prev;
+                      if (next) {
+                        setTimeout(() => searchInputRef.current?.focus(), 100);
+                      }
+                      return next;
+                    });
+                  }}
+                  className={`flex items-center justify-center w-9 h-9 rounded-xl border transition-all active:scale-95 shadow-2xs shrink-0 ${
+                    isMobileSearchOpen
+                      ? "bg-[#181A1D] text-white border-black"
+                      : "bg-slate-100 hover:bg-slate-200 border-slate-200/80 text-slate-700"
+                  }`}
+                  title="Search products"
+                  aria-label="Toggle Search"
+                >
+                  {isMobileSearchOpen ? (
+                    <X className="h-[18px] w-[18px]" />
+                  ) : (
+                    <Search className="h-[18px] w-[18px]" />
+                  )}
+                </button>
+
                 <button
                   onClick={() => setIsTrackModalOpen(true)}
                   className="flex items-center justify-center w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200/80 text-slate-700 transition-colors active:scale-95 shadow-2xs shrink-0"
@@ -136,8 +164,14 @@ export function Navbar({
               </div>
             </div>
 
-            {/* Instant Search Bar with Live Autocomplete Popover (Always persistent on mobile & desktop) */}
-            <div className="flex-1 w-full sm:max-w-md md:max-w-lg relative">
+            {/* Instant Search Bar with Live Autocomplete Popover (Hidden on mobile until Search button is pressed; always present on desktop) */}
+            <div
+              className={`flex-1 w-full sm:max-w-md md:max-w-lg relative ${
+                isMobileSearchOpen || searchQuery
+                  ? "block animate-in fade-in slide-in-from-top-1 duration-200"
+                  : "hidden sm:block"
+              }`}
+            >
               <div className="relative">
                 <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 h-3.5 sm:h-4 w-3.5 sm:w-4 text-slate-400 pointer-events-none" />
                 <input
