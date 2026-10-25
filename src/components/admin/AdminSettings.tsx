@@ -1036,55 +1036,6 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
                   </button>
                 </div>
 
-                {/* 1-Click Banner Templates */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
-                      <Palette className="h-4 w-4 text-[#FF6448]" />
-                      <span>1-Click Designer Templates</span>
-                    </div>
-                    <span className="text-[10px] text-slate-400 font-medium">
-                      Select a template to customize
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {BANNER_TEMPLATES.map((tpl) => (
-                      <div
-                        key={tpl.id}
-                        className="p-3 rounded-xl border border-gray-200/80 bg-white hover:border-[#FF6448]/50 hover:shadow-sm transition-all flex flex-col justify-between gap-2 group"
-                      >
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-between">
-                            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
-                              {tpl.tag}
-                            </span>
-                            <div
-                              className="w-4 h-4 rounded-full border border-white shadow-xs"
-                              style={{ backgroundColor: tpl.previewColor }}
-                            />
-                          </div>
-                          <h4 className="text-xs font-bold text-slate-900 group-hover:text-[#FF6448] transition-colors">
-                            {tpl.name}
-                          </h4>
-                          <p className="text-[10px] text-slate-500 line-clamp-2 leading-relaxed">
-                            {tpl.description}
-                          </p>
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() => handleOpenAddBanner(tpl)}
-                          className="w-full inline-flex items-center justify-center gap-1 px-2.5 py-1.5 bg-slate-100 hover:bg-[#FF6448] text-slate-700 hover:text-white text-[11px] font-bold rounded-lg transition-colors active:scale-95 mt-1"
-                        >
-                          <Plus className="h-3 w-3" />
-                          <span>Use Template</span>
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
                 {/* Live Banners Sequence & Management */}
                 <div className="space-y-3 pt-2">
                   <div className="flex items-center justify-between">
@@ -2205,6 +2156,44 @@ export function AdminSettings({ initialSettings, onSettingsSaved }: AdminSetting
                   </div>
 
                   <div className="absolute -right-6 -bottom-6 w-32 h-20 striped-bar-pattern opacity-20 pointer-events-none rounded-tl-full" />
+                </div>
+              </div>
+
+              {/* Quick Style Inspiration Chips */}
+              <div className="space-y-1.5 pt-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1">
+                    <Palette className="h-3 w-3 text-[#FF6448]" />
+                    <span>Quick Style Presets (1-Click Autofill)</span>
+                  </span>
+                  <span className="text-[10px] text-slate-400">Click any preset to apply style</span>
+                </div>
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+                  {BANNER_TEMPLATES.map((tpl) => (
+                    <button
+                      key={tpl.id}
+                      type="button"
+                      onClick={() =>
+                        setBannerForm((prev) => ({
+                          ...prev,
+                          title: tpl.title,
+                          subtitle: tpl.subtitle,
+                          badgeText: tpl.badgeText,
+                          badgeSecondary: tpl.badgeSecondary,
+                          ctaText: tpl.ctaText,
+                          ctaLink: tpl.ctaLink,
+                          bgGradient: tpl.bgGradient,
+                        }))
+                      }
+                      className="px-2.5 py-1 rounded-lg text-[10px] font-bold border border-slate-200 hover:border-[#FF6448] bg-slate-50 hover:bg-orange-50/50 text-slate-700 transition-all shrink-0 flex items-center gap-1.5 shadow-2xs"
+                    >
+                      <span
+                        className="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs border border-white"
+                        style={{ backgroundColor: tpl.previewColor }}
+                      />
+                      <span>{tpl.name.split(" ")[0]} ({tpl.tag})</span>
+                    </button>
+                  ))}
                 </div>
               </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -17,6 +17,7 @@ import {
   MessageCircle,
   AlertCircle,
   ChevronDown,
+  Boxes,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { Navbar } from "@/components/Navbar";
@@ -279,17 +280,35 @@ export function StorefrontClient({
 
   // Filter & sort states
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedCategory, setSelectedCategory] = useState("Discover");
   const [sortBy, setSortBy] = useState<"featured" | "viral" | "price-asc" | "price-desc" | "discount">("featured");
   const [activeModalProduct, setActiveModalProduct] = useState<ModalProduct | null>(null);
 
-  // Extract unique categories including Viral and Featured
+  // Random 8 products picker (deterministic SSR initialization to avoid hydration mismatches)
+  const [randomProducts, setRandomProducts] = useState<ModalProduct[]>(() => {
+    return initialProducts.slice(0, 8);
+  });
+
+  const reshuffleRandom = useCallback(() => {
+    if (initialProducts.length <= 8) {
+      setRandomProducts(initialProducts);
+      return;
+    }
+    const shuffled = [...initialProducts].sort(() => 0.5 - Math.random());
+    setRandomProducts(shuffled.slice(0, 8));
+  }, [initialProducts]);
+
+  useEffect(() => {
+    reshuffleRandom();
+  }, [reshuffleRandom]);
+
+  // Extract unique categories including Discover, All, Viral and Featured
   const categories = useMemo(() => {
     const set = new Set<string>();
     initialProducts.forEach((p) => {
       if (p.category) set.add(p.category);
     });
-    return ["All", "Viral", "Featured", ...Array.from(set)];
+    return ["Discover", "All", "Viral", "Featured", ...Array.from(set)];
   }, [initialProducts]);
 
   // Helper to sort products dynamically
@@ -326,9 +345,12 @@ export function StorefrontClient({
     return searchProducts(initialProducts, searchQuery);
   }, [initialProducts, searchQuery, isSearching]);
 
-  // Category filter helper (supports "Viral" and "Featured" admin pushed)
+  // Category filter helper (supports "Discover", "All", "Viral" and "Featured")
   const filterByCategory = useCallback(
     (items: ModalProduct[]) => {
+      if (selectedCategory === "Discover") {
+        return randomProducts;
+      }
       if (selectedCategory === "All") return items;
       if (selectedCategory === "Viral") {
         return items.filter((p) => Boolean(p.isViral || (p.salesCount && p.salesCount >= 10)));
@@ -338,7 +360,7 @@ export function StorefrontClient({
       }
       return items.filter((p) => p.category.toLowerCase() === selectedCategory.toLowerCase());
     },
-    [selectedCategory]
+    [selectedCategory, randomProducts]
   );
 
   // Exact product search results
@@ -356,8 +378,11 @@ export function StorefrontClient({
   // Default filtered products when not searching
   const standardFilteredProducts = useMemo(() => {
     if (isSearching) return [];
+    if (selectedCategory === "Discover" && sortBy === "featured") {
+      return randomProducts;
+    }
     return sortProducts(filterByCategory(initialProducts));
-  }, [initialProducts, isSearching, filterByCategory, sortProducts]);
+  }, [initialProducts, isSearching, selectedCategory, sortBy, randomProducts, sortProducts, filterByCategory]);
 
   // Featured picks for smart fallback
   const featuredPicks = useMemo(() => {
@@ -481,8 +506,10 @@ export function StorefrontClient({
                 <span className="truncate">
                   {isSearching
                     ? "Search Results"
+                    : selectedCategory === "Discover"
+                    ? "✨ Handpicked For You"
                     : selectedCategory === "All"
-                    ? "Explore Catalog"
+                    ? "Explore Full Catalog"
                     : selectedCategory === "Viral"
                     ? "🔥 Viral Products"
                     : selectedCategory === "Featured"
@@ -543,10 +570,21 @@ export function StorefrontClient({
                       : "bg-white/85 backdrop-blur-sm text-slate-700 hover:bg-white hover:text-slate-950 border border-black/5"
                   }`}
                 >
+                  {cat === "Discover" && <Sparkles className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-[#FF6448]" />}
+                  {cat === "All" && <Boxes className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-slate-600" />}
                   {cat === "Viral" && <Flame className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-[#FF6448] fill-[#FF6448]" />}
                   {cat === "Featured" && <Sparkles className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-amber-500" />}
-                  {cat === "All" && <Sparkles className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-slate-500" />}
-                  <span>{cat === "Viral" ? "Viral Hits" : cat === "Featured" ? "Admin Picks" : cat}</span>
+                  <span>
+                    {cat === "Discover"
+                      ? "🎲 Discover (8)"
+                      : cat === "All"
+                      ? `All Products (${initialProducts.length})`
+                      : cat === "Viral"
+                      ? "Viral Hits"
+                      : cat === "Featured"
+                      ? "Admin Picks"
+                      : cat}
+                  </span>
                 </button>
               );
             })}
@@ -794,18 +832,55 @@ export function StorefrontClient({
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-6">
-              {standardFilteredProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  currencySymbol={currencySymbol}
-                  onOpenModal={setActiveModalProduct}
-                  onAddToCart={(p) => addItem(p, 1)}
-                  onQuickBuy={handleQuickBuy}
-                />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-6">
+                {standardFilteredProducts.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    currencySymbol={currencySymbol}
+                    onOpenModal={setActiveModalProduct}
+                    onAddToCart={(p) => addItem(p, 1)}
+                    onQuickBuy={handleQuickBuy}
+                  />
+                ))}
+              </div>
+
+              {/* Browse All Products Prompt when in Discover Mode */}
+              {selectedCategory === "Discover" && initialProducts.length > 8 && (
+                <div className="bg-white/90 backdrop-blur-md rounded-2xl sm:rounded-3xl border border-black/5 p-6 sm:p-8 text-center shadow-sm space-y-3.5 mt-2 sm:mt-4">
+                  <div>
+                    <h4 className="text-sm sm:text-base font-black text-slate-900">
+                      Showing 8 Random Picks from our {initialProducts.length} Products
+                    </h4>
+                    <p className="text-[11px] sm:text-xs text-slate-500 max-w-md mx-auto mt-0.5">
+                      Want to explore our entire collection or get another fresh set of 8 items?
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-center gap-2.5 flex-wrap pt-1">
+                    <button
+                      onClick={() => {
+                        setSelectedCategory("All");
+                        const el = document.getElementById("catalog");
+                        if (el) el.scrollIntoView({ behavior: "smooth" });
+                      }}
+                      className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl sm:rounded-2xl bg-[#181A1D] hover:bg-black text-white text-xs font-bold transition-all shadow-md active:scale-95 min-h-[42px]"
+                    >
+                      <span>Browse All Products ({initialProducts.length})</span>
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </button>
+
+                    <button
+                      onClick={reshuffleRandom}
+                      className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl sm:rounded-2xl bg-white hover:bg-slate-50 text-slate-800 text-xs font-bold transition-all border border-slate-200 shadow-xs active:scale-95 min-h-[42px]"
+                    >
+                      <Sparkles className="h-3.5 w-3.5 text-[#FF6448]" />
+                      <span>Roll / Shuffle 8 More</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </section>
       </main>
